@@ -99,8 +99,8 @@ const Profile = () => {
 
       if (error && error.code !== 'PGRST116') throw error;
       
-      if (profile?.avatar_url) {
-        setAvatarUrl(profile.avatar_url);
+      if (profile && (profile as any).avatar_url) {
+        setAvatarUrl((profile as any).avatar_url);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
