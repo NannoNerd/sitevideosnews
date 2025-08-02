@@ -243,7 +243,7 @@ export default function Feed() {
               <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
               {filteredContent.map((item) => {
                 const isLiked = userLikes.has(item.id);
                 
@@ -280,22 +280,20 @@ export default function Feed() {
                        </div>
                      </Link>
                      
-                     <CardHeader>
-                       <div className="flex items-start justify-between gap-2">
-                         <CardTitle className="break-anywhere leading-tight flex-1">
-                           <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
-                             {item.title}
-                           </Link>
-                         </CardTitle>
-                         <div className="flex gap-1 flex-shrink-0">
-                           <Badge variant="default" className="text-xs">
-                             Publicado
-                           </Badge>
-                           <Badge variant="outline" className="text-xs">
-                             {item.type === 'post' ? 'Post' : 'Vídeo'}
-                           </Badge>
-                         </div>
-                       </div>
+                      <CardHeader>
+                        <CardTitle className="break-anywhere leading-tight">
+                          <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
+                            {item.title}
+                          </Link>
+                        </CardTitle>
+                        <div className="flex gap-1 mt-2">
+                          <Badge variant="default" className="text-xs">
+                            Publicado
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {item.type === 'post' ? 'Post' : 'Vídeo'}
+                          </Badge>
+                        </div>
                        <CardDescription className="line-clamp-2 break-anywhere">
                          {item.type === 'post' ? item.content?.substring(0, 150) + '...' : item.description}
                        </CardDescription>

@@ -53,7 +53,19 @@ export default function Auth() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
     const displayName = formData.get('displayName') as string;
+
+    // Validação de senha
+    if (password !== confirmPassword) {
+      toast({
+        title: 'Erro no cadastro',
+        description: 'As senhas não coincidem.',
+        variant: 'destructive'
+      });
+      setIsLoading(false);
+      return;
+    }
 
     const { error } = await signUp(email, password, displayName);
     
@@ -135,12 +147,12 @@ export default function Auth() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Nome</Label>
+                  <Label htmlFor="signup-name">Apelido</Label>
                   <Input
                     id="signup-name"
                     name="displayName"
                     type="text"
-                    placeholder="Seu nome"
+                    placeholder="Seu apelido"
                     required
                   />
                 </div>
@@ -161,6 +173,17 @@ export default function Auth() {
                     name="password"
                     type="password"
                     placeholder="Mínimo 6 caracteres"
+                    minLength={6}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm-password">Repetir Senha</Label>
+                  <Input
+                    id="signup-confirm-password"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Digite novamente sua senha"
                     minLength={6}
                     required
                   />

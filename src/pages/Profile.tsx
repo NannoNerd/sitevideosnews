@@ -40,6 +40,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [editingContent, setEditingContent] = useState<{id: string, type: 'post' | 'video'} | null>(null);
+  const [userProfile, setUserProfile] = useState<{display_name?: string} | null>(null);
 
   const fetchUserContent = async () => {
     if (!user) return;
@@ -101,8 +102,13 @@ const Profile = () => {
 
       if (error && error.code !== 'PGRST116') throw error;
       
-      if (profile && (profile as any).avatar_url) {
-        setAvatarUrl((profile as any).avatar_url);
+      if (profile) {
+        if ((profile as any).avatar_url) {
+          setAvatarUrl((profile as any).avatar_url);
+        }
+        setUserProfile({
+          display_name: (profile as any).display_name
+        });
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -370,44 +376,91 @@ const Profile = () => {
                 <CardHeader>
                   <CardTitle>Configurações da Conta</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handlePasswordChange} className="space-y-4">
+                <CardContent className="space-y-6">
+                  {/* Seção de Apelido */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Informações do Perfil</h3>
                     <div>
-                      <Label htmlFor="current-password">Senha Atual</Label>
+                      <Label htmlFor="display-name">Apelido</Label>
                       <Input
-                        id="current-password"
-                        name="current-password"
-                        type="password"
-                        required
+                        id="display-name"
+                        name="display-name"
+                        type="text"
+                        placeholder="Seu apelido"
+                        value={userProfile?.display_name || ''}
+                        onChange={(e) => setUserProfile(prev => ({ ...prev, display_name: e.target.value }))}
                       />
+                      <Button 
+                        type="button" 
+                        className="mt-2" 
+                        onClick={async () => {
+                          try {
+                            const { error } = await supabase
+                              .from('profiles')
+                              .update({ display_name: userProfile?.display_name })
+                              .eq('user_id', user?.id);
+                            
+                            if (error) throw error;
+                            
+                            toast({
+                              title: 'Sucesso',
+                              description: 'Apelido atualizado com sucesso!'
+                            });
+                          } catch (error) {
+                            toast({
+                              title: 'Erro',
+                              description: 'Não foi possível atualizar o apelido.',
+                              variant: 'destructive'
+                            });
+                          }
+                        }}
+                      >
+                        Salvar Apelido
+                      </Button>
                     </div>
-                    <div>
-                      <Label htmlFor="new-password">Nova Senha</Label>
-                      <Input
-                        id="new-password"
-                        name="new-password"
-                        type="password"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-                      <Input
-                        id="confirm-password"
-                        name="confirm-password"
-                        type="password"
-                        required
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full gradient-bg"
-                    >
-                      <Key className="h-4 w-4 mr-2" />
-                      {isLoading ? "Alterando..." : "Alterar Senha"}
-                    </Button>
-                  </form>
+                  </div>
+
+                  {/* Seção de Senha */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Alterar Senha</h3>
+                    <form onSubmit={handlePasswordChange} className="space-y-4">
+                      <div>
+                        <Label htmlFor="current-password">Senha Atual</Label>
+                        <Input
+                          id="current-password"
+                          name="current-password"
+                          type="password"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-password">Nova Senha</Label>
+                        <Input
+                          id="new-password"
+                          name="new-password"
+                          type="password"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+                        <Input
+                          id="confirm-password"
+                          name="confirm-password"
+                          type="password"
+                          required
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full gradient-bg"
+                      >
+                        <Key className="h-4 w-4 mr-2" />
+                        {isLoading ? "Alterando..." : "Alterar Senha"}
+                      </Button>
+                    </form>
+                  </div>
                 </CardContent>
               </Card>
             )}
