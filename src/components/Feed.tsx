@@ -197,6 +197,27 @@ export default function Feed() {
 
   useEffect(() => {
     fetchContent();
+
+    // Set up real-time subscription to update comment counts
+    const commentsChannel = supabase
+      .channel('comments-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'comments'
+        },
+        () => {
+          // Refetch content to update comment counts
+          fetchContent();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(commentsChannel);
+    };
   }, [user]);
 
   const filteredContent = content.filter(item => {

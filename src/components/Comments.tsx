@@ -279,7 +279,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
                 <Button 
                   onClick={handleSubmitComment}
                   disabled={submitting || !newComment.trim()}
-                  className="gradient-bg"
+                  className="bg-gradient-to-r from-primary to-accent text-white hover:opacity-90"
                 >
                   <Send className="h-4 w-4 mr-2" />
                   {submitting ? 'Enviando...' : 'Comentar'}
@@ -299,30 +299,30 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       {/* Comments List */}
       <div className="space-y-4">
         {comments.map((comment) => (
-          <Card key={comment.id} className={comment.user_profile?.role === 'admin' ? 'gradient-bg' : ''}>
-            <CardHeader className="pb-3">
-              <div className="flex items-start gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>
-                    <User className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-medium text-sm ${comment.user_profile?.role === 'admin' ? 'text-white' : ''}`}>
-                      {comment.user_profile?.display_name || 'Usuário'}
-                    </span>
-                    <span className={`text-xs ${comment.user_profile?.role === 'admin' ? 'text-white/70' : 'text-muted-foreground'}`}>
-                      {formatDistanceToNow(new Date(comment.created_at), {
-                        addSuffix: true,
-                        locale: ptBR
-                      })}
-                    </span>
-                  </div>
-                  <p className={`text-sm mt-2 break-words ${comment.user_profile?.role === 'admin' ? 'text-white' : ''}`}>{comment.content}</p>
+        <Card key={comment.id} className={comment.user_profile?.role === 'admin' ? 'bg-gradient-to-r from-primary to-accent border-primary/50' : ''}>
+          <CardHeader className="pb-3">
+            <div className="flex items-start gap-3">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback>
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className={`font-medium text-sm ${comment.user_profile?.role === 'admin' ? 'text-white' : ''}`}>
+                    {comment.user_profile?.display_name || 'Usuário'}
+                  </span>
+                  <span className={`text-xs ${comment.user_profile?.role === 'admin' ? 'text-white/70' : 'text-muted-foreground'}`}>
+                    {formatDistanceToNow(new Date(comment.created_at), {
+                      addSuffix: true,
+                      locale: ptBR
+                    })}
+                  </span>
                 </div>
+                <p className={`text-sm mt-2 break-words ${comment.user_profile?.role === 'admin' ? 'text-white' : ''}`}>{comment.content}</p>
               </div>
-            </CardHeader>
+            </div>
+          </CardHeader>
             
             <CardContent className="pt-0">
               <div className="flex items-center gap-2">
@@ -361,7 +361,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
                       size="sm"
                       onClick={() => handleSubmitReply(comment.id)}
                       disabled={submitting || !replyContent.trim()}
-                      className="gradient-bg"
+                      className="bg-gradient-to-r from-primary to-accent text-white hover:opacity-90"
                     >
                       {submitting ? 'Enviando...' : 'Responder'}
                     </Button>
@@ -373,7 +373,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
               {comment.replies && comment.replies.length > 0 && (
                 <div className="mt-4 space-y-3 border-l-2 border-muted pl-4">
                   {comment.replies.map((reply) => (
-                    <div key={reply.id} className={`flex gap-3 p-3 rounded-lg ${reply.user_profile?.role === 'admin' ? 'gradient-bg' : ''}`}>
+                    <div key={reply.id} className={`flex gap-3 p-3 rounded-lg ${reply.user_profile?.role === 'admin' ? 'bg-gradient-to-r from-primary to-accent' : ''}`}>
                       <Avatar className="h-6 w-6">
                         <AvatarFallback>
                           <User className="h-3 w-3" />
