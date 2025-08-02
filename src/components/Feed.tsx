@@ -22,6 +22,7 @@ interface ContentItem {
   cover_image_url?: string;
   thumbnail_url?: string;
   youtube_video_id?: string;
+  duration?: string;
   category: { name: string; slug: string };
   author: { display_name: string };
   published_at: string;
