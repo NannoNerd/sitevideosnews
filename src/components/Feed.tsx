@@ -274,26 +274,31 @@ export default function Feed() {
                             )}
                           </div>
                         )}
-                        <Badge className="absolute top-2 left-2" variant="secondary">
-                          {item.category?.name}
-                        </Badge>
-                        {item.type === 'video' && (
-                          <Badge className="absolute top-2 right-2" variant="default">
-                            Vídeo
-                          </Badge>
-                        )}
-                      </div>
-                    </Link>
-                    
-                    <CardHeader>
-                      <CardTitle className="break-anywhere leading-tight">
-                        <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
-                          {item.title}
-                        </Link>
-                      </CardTitle>
-                      <CardDescription className="line-clamp-2 break-anywhere">
-                        {item.type === 'post' ? item.content?.substring(0, 150) + '...' : item.description}
-                      </CardDescription>
+                         <Badge className="absolute top-2 left-2" variant="secondary">
+                           {item.category?.name}
+                         </Badge>
+                       </div>
+                     </Link>
+                     
+                     <CardHeader>
+                       <div className="flex items-start justify-between gap-2">
+                         <CardTitle className="break-anywhere leading-tight flex-1">
+                           <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
+                             {item.title}
+                           </Link>
+                         </CardTitle>
+                         <div className="flex gap-1 flex-shrink-0">
+                           <Badge variant="default" className="text-xs">
+                             Publicado
+                           </Badge>
+                           <Badge variant="outline" className="text-xs">
+                             {item.type === 'post' ? 'Post' : 'Vídeo'}
+                           </Badge>
+                         </div>
+                       </div>
+                       <CardDescription className="line-clamp-2 break-anywhere">
+                         {item.type === 'post' ? item.content?.substring(0, 150) + '...' : item.description}
+                       </CardDescription>
                     </CardHeader>
                     
                     <CardContent>
