@@ -266,7 +266,7 @@ const Profile = () => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 max-w-[calc(100%-320px-1.5rem)]">
             {activeTab === "posts" && (
               <Card>
                 <CardHeader>

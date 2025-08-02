@@ -228,7 +228,7 @@ export default function Feed() {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 w-full overflow-x-hidden">
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8 max-w-full">
-          <div className="mb-6">
+          <div className="mb-6 flex justify-center">
             <Tabs value={filter} onValueChange={(value) => setFilter(value as any)}>
               <TabsList>
                 <TabsTrigger value="all">Todos</TabsTrigger>

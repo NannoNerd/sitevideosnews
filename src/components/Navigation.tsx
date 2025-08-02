@@ -49,7 +49,7 @@ const Navigation = () => {
             <span className="text-white font-bold text-lg">N</span>
           </div>
           <span className="text-white font-bold text-xl hidden sm:inline">
-            NewsPortal
+            Ivo Fernandes News
           </span>
         </Link>
 
