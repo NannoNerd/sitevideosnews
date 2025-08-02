@@ -271,7 +271,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
         {comments.map((comment) => (
         <Card key={comment.id}>
           <CardHeader className="pb-3">
-            <div className={`flex items-start gap-3 p-4 rounded-lg ${comment.user_profile?.role === 'admin' ? 'bg-gradient-to-r from-primary to-accent' : ''}`}>
+            <div className={`flex items-start gap-3 p-4 rounded-lg ${comment.user_profile?.role === 'admin' ? 'gradient-bg' : ''}`}>
               <Avatar className="h-8 w-8">
                 <AvatarFallback>
                   <User className="h-4 w-4" />
@@ -343,7 +343,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
               {comment.replies && comment.replies.length > 0 && (
                 <div className="mt-4 space-y-3 border-l-2 border-muted pl-4">
                   {comment.replies.map((reply) => (
-                    <div key={reply.id} className={`flex gap-3 p-3 rounded-lg ${reply.user_profile?.role === 'admin' ? 'bg-gradient-to-r from-primary to-accent' : ''}`}>
+                    <div key={reply.id} className={`flex gap-3 p-3 rounded-lg ${reply.user_profile?.role === 'admin' ? 'gradient-bg' : ''}`}>
                       <Avatar className="h-6 w-6">
                         <AvatarFallback>
                           <User className="h-3 w-3" />
