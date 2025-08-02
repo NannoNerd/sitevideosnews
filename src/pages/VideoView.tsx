@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Heart, Eye, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { processTextWithLinks } from '@/lib/text-utils';
 
 interface Video {
   id: string;
@@ -169,7 +170,7 @@ export default function VideoView() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Link to="/" className="inline-flex items-center mb-6 text-muted-foreground hover:text-primary">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -230,7 +231,7 @@ export default function VideoView() {
 
           {video.description && (
             <div className="prose prose-lg max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: video.description }} />
+              <div dangerouslySetInnerHTML={{ __html: processTextWithLinks(video.description) }} />
             </div>
           )}
         </article>

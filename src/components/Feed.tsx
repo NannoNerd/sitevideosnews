@@ -143,62 +143,7 @@ export default function Feed() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-primary">IvoFernandesNews</h1>
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar conteúdo..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <>
-                <Link to="/admin">
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Admin
-                  </Button>
-                </Link>
-                <Link to="/create">
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Criar
-                  </Button>
-                </Link>
-                <div className="flex items-center space-x-2">
-                  <Avatar>
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button variant="ghost" onClick={handleSignOut}>
-                    Sair
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Link to="/auth">
-                  <Button variant="outline">Entrar</Button>
-                </Link>
-                <Link to="/auth">
-                  <Button>Cadastrar</Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
