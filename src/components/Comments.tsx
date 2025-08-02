@@ -160,21 +160,6 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
         description: 'Comentário adicionado.',
       });
       
-      // Update comments count
-      const tableName = contentType === 'post' ? 'posts' : 'videos';
-      const { data: currentData } = await supabase
-        .from(tableName)
-        .select('comments_count')
-        .eq('id', contentId)
-        .single();
-
-      if (currentData) {
-        await supabase
-          .from(tableName)
-          .update({ comments_count: (currentData.comments_count || 0) + 1 })
-          .eq('id', contentId);
-      }
-
       fetchComments();
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -214,21 +199,6 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
         title: 'Sucesso!',
         description: 'Resposta adicionada.',
       });
-
-      // Update comments count for replies too
-      const tableName = contentType === 'post' ? 'posts' : 'videos';
-      const { data: currentData } = await supabase
-        .from(tableName)
-        .select('comments_count')
-        .eq('id', contentId)
-        .single();
-
-      if (currentData) {
-        await supabase
-          .from(tableName)
-          .update({ comments_count: (currentData.comments_count || 0) + 1 })
-          .eq('id', contentId);
-      }
 
       fetchComments();
     } catch (error) {
