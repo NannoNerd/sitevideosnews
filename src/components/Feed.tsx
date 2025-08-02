@@ -187,9 +187,14 @@ export default function Feed() {
                 </div>
               </>
             ) : (
-              <Link to="/auth">
-                <Button>Entrar</Button>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link to="/auth">
+                  <Button variant="outline">Entrar</Button>
+                </Link>
+                <Link to="/auth">
+                  <Button>Cadastrar</Button>
+                </Link>
+              </div>
             )}
           </div>
         </div>
