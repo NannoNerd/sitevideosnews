@@ -19,6 +19,7 @@ interface Comment {
   approved: boolean;
   user_profile: {
     display_name: string;
+    role?: string;
   };
   replies?: Comment[];
 }
@@ -63,7 +64,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       const userIds = (commentsData || []).map(comment => comment.user_id);
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, display_name')
+        .select('user_id, display_name, role')
         .in('user_id', userIds);
 
       const profileMap = (profiles || []).reduce((acc, profile) => {
@@ -94,7 +95,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
           const replyUserIds = (replies || []).map(reply => reply.user_id);
           const { data: replyProfiles } = await supabase
             .from('profiles')
-            .select('user_id, display_name')
+            .select('user_id, display_name, role')
             .in('user_id', replyUserIds);
 
           const replyProfileMap = (replyProfiles || []).reduce((acc, profile) => {
@@ -214,6 +215,21 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
         description: 'Resposta adicionada.',
       });
 
+      // Update comments count for replies too
+      const tableName = contentType === 'post' ? 'posts' : 'videos';
+      const { data: currentData } = await supabase
+        .from(tableName)
+        .select('comments_count')
+        .eq('id', contentId)
+        .single();
+
+      if (currentData) {
+        await supabase
+          .from(tableName)
+          .update({ comments_count: (currentData.comments_count || 0) + 1 })
+          .eq('id', contentId);
+      }
+
       fetchComments();
     } catch (error) {
       console.error('Error submitting reply:', error);
@@ -244,7 +260,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       <div className="flex items-center gap-2">
         <MessageCircle className="h-5 w-5" />
         <h3 className="text-lg font-semibold">
-          Comentários ({comments.length})
+          Comentários ({comments.reduce((total, comment) => total + 1 + (comment.replies?.length || 0), 0)})
         </h3>
       </div>
 
@@ -283,7 +299,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       {/* Comments List */}
       <div className="space-y-4">
         {comments.map((comment) => (
-          <Card key={comment.id}>
+          <Card key={comment.id} className={comment.user_profile?.role === 'admin' ? 'gradient-bg' : ''}>
             <CardHeader className="pb-3">
               <div className="flex items-start gap-3">
                 <Avatar className="h-8 w-8">
@@ -293,17 +309,17 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">
+                    <span className={`font-medium text-sm ${comment.user_profile?.role === 'admin' ? 'text-white' : ''}`}>
                       {comment.user_profile?.display_name || 'Usuário'}
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className={`text-xs ${comment.user_profile?.role === 'admin' ? 'text-white/70' : 'text-muted-foreground'}`}>
                       {formatDistanceToNow(new Date(comment.created_at), {
                         addSuffix: true,
                         locale: ptBR
                       })}
                     </span>
                   </div>
-                  <p className="text-sm mt-2 break-words">{comment.content}</p>
+                  <p className={`text-sm mt-2 break-words ${comment.user_profile?.role === 'admin' ? 'text-white' : ''}`}>{comment.content}</p>
                 </div>
               </div>
             </CardHeader>
@@ -357,7 +373,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
               {comment.replies && comment.replies.length > 0 && (
                 <div className="mt-4 space-y-3 border-l-2 border-muted pl-4">
                   {comment.replies.map((reply) => (
-                    <div key={reply.id} className="flex gap-3">
+                    <div key={reply.id} className={`flex gap-3 p-3 rounded-lg ${reply.user_profile?.role === 'admin' ? 'gradient-bg' : ''}`}>
                       <Avatar className="h-6 w-6">
                         <AvatarFallback>
                           <User className="h-3 w-3" />
@@ -365,17 +381,17 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-xs">
+                          <span className={`font-medium text-xs ${reply.user_profile?.role === 'admin' ? 'text-white' : ''}`}>
                             {reply.user_profile?.display_name || 'Usuário'}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className={`text-xs ${reply.user_profile?.role === 'admin' ? 'text-white/70' : 'text-muted-foreground'}`}>
                             {formatDistanceToNow(new Date(reply.created_at), {
                               addSuffix: true,
                               locale: ptBR
                             })}
                           </span>
                         </div>
-                        <p className="text-xs mt-1 break-words">{reply.content}</p>
+                        <p className={`text-xs mt-1 break-words ${reply.user_profile?.role === 'admin' ? 'text-white' : ''}`}>{reply.content}</p>
                       </div>
                     </div>
                   ))}
