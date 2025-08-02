@@ -70,9 +70,8 @@ export default function VideoView() {
           const { data: likeData } = await supabase
             .from('likes')
             .select('id')
-            .eq('content_id', videoData.id)
+            .eq('video_id', videoData.id)
             .eq('user_id', user.id)
-            .eq('content_type', 'video')
             .maybeSingle();
 
           setLiked(!!likeData);
@@ -113,9 +112,8 @@ export default function VideoView() {
         await supabase
           .from('likes')
           .delete()
-          .eq('content_id', video.id)
-          .eq('user_id', user.id)
-          .eq('content_type', 'video');
+          .eq('video_id', video.id)
+          .eq('user_id', user.id);
 
         setVideo(prevVideo => {
           if (!prevVideo) return null;
@@ -126,9 +124,8 @@ export default function VideoView() {
         await supabase
           .from('likes')
           .insert({
-            content_id: video.id,
-            user_id: user.id,
-            content_type: 'video'
+            video_id: video.id,
+            user_id: user.id
           });
 
         setVideo(prevVideo => {
