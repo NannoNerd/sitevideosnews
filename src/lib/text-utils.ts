@@ -21,6 +21,45 @@ export const stripHtml = (html: string): string => {
   return temp.textContent || temp.innerText || '';
 };
 
+export const cleanHtmlForEditor = (html: string): string => {
+  if (!html) return '';
+  
+  // Remove style attributes and CSS
+  let cleaned = html.replace(/style="[^"]*"/gi, '');
+  cleaned = cleaned.replace(/<style[^>]*>.*?<\/style>/gi, '');
+  
+  // Remove script tags
+  cleaned = cleaned.replace(/<script[^>]*>.*?<\/script>/gi, '');
+  
+  // Remove unwanted attributes but keep basic formatting
+  cleaned = cleaned.replace(/class="[^"]*"/gi, '');
+  cleaned = cleaned.replace(/id="[^"]*"/gi, '');
+  
+  // Convert some common HTML entities
+  cleaned = cleaned.replace(/&nbsp;/g, ' ');
+  cleaned = cleaned.replace(/&amp;/g, '&');
+  cleaned = cleaned.replace(/&lt;/g, '<');
+  cleaned = cleaned.replace(/&gt;/g, '>');
+  cleaned = cleaned.replace(/&quot;/g, '"');
+  
+  // Keep only basic formatting tags
+  const allowedTags = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a'];
+  const tagPattern = /<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*>/g;
+  
+  cleaned = cleaned.replace(tagPattern, (match, tagName) => {
+    if (allowedTags.includes(tagName.toLowerCase())) {
+      // For links, preserve href attribute
+      if (tagName.toLowerCase() === 'a' && match.includes('href=')) {
+        return match.replace(/\s+((?!href=)[a-zA-Z-]+="[^"]*")/g, '');
+      }
+      return `<${tagName.toLowerCase()}>`.replace(match.substring(1, match.length - 1), tagName.toLowerCase());
+    }
+    return '';
+  });
+  
+  return cleaned.trim();
+};
+
 export const truncateText = (text: string, maxLength: number = 150): string => {
   const strippedText = stripHtml(text);
   if (strippedText.length <= maxLength) {

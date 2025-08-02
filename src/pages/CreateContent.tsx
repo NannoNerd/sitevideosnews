@@ -27,6 +27,10 @@ export default function CreateContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [postContent, setPostContent] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
+  const [postTitle, setPostTitle] = useState('');
+  const [videoTitle, setVideoTitle] = useState('');
+
+  const MAX_TITLE_LENGTH = 120;
 
   // Redirect if not authenticated
   if (!loading && !user) {
@@ -73,10 +77,18 @@ export default function CreateContent() {
 
     try {
       const formData = new FormData(e.currentTarget);
-      const title = formData.get('title') as string;
+      const title = postTitle;
       const content = postContent;
       const categoryId = formData.get('categoryId') as string;
       const coverImage = formData.get('coverImage') as File;
+
+      if (!title.trim()) {
+        throw new Error('Título é obrigatório');
+      }
+
+      if (title.length > MAX_TITLE_LENGTH) {
+        throw new Error(`Título deve ter no máximo ${MAX_TITLE_LENGTH} caracteres`);
+      }
 
       let coverImageUrl = '';
 
@@ -140,11 +152,19 @@ export default function CreateContent() {
 
     try {
       const formData = new FormData(e.currentTarget);
-      const title = formData.get('title') as string;
+      const title = videoTitle;
       const description = videoDescription;
       const youtubeUrl = formData.get('youtubeUrl') as string;
       const categoryId = formData.get('categoryId') as string;
       const thumbnail = formData.get('thumbnail') as File;
+
+      if (!title.trim()) {
+        throw new Error('Título é obrigatório');
+      }
+
+      if (title.length > MAX_TITLE_LENGTH) {
+        throw new Error(`Título deve ter no máximo ${MAX_TITLE_LENGTH} caracteres`);
+      }
 
       const videoId = extractYouTubeVideoId(youtubeUrl);
       if (!videoId) {
@@ -243,13 +263,26 @@ export default function CreateContent() {
               <TabsContent value="post">
                 <form onSubmit={handleCreatePost} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="post-title">Título</Label>
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor="post-title">Título</Label>
+                      <span className={`text-xs ${postTitle.length > MAX_TITLE_LENGTH ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        {postTitle.length}/{MAX_TITLE_LENGTH}
+                      </span>
+                    </div>
                     <Input
                       id="post-title"
-                      name="title"
+                      value={postTitle}
+                      onChange={(e) => setPostTitle(e.target.value)}
                       placeholder="Digite o título da notícia"
                       required
+                      maxLength={MAX_TITLE_LENGTH + 20} // Allow typing a bit over to show error
+                      className={postTitle.length > MAX_TITLE_LENGTH ? 'border-destructive' : ''}
                     />
+                    {postTitle.length > MAX_TITLE_LENGTH && (
+                      <p className="text-xs text-destructive">
+                        Título muito longo. Máximo de {MAX_TITLE_LENGTH} caracteres.
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -287,7 +320,11 @@ export default function CreateContent() {
                     />
                   </div>
 
-                  <Button type="submit" disabled={isLoading} className="w-full">
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading || postTitle.length > MAX_TITLE_LENGTH} 
+                    className="w-full"
+                  >
                     {isLoading ? 'Publicando...' : 'Publicar Post'}
                   </Button>
                 </form>
@@ -296,13 +333,26 @@ export default function CreateContent() {
               <TabsContent value="video">
                 <form onSubmit={handleCreateVideo} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="video-title">Título</Label>
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor="video-title">Título</Label>
+                      <span className={`text-xs ${videoTitle.length > MAX_TITLE_LENGTH ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        {videoTitle.length}/{MAX_TITLE_LENGTH}
+                      </span>
+                    </div>
                     <Input
                       id="video-title"
-                      name="title"
+                      value={videoTitle}
+                      onChange={(e) => setVideoTitle(e.target.value)}
                       placeholder="Digite o título do vídeo"
                       required
+                      maxLength={MAX_TITLE_LENGTH + 20} // Allow typing a bit over to show error
+                      className={videoTitle.length > MAX_TITLE_LENGTH ? 'border-destructive' : ''}
                     />
+                    {videoTitle.length > MAX_TITLE_LENGTH && (
+                      <p className="text-xs text-destructive">
+                        Título muito longo. Máximo de {MAX_TITLE_LENGTH} caracteres.
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -350,7 +400,11 @@ export default function CreateContent() {
                     />
                   </div>
 
-                  <Button type="submit" disabled={isLoading} className="w-full">
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading || videoTitle.length > MAX_TITLE_LENGTH} 
+                    className="w-full"
+                  >
                     {isLoading ? 'Publicando...' : 'Publicar Vídeo'}
                   </Button>
                 </form>

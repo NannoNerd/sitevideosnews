@@ -68,6 +68,8 @@ export default function ContentEditDialog({
     category_id: ''
   });
 
+  const MAX_TITLE_LENGTH = 120;
+
   const generateSlug = (title: string): string => {
     return title
       .toLowerCase()
@@ -194,6 +196,24 @@ export default function ContentEditDialog({
   const handleSave = async () => {
     if (!user || !contentData) return;
 
+    if (!formData.title.trim()) {
+      toast({
+        title: 'Erro',
+        description: 'Título é obrigatório.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (formData.title.length > MAX_TITLE_LENGTH) {
+      toast({
+        title: 'Erro',
+        description: `Título deve ter no máximo ${MAX_TITLE_LENGTH} caracteres.`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const tableName = contentType === 'post' ? 'posts' : 'videos';
@@ -307,13 +327,24 @@ export default function ContentEditDialog({
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="title">Título</Label>
+                <div className="flex justify-between items-center mb-2">
+                  <Label htmlFor="title">Título</Label>
+                  <span className={`text-xs ${formData.title.length > MAX_TITLE_LENGTH ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {formData.title.length}/{MAX_TITLE_LENGTH}
+                  </span>
+                </div>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Título do conteúdo"
+                  className={formData.title.length > MAX_TITLE_LENGTH ? 'border-destructive' : ''}
                 />
+                {formData.title.length > MAX_TITLE_LENGTH && (
+                  <p className="text-xs text-destructive mt-1">
+                    Título muito longo. Máximo de {MAX_TITLE_LENGTH} caracteres.
+                  </p>
+                )}
               </div>
               
               <div>
@@ -456,7 +487,11 @@ export default function ContentEditDialog({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={saving} className="gradient-bg">
+            <Button
+              onClick={handleSave}
+              disabled={saving || formData.title.length > MAX_TITLE_LENGTH}
+              className="gradient-bg"
+            >
               <Save className="h-4 w-4 mr-2" />
               {saving ? 'Salvando...' : 'Salvar'}
             </Button>

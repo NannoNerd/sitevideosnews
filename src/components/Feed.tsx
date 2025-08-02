@@ -245,7 +245,6 @@ export default function Feed() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredContent.map((item) => {
-                const titleTruncated = truncateWithTooltip(item.title, 30);
                 const isLiked = userLikes.has(item.id);
                 
                 return (
@@ -287,27 +286,12 @@ export default function Feed() {
                     </Link>
                     
                     <CardHeader>
-                      {titleTruncated.needsTooltip ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <CardTitle className="line-clamp-2 cursor-pointer break-words">
-                              <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
-                                {titleTruncated.truncated}
-                              </Link>
-                            </CardTitle>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs break-words">{titleTruncated.full}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <CardTitle className="line-clamp-2 break-words">
-                          <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
-                            {titleTruncated.truncated}
-                          </Link>
-                        </CardTitle>
-                      )}
-                      <CardDescription className="line-clamp-2 break-words">
+                      <CardTitle className="break-anywhere leading-tight">
+                        <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
+                          {item.title}
+                        </Link>
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 break-anywhere">
                         {item.type === 'post' ? item.content?.substring(0, 150) + '...' : item.description}
                       </CardDescription>
                     </CardHeader>

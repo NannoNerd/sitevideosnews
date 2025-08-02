@@ -160,6 +160,34 @@ All colors MUST be HSL.
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* Force text wrapping and prevent horizontal overflow */
+  .break-anywhere {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  /* Ensure all text content respects container boundaries */
+  p, div, span, h1, h2, h3, h4, h5, h6 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+
+  /* Prevent code blocks and pre-formatted text from breaking layout */
+  pre, code {
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  /* Ensure images and media don't break layout */
+  img, video, iframe {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 @keyframes fadeIn {
