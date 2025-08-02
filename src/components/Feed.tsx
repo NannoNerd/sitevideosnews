@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Heart, MessageCircle, Eye, Search, Plus, Settings, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 interface ContentItem {
@@ -32,10 +32,11 @@ interface ContentItem {
 export default function Feed() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'posts' | 'videos'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchQuery = searchParams.get('search') || '';
 
   const fetchContent = async () => {
     try {

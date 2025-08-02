@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +10,7 @@ const Navigation = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -30,6 +31,13 @@ const Navigation = () => {
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -47,7 +55,7 @@ const Navigation = () => {
 
         {/* Search Bar */}
         <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
+          <form onSubmit={handleSearch} className="relative w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
             <Input
               placeholder="Buscar conteúdo..."
@@ -55,7 +63,7 @@ const Navigation = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/20"
             />
-          </div>
+          </form>
         </div>
 
         {/* Desktop Auth Buttons */}
@@ -124,7 +132,7 @@ const Navigation = () => {
         <div className="md:hidden border-t bg-background/95 backdrop-blur animate-slide-up">
           <div className="container py-4 px-4 space-y-4">
             {/* Mobile Search */}
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Buscar conteúdo..."
@@ -132,7 +140,7 @@ const Navigation = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
-            </div>
+            </form>
 
             <div className="pt-4 border-t space-y-3">
               {user ? (
