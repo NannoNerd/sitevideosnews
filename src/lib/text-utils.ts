@@ -6,13 +6,20 @@ export const truncateUrl = (url: string, maxLength: number = 30): string => {
 };
 
 export const processTextWithLinks = (text: string): string => {
+  if (!text) return '';
+  
+  // Convert line breaks to HTML line breaks
+  let processedText = text.replace(/\n/g, '<br />');
+  
   // Regex to find URLs
   const urlRegex = /(https?:\/\/[^\s<>"]+)/gi;
   
-  return text.replace(urlRegex, (url) => {
+  processedText = processedText.replace(urlRegex, (url) => {
     const displayUrl = truncateUrl(url);
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline" title="${url}">${displayUrl}</a>`;
   });
+  
+  return processedText;
 };
 
 export const stripHtml = (html: string): string => {

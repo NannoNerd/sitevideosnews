@@ -238,6 +238,13 @@ export default function Feed() {
             </Tabs>
           </div>
 
+          {/* Search Results Info */}
+          {searchQuery && (
+            <div className="mb-4 text-center text-muted-foreground">
+              <p>{filteredContent.length} resultado(s) para o termo "{searchQuery}"</p>
+            </div>
+          )}
+
           {filteredContent.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
