@@ -181,7 +181,7 @@ export default function VideoView() {
         <article className="space-y-6">
           <div className="aspect-video overflow-hidden rounded-lg bg-black">
             <iframe
-              src={`https://www.youtube.com/embed/${video.youtube_video_id}?controls=1&modestbranding=1&rel=0&showinfo=0&fs=0&disablekb=1&iv_load_policy=3&cc_load_policy=0&playsinline=1&enablejsapi=0`}
+              src={`https://www.youtube.com/embed/${video.youtube_video_id}?controls=0&modestbranding=1&rel=0&showinfo=0&fs=0&disablekb=1&iv_load_policy=3&cc_load_policy=0&playsinline=1&enablejsapi=0&autohide=1&color=white&theme=dark`}
               frameBorder="0"
               allowFullScreen
               className="w-full h-full"
