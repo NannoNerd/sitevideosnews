@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import RichTextEditor from '@/components/RichTextEditor';
 
 interface Category {
   id: string;
@@ -24,6 +25,8 @@ export default function CreateContent() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [postContent, setPostContent] = useState('');
+  const [videoDescription, setVideoDescription] = useState('');
 
   // Redirect if not authenticated
   if (!loading && !user) {
@@ -71,7 +74,7 @@ export default function CreateContent() {
     try {
       const formData = new FormData(e.currentTarget);
       const title = formData.get('title') as string;
-      const content = formData.get('content') as string;
+      const content = postContent;
       const categoryId = formData.get('categoryId') as string;
       const coverImage = formData.get('coverImage') as File;
 
@@ -138,7 +141,7 @@ export default function CreateContent() {
     try {
       const formData = new FormData(e.currentTarget);
       const title = formData.get('title') as string;
-      const description = formData.get('description') as string;
+      const description = videoDescription;
       const youtubeUrl = formData.get('youtubeUrl') as string;
       const categoryId = formData.get('categoryId') as string;
       const thumbnail = formData.get('thumbnail') as File;
@@ -277,12 +280,10 @@ export default function CreateContent() {
 
                   <div className="space-y-2">
                     <Label htmlFor="post-content">Conteúdo</Label>
-                    <Textarea
-                      id="post-content"
-                      name="content"
+                    <RichTextEditor
+                      value={postContent}
+                      onChange={setPostContent}
                       placeholder="Escreva o conteúdo da notícia"
-                      rows={10}
-                      required
                     />
                   </div>
 
@@ -342,11 +343,10 @@ export default function CreateContent() {
 
                   <div className="space-y-2">
                     <Label htmlFor="video-description">Descrição</Label>
-                    <Textarea
-                      id="video-description"
-                      name="description"
+                    <RichTextEditor
+                      value={videoDescription}
+                      onChange={setVideoDescription}
                       placeholder="Descreva o conteúdo do vídeo"
-                      rows={6}
                     />
                   </div>
 

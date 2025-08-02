@@ -84,10 +84,9 @@ const Navigation = () => {
                 </Button>
               )}
               <Button
-                variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="border-white/20 text-white hover:bg-white/10"
+                className="bg-white/20 text-white hover:bg-white/30 border-white/20"
               >
                 <LogOut className="h-4 w-4 mr-1" />
                 Sair
@@ -160,13 +159,12 @@ const Navigation = () => {
                     </Button>
                   )}
                   <Button
-                    variant="outline"
                     size="sm"
                     onClick={() => {
                       handleLogout();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full"
+                    className="w-full gradient-bg hover:opacity-90"
                   >
                     <LogOut className="h-4 w-4 mr-1" />
                     Sair
