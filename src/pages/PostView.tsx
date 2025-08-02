@@ -1,0 +1,241 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ArrowLeft, Heart, Eye, User } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  cover_image_url?: string;
+  author_id: string;
+  published_at: string;
+  views_count: number;
+  likes_count: number;
+  categories: { name: string; slug: string } | null;
+  author: { display_name: string };
+}
+
+export default function PostView() {
+  const { slug } = useParams();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    if (slug) {
+      fetchPost();
+    }
+  }, []);
+
+  const fetchPost = async () => {
+    if (!slug) return;
+    
+    try {
+      const { data: postData, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          categories(name, slug)
+        `)
+        .eq('slug', slug)
+        .eq('published', true)
+        .single();
+
+      if (error) throw error;
+
+      if (postData) {
+        // Get author info
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', postData.author_id)
+          .single();
+
+        const postWithAuthor = {
+          ...postData,
+          author: { display_name: profile?.display_name || 'Anônimo' }
+        };
+
+        setPost(postWithAuthor);
+
+        // Check if user liked this post
+        if (user) {
+          const { data: likeData } = await supabase
+            .from('likes')
+            .select('id')
+            .eq('content_id', postData.id)
+            .eq('user_id', user.id)
+            .eq('content_type', 'post')
+            .maybeSingle();
+
+          setLiked(!!likeData);
+        }
+
+        // Increment view count
+        await supabase
+          .from('posts')
+          .update({ views_count: postData.views_count + 1 })
+          .eq('id', postData.id);
+      }
+    } catch (error) {
+      console.error('Error fetching post:', error);
+      toast({
+        title: 'Erro ao carregar post',
+        description: 'Post não encontrado.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!user) {
+      toast({
+        title: 'Login necessário',
+        description: 'Faça login para curtir posts.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!post) return;
+
+    try {
+      if (liked) {
+        await supabase
+          .from('likes')
+          .delete()
+          .eq('content_id', post.id)
+          .eq('user_id', user.id)
+          .eq('content_type', 'post');
+
+        setPost(prevPost => {
+          if (!prevPost) return null;
+          return { ...prevPost, likes_count: prevPost.likes_count - 1 };
+        });
+        setLiked(false);
+      } else {
+        await supabase
+          .from('likes')
+          .insert({
+            content_id: post.id,
+            user_id: user.id,
+            content_type: 'post'
+          });
+
+        setPost(prevPost => {
+          if (!prevPost) return null;
+          return { ...prevPost, likes_count: prevPost.likes_count + 1 };
+        });
+        setLiked(true);
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível processar a curtida.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Post não encontrado</h1>
+          <Link to="/">
+            <Button>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar ao início
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <Link to="/" className="inline-flex items-center mb-6 text-muted-foreground hover:text-primary">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar ao feed
+        </Link>
+
+        <article className="space-y-6">
+          {post.cover_image_url && (
+            <div className="aspect-video overflow-hidden rounded-lg">
+              <img
+                src={post.cover_image_url}
+                alt={post.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          <header className="space-y-4">
+            <div className="flex items-center space-x-2">
+              {post.categories && (
+                <Badge variant="secondary">{post.categories.name}</Badge>
+              )}
+            </div>
+
+            <h1 className="text-4xl font-bold leading-tight">{post.title}</h1>
+
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Avatar>
+                    <AvatarFallback>
+                      <User className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>Por {post.author.display_name}</span>
+                </div>
+                <span>{new Date(post.published_at).toLocaleDateString('pt-BR')}</span>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-1">
+                  <Eye className="h-4 w-4" />
+                  <span>{post.views_count}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLike}
+                  className={liked ? 'text-red-500' : ''}
+                >
+                  <Heart className={`h-4 w-4 mr-1 ${liked ? 'fill-current' : ''}`} />
+                  {post.likes_count}
+                </Button>
+              </div>
+            </div>
+          </header>
+
+          <div className="prose prose-lg max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+          </div>
+        </article>
+      </div>
+    </div>
+  );
+}

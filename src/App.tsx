@@ -7,6 +7,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import CreateContent from "./pages/CreateContent";
+import PostView from "./pages/PostView";
+import VideoView from "./pages/VideoView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/create" element={<CreateContent />} />
+            <Route path="/post/:slug" element={<PostView />} />
+            <Route path="/video/:slug" element={<VideoView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
