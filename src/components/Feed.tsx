@@ -274,9 +274,6 @@ export default function Feed() {
                             )}
                           </div>
                         )}
-                         <Badge className="absolute top-2 left-2" variant="secondary">
-                           {item.category?.name}
-                         </Badge>
                        </div>
                      </Link>
                      
@@ -287,8 +284,8 @@ export default function Feed() {
                           </Link>
                         </CardTitle>
                         <div className="flex gap-1 mt-2">
-                          <Badge variant="default" className="text-xs">
-                            Publicado
+                          <Badge variant="secondary" className="text-xs">
+                            {item.category?.name}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
                             {item.type === 'post' ? 'Post' : 'Vídeo'}
