@@ -299,9 +299,9 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       {/* Comments List */}
       <div className="space-y-4">
         {comments.map((comment) => (
-        <Card key={comment.id} className={comment.user_profile?.role === 'admin' ? 'bg-gradient-to-r from-primary to-accent border-primary/50' : ''}>
+        <Card key={comment.id}>
           <CardHeader className="pb-3">
-            <div className="flex items-start gap-3">
+            <div className={`flex items-start gap-3 p-4 rounded-lg ${comment.user_profile?.role === 'admin' ? 'bg-gradient-to-r from-primary to-accent' : ''}`}>
               <Avatar className="h-8 w-8">
                 <AvatarFallback>
                   <User className="h-4 w-4" />

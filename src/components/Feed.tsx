@@ -213,6 +213,30 @@ export default function Feed() {
           fetchContent();
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'posts'
+        },
+        () => {
+          // Refetch content when posts are updated (for comment counts)
+          fetchContent();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'videos'
+        },
+        () => {
+          // Refetch content when videos are updated (for comment counts)
+          fetchContent();
+        }
+      )
       .subscribe();
 
     return () => {
