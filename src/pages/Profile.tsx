@@ -313,26 +313,26 @@ const Profile = () => {
                               
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div 
-                                      className="font-semibold hover:text-primary line-clamp-2 cursor-pointer"
-                                      onClick={() => setEditingContent({id: item.id, type: item.type})}
-                                    >
-                                      {item.title}
-                                      <Edit className="h-3 w-3 ml-1 inline opacity-60" />
-                                    </div>
-                                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                      {item.type === 'post' ? item.content?.substring(0, 100) + '...' : item.description}
-                                    </p>
-                                  </div>
-                                  <div className="flex items-center gap-2 ml-4">
-                                    <Badge variant={item.published ? "default" : "secondary"}>
-                                      {item.published ? "Publicado" : "Rascunho"}
-                                    </Badge>
-                                    <Badge variant="outline">
-                                      {item.type === 'post' ? 'Post' : 'Vídeo'}
-                                    </Badge>
-                                  </div>
+                                   <div className="flex-1">
+                                     <div 
+                                       className="font-semibold hover:text-primary line-clamp-2 cursor-pointer flex items-center gap-2 flex-wrap"
+                                       onClick={() => setEditingContent({id: item.id, type: item.type})}
+                                     >
+                                       <span className="flex-1">{item.title}</span>
+                                       <div className="flex items-center gap-1">
+                                         <Badge variant={item.published ? "default" : "secondary"} className="text-xs">
+                                           {item.published ? "Publicado" : "Rascunho"}
+                                         </Badge>
+                                         <Badge variant="outline" className="text-xs">
+                                           {item.type === 'post' ? 'Post' : 'Vídeo'}
+                                         </Badge>
+                                         <Edit className="h-3 w-3 opacity-60" />
+                                       </div>
+                                     </div>
+                                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                       {item.type === 'post' ? item.content?.substring(0, 100) + '...' : item.description}
+                                     </p>
+                                   </div>
                                 </div>
                                 
                                 <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
