@@ -315,6 +315,7 @@ export type Database = {
           comments_count: number | null
           created_at: string
           description: string | null
+          duration: string | null
           id: string
           likes_count: number | null
           published: boolean | null
@@ -333,6 +334,7 @@ export type Database = {
           comments_count?: number | null
           created_at?: string
           description?: string | null
+          duration?: string | null
           id?: string
           likes_count?: number | null
           published?: boolean | null
@@ -351,6 +353,7 @@ export type Database = {
           comments_count?: number | null
           created_at?: string
           description?: string | null
+          duration?: string | null
           id?: string
           likes_count?: number | null
           published?: boolean | null

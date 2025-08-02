@@ -305,11 +305,18 @@ export default function Feed() {
                     <Link to={`/${item.type}/${item.slug}`}>
                       <div className="aspect-video bg-muted relative overflow-hidden">
                         {item.type === 'video' && item.youtube_video_id ? (
-                          <img
-                            src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
+                          <>
+                            <img
+                              src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                            />
+                            {item.duration && (
+                              <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                                {item.duration}
+                              </div>
+                            )}
+                          </>
                         ) : item.cover_image_url ? (
                           <img
                             src={item.cover_image_url}
