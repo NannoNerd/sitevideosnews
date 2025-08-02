@@ -1,0 +1,364 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export default function CreateContent() {
+  const { user, loading } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if not authenticated
+  if (!loading && !user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+  };
+
+  const extractYouTubeVideoId = (url: string) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const handleCreatePost = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const title = formData.get('title') as string;
+      const content = formData.get('content') as string;
+      const categoryId = formData.get('categoryId') as string;
+      const coverImage = formData.get('coverImage') as File;
+
+      let coverImageUrl = '';
+
+      // Upload cover image if provided
+      if (coverImage && coverImage.size > 0) {
+        const fileExt = coverImage.name.split('.').pop();
+        const fileName = `${user!.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('content-images')
+          .upload(fileName, coverImage);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('content-images')
+          .getPublicUrl(fileName);
+
+        coverImageUrl = publicUrl;
+      }
+
+      const slug = generateSlug(title);
+      
+      const { error } = await supabase
+        .from('posts')
+        .insert({
+          title,
+          slug,
+          content,
+          excerpt: content.substring(0, 200),
+          cover_image_url: coverImageUrl,
+          category_id: categoryId || null,
+          author_id: user!.id,
+          published: true,
+          published_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Post criado com sucesso!',
+        description: 'Seu post foi publicado.'
+      });
+
+      navigate('/');
+    } catch (error: any) {
+      console.error('Error creating post:', error);
+      toast({
+        title: 'Erro ao criar post',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateVideo = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const title = formData.get('title') as string;
+      const description = formData.get('description') as string;
+      const youtubeUrl = formData.get('youtubeUrl') as string;
+      const categoryId = formData.get('categoryId') as string;
+      const thumbnail = formData.get('thumbnail') as File;
+
+      const videoId = extractYouTubeVideoId(youtubeUrl);
+      if (!videoId) {
+        throw new Error('URL do YouTube inválida');
+      }
+
+      let thumbnailUrl = '';
+
+      // Upload custom thumbnail if provided
+      if (thumbnail && thumbnail.size > 0) {
+        const fileExt = thumbnail.name.split('.').pop();
+        const fileName = `${user!.id}/thumbnails/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('content-images')
+          .upload(fileName, thumbnail);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('content-images')
+          .getPublicUrl(fileName);
+
+        thumbnailUrl = publicUrl;
+      }
+
+      const slug = generateSlug(title);
+      
+      const { error } = await supabase
+        .from('videos')
+        .insert({
+          title,
+          slug,
+          description,
+          youtube_url: youtubeUrl,
+          youtube_video_id: videoId,
+          thumbnail_url: thumbnailUrl,
+          category_id: categoryId || null,
+          author_id: user!.id,
+          published: true,
+          published_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Vídeo criado com sucesso!',
+        description: 'Seu vídeo foi publicado.'
+      });
+
+      navigate('/');
+    } catch (error: any) {
+      console.error('Error creating video:', error);
+      toast({
+        title: 'Erro ao criar vídeo',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="mb-6">
+          <Button variant="outline" onClick={() => navigate('/')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Criar Conteúdo</CardTitle>
+            <CardDescription>
+              Publique novos posts ou vídeos na plataforma
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="post">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="post">Notícia/Post</TabsTrigger>
+                <TabsTrigger value="video">Vídeo</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="post">
+                <form onSubmit={handleCreatePost} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="post-title">Título</Label>
+                    <Input
+                      id="post-title"
+                      name="title"
+                      placeholder="Digite o título da notícia"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="post-category">Categoria</Label>
+                    <Select name="categoryId">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="post-cover">Imagem de Capa</Label>
+                    <Input
+                      id="post-cover"
+                      name="coverImage"
+                      type="file"
+                      accept="image/*"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="post-content">Conteúdo</Label>
+                    <Textarea
+                      id="post-content"
+                      name="content"
+                      placeholder="Escreva o conteúdo da notícia"
+                      rows={10}
+                      required
+                    />
+                  </div>
+
+                  <Button type="submit" disabled={isLoading} className="w-full">
+                    {isLoading ? 'Publicando...' : 'Publicar Post'}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="video">
+                <form onSubmit={handleCreateVideo} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="video-title">Título</Label>
+                    <Input
+                      id="video-title"
+                      name="title"
+                      placeholder="Digite o título do vídeo"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="video-category">Categoria</Label>
+                    <Select name="categoryId">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="video-url">URL do YouTube</Label>
+                    <Input
+                      id="video-url"
+                      name="youtubeUrl"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="video-thumbnail">Thumbnail Personalizada (opcional)</Label>
+                    <Input
+                      id="video-thumbnail"
+                      name="thumbnail"
+                      type="file"
+                      accept="image/*"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="video-description">Descrição</Label>
+                    <Textarea
+                      id="video-description"
+                      name="description"
+                      placeholder="Descreva o conteúdo do vídeo"
+                      rows={6}
+                    />
+                  </div>
+
+                  <Button type="submit" disabled={isLoading} className="w-full">
+                    {isLoading ? 'Publicando...' : 'Publicar Vídeo'}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
