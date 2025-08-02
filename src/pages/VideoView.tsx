@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Heart, Eye, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { processTextWithLinks } from '@/lib/text-utils';
+import Comments from '@/components/Comments';
 
 interface Video {
   id: string;
@@ -234,6 +235,11 @@ export default function VideoView() {
               <div dangerouslySetInnerHTML={{ __html: processTextWithLinks(video.description) }} />
             </div>
           )}
+
+          {/* Comments Section */}
+          <div className="mt-12 pt-8 border-t">
+            <Comments contentId={video.id} contentType="video" />
+          </div>
         </article>
       </div>
     </div>

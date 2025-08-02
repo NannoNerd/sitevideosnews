@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Heart, Eye, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { processTextWithLinks } from '@/lib/text-utils';
+import Comments from '@/components/Comments';
 
 interface Post {
   id: string;
@@ -231,6 +232,11 @@ export default function PostView() {
 
           <div className="prose prose-lg max-w-none">
             <div dangerouslySetInnerHTML={{ __html: processTextWithLinks(post.content) }} />
+          </div>
+
+          {/* Comments Section */}
+          <div className="mt-12 pt-8 border-t">
+            <Comments contentId={post.id} contentType="post" />
           </div>
         </article>
       </div>

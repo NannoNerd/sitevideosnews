@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { User, Camera, Key, FileText, Eye, Heart, MessageCircle, Play } from "lucide-react";
+import { User, Camera, Key, FileText, Eye, Heart, MessageCircle, Play, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
+import ContentEditDialog from "@/components/ContentEditDialog";
 
 interface UserContent {
   id: string;
@@ -38,6 +39,7 @@ const Profile = () => {
   const [loadingContent, setLoadingContent] = useState(true);
   const [activeTab, setActiveTab] = useState("posts");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [editingContent, setEditingContent] = useState<{id: string, type: 'post' | 'video'} | null>(null);
 
   const fetchUserContent = async () => {
     if (!user) return;
@@ -312,12 +314,13 @@ const Profile = () => {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1">
-                                    <Link 
-                                      to={`/${item.type}/${item.slug}`}
-                                      className="font-semibold hover:text-primary line-clamp-2"
+                                    <div 
+                                      className="font-semibold hover:text-primary line-clamp-2 cursor-pointer"
+                                      onClick={() => setEditingContent({id: item.id, type: item.type})}
                                     >
                                       {item.title}
-                                    </Link>
+                                      <Edit className="h-3 w-3 ml-1 inline opacity-60" />
+                                    </div>
                                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                                       {item.type === 'post' ? item.content?.substring(0, 100) + '...' : item.description}
                                     </p>
@@ -411,6 +414,24 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Content Dialog */}
+      {editingContent && (
+        <ContentEditDialog
+          open={!!editingContent}
+          onOpenChange={(open) => !open && setEditingContent(null)}
+          contentId={editingContent.id}
+          contentType={editingContent.type}
+          onContentUpdated={() => {
+            fetchUserContent();
+            setEditingContent(null);
+          }}
+          onContentDeleted={() => {
+            fetchUserContent();
+            setEditingContent(null);
+          }}
+        />
+      )}
     </div>
   );
 };
