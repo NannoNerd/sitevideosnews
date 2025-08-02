@@ -214,7 +214,7 @@ const Profile = () => {
           {/* Sidebar */}
           <div className="lg:w-64 space-y-4">
             <Card className="hover-lift">
-              <CardHeader className="text-center">
+              <CardHeader className="text-center pb-4">
                 <div className="relative mx-auto">
                   <Avatar className="h-24 w-24 mx-auto">
                     <AvatarImage src={avatarUrl} alt="Profile" />
@@ -239,20 +239,22 @@ const Profile = () => {
                 </div>
                 <CardTitle className="text-lg">{user.email}</CardTitle>
               </CardHeader>
+              
+              <CardContent className="pt-0">
+                <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
+                  <TabsList className="grid w-full grid-cols-1 gap-2 h-auto bg-transparent p-0">
+                    <TabsTrigger value="posts" className="w-full justify-start bg-background">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Posts
+                    </TabsTrigger>
+                    <TabsTrigger value="account" className="w-full justify-start bg-background">
+                      <User className="h-4 w-4 mr-2" />
+                      Conta
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardContent>
             </Card>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full">
-                <TabsTrigger value="posts" className="flex-1">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Posts
-                </TabsTrigger>
-                <TabsTrigger value="account" className="flex-1">
-                  <User className="h-4 w-4 mr-2" />
-                  Conta
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
 
           {/* Main Content */}

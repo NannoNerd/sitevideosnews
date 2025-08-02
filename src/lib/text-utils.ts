@@ -28,3 +28,15 @@ export const truncateText = (text: string, maxLength: number = 150): string => {
   }
   return strippedText.substring(0, maxLength) + '...';
 };
+
+export const truncateWithTooltip = (text: string, maxLength: number = 30): { truncated: string; full: string; needsTooltip: boolean } => {
+  const strippedText = stripHtml(text);
+  const needsTooltip = strippedText.length > maxLength;
+  const truncated = needsTooltip ? strippedText.substring(0, maxLength) + '...' : strippedText;
+  
+  return {
+    truncated,
+    full: strippedText,
+    needsTooltip
+  };
+};

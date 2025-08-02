@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Heart, MessageCircle, Eye, Search, Plus, Settings, User } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { truncateWithTooltip } from '@/lib/text-utils';
 
 interface ContentItem {
   id: string;
@@ -36,6 +38,7 @@ export default function Feed() {
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'posts' | 'videos'>('all');
+  const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
   const searchQuery = searchParams.get('search') || '';
 
   const fetchContent = async () => {
@@ -103,6 +106,21 @@ export default function Feed() {
       ].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
 
       setContent(allContent);
+
+      // Fetch user likes if authenticated
+      if (user) {
+        const contentIds = allContent.map(item => item.id);
+        const { data: likes } = await supabase
+          .from('likes')
+          .select('post_id, video_id')
+          .eq('user_id', user.id)
+          .or(`post_id.in.(${contentIds.join(',')}),video_id.in.(${contentIds.join(',')})`);
+
+        if (likes) {
+          const likedIds = new Set(likes.map(like => like.post_id || like.video_id).filter(Boolean));
+          setUserLikes(likedIds);
+        }
+      }
     } catch (error) {
       console.error('Error fetching content:', error);
       toast({
@@ -115,9 +133,71 @@ export default function Feed() {
     }
   };
 
+  const handleLike = async (item: ContentItem) => {
+    if (!user) {
+      toast({
+        title: 'Login necessário',
+        description: 'Faça login para curtir conteúdos.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const isLiked = userLikes.has(item.id);
+    const foreignKey = item.type === 'post' ? 'post_id' : 'video_id';
+
+    try {
+      if (isLiked) {
+        // Remove like
+        await supabase
+          .from('likes')
+          .delete()
+          .eq(foreignKey, item.id)
+          .eq('user_id', user.id);
+
+        // Update UI
+        setUserLikes(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(item.id);
+          return newSet;
+        });
+
+        setContent(prev => prev.map(contentItem => 
+          contentItem.id === item.id 
+            ? { ...contentItem, likes_count: contentItem.likes_count - 1 }
+            : contentItem
+        ));
+      } else {
+        // Add like
+        await supabase
+          .from('likes')
+          .insert({
+            [foreignKey]: item.id,
+            user_id: user.id
+          });
+
+        // Update UI
+        setUserLikes(prev => new Set([...prev, item.id]));
+
+        setContent(prev => prev.map(contentItem => 
+          contentItem.id === item.id 
+            ? { ...contentItem, likes_count: contentItem.likes_count + 1 }
+            : contentItem
+        ));
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível processar a curtida.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   useEffect(() => {
     fetchContent();
-  }, []);
+  }, [user]);
 
   const filteredContent = content.filter(item => {
     const matchesFilter = filter === 'all' || 
@@ -144,101 +224,130 @@ export default function Feed() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Tabs value={filter} onValueChange={(value) => setFilter(value as any)}>
-            <TabsList>
-              <TabsTrigger value="all">Todos</TabsTrigger>
-              <TabsTrigger value="posts">Notícias</TabsTrigger>
-              <TabsTrigger value="videos">Vídeos</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {filteredContent.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
+    <TooltipProvider>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 w-full overflow-x-hidden">
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-8 max-w-full">
+          <div className="mb-6">
+            <Tabs value={filter} onValueChange={(value) => setFilter(value as any)}>
+              <TabsList>
+                <TabsTrigger value="all">Todos</TabsTrigger>
+                <TabsTrigger value="posts">Notícias</TabsTrigger>
+                <TabsTrigger value="videos">Vídeos</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredContent.map((item) => (
-              <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <Link to={`/${item.type}/${item.slug}`}>
-                  <div className="aspect-video bg-muted relative overflow-hidden">
-                    {item.type === 'video' && item.youtube_video_id ? (
-                      <img
-                        src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : item.cover_image_url ? (
-                      <img
-                        src={item.cover_image_url}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted">
-                        {item.type === 'video' ? (
-                          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                            <div className="w-0 h-0 border-l-[6px] border-l-primary border-y-[4px] border-y-transparent ml-1"></div>
-                          </div>
+
+          {filteredContent.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredContent.map((item) => {
+                const titleTruncated = truncateWithTooltip(item.title, 30);
+                const isLiked = userLikes.has(item.id);
+                
+                return (
+                  <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow w-full">
+                    <Link to={`/${item.type}/${item.slug}`}>
+                      <div className="aspect-video bg-muted relative overflow-hidden">
+                        {item.type === 'video' && item.youtube_video_id ? (
+                          <img
+                            src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : item.cover_image_url ? (
+                          <img
+                            src={item.cover_image_url}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <div className="text-muted-foreground text-sm">Sem imagem</div>
+                          <div className="w-full h-full flex items-center justify-center bg-muted">
+                            {item.type === 'video' ? (
+                              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                                <div className="w-0 h-0 border-l-[6px] border-l-primary border-y-[4px] border-y-transparent ml-1"></div>
+                              </div>
+                            ) : (
+                              <div className="text-muted-foreground text-sm">Sem imagem</div>
+                            )}
+                          </div>
+                        )}
+                        <Badge className="absolute top-2 left-2" variant="secondary">
+                          {item.category?.name}
+                        </Badge>
+                        {item.type === 'video' && (
+                          <Badge className="absolute top-2 right-2" variant="default">
+                            Vídeo
+                          </Badge>
                         )}
                       </div>
-                    )}
-                    <Badge className="absolute top-2 left-2" variant="secondary">
-                      {item.category?.name}
-                    </Badge>
-                    {item.type === 'video' && (
-                      <Badge className="absolute top-2 right-2" variant="default">
-                        Vídeo
-                      </Badge>
-                    )}
-                  </div>
-                </Link>
-                
-                <CardHeader>
-                  <CardTitle className="line-clamp-2">
-                    <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
-                      {item.title}
                     </Link>
-                  </CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {item.type === 'post' ? item.content?.substring(0, 150) + '...' : item.description}
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Por {item.author?.display_name}</span>
-                    <span>{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4 mt-3 text-sm text-muted-foreground">
-                    <div className="flex items-center space-x-1">
-                      <Eye className="h-4 w-4" />
-                      <span>{item.views_count}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="h-4 w-4" />
-                      <span>{item.likes_count}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <MessageCircle className="h-4 w-4" />
-                      <span>{item.comments_count}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+                    
+                    <CardHeader>
+                      {titleTruncated.needsTooltip ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <CardTitle className="line-clamp-2 cursor-pointer break-words">
+                              <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
+                                {titleTruncated.truncated}
+                              </Link>
+                            </CardTitle>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs break-words">{titleTruncated.full}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <CardTitle className="line-clamp-2 break-words">
+                          <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
+                            {titleTruncated.truncated}
+                          </Link>
+                        </CardTitle>
+                      )}
+                      <CardDescription className="line-clamp-2 break-words">
+                        {item.type === 'post' ? item.content?.substring(0, 150) + '...' : item.description}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span className="truncate">Por {item.author?.display_name}</span>
+                        <span className="whitespace-nowrap">{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Eye className="h-4 w-4" />
+                          <span>{item.views_count}</span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleLike(item);
+                          }}
+                          className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}
+                        >
+                          <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                          <span>{item.likes_count}</span>
+                        </Button>
+                        <div className="flex items-center space-x-1">
+                          <MessageCircle className="h-4 w-4" />
+                          <span>{item.comments_count}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </main>
+      </div>
+    </TooltipProvider>
   );
 }
