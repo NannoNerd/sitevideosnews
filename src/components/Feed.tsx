@@ -11,7 +11,7 @@ import { Heart, MessageCircle, Eye, Search, Plus, Settings, User } from 'lucide-
 import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { truncateWithTooltip } from '@/lib/text-utils';
+import { truncateWithTooltip, processTextWithLinks, truncateText } from '@/lib/text-utils';
 
 interface ContentItem {
   id: string;
@@ -351,9 +351,16 @@ export default function Feed() {
                             {item.type === 'post' ? 'Post' : 'Vídeo'}
                           </Badge>
                         </div>
-                       <CardDescription className="line-clamp-2 break-anywhere">
-                         {item.type === 'post' ? item.content?.substring(0, 150) + '...' : item.description}
-                       </CardDescription>
+                        <CardDescription 
+                          className="line-clamp-2 break-anywhere"
+                          dangerouslySetInnerHTML={{
+                            __html: processTextWithLinks(
+                              item.type === 'post' 
+                                ? truncateText(item.content || '', 150)
+                                : truncateText(item.description || '', 150)
+                            )
+                          }}
+                        />
                     </CardHeader>
                     
                     <CardContent>
