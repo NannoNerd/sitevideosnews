@@ -37,16 +37,25 @@ export default function CreateContent() {
   // Check user role
   useEffect(() => {
     const checkUserRole = async () => {
-      if (!user) return;
+      console.log('CreateContent: checking user role, user:', user);
+      if (!user) {
+        console.log('CreateContent: no user found');
+        setCheckingRole(false);
+        return;
+      }
       
       try {
-        const { data: profile } = await supabase
+        console.log('CreateContent: fetching role for user:', user.id);
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('role')
           .eq('user_id', user.id)
           .single();
         
+        console.log('CreateContent: profile data:', profile, 'error:', error);
+        
         setUserRole(profile?.role || 'user');
+        console.log('CreateContent: role set to:', profile?.role || 'user');
       } catch (error) {
         console.error('Error fetching user role:', error);
         setUserRole('user');
