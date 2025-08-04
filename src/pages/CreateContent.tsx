@@ -20,7 +20,7 @@ interface Category {
 }
 
 export default function CreateContent() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -30,17 +30,20 @@ export default function CreateContent() {
   const [postTitle, setPostTitle] = useState('');
   const [videoTitle, setVideoTitle] = useState('');
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [checkingRole, setCheckingRole] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
 
   const MAX_TITLE_LENGTH = 120;
 
   // Check user role
   useEffect(() => {
     const checkUserRole = async () => {
-      console.log('CreateContent: checking user role, user:', user);
+      if (authLoading) return; // Wait for auth to complete
+      
       if (!user) {
-        console.log('CreateContent: no user found');
-        setCheckingRole(false);
+        console.log('CreateContent: no user found, redirecting to auth');
+        setRedirecting(true);
+        navigate('/auth', { replace: true });
         return;
       }
       
@@ -54,21 +57,32 @@ export default function CreateContent() {
         
         console.log('CreateContent: profile data:', profile, 'error:', error);
         
-        setUserRole(profile?.role || 'user');
-        console.log('CreateContent: role set to:', profile?.role || 'user');
+        const role = profile?.role || 'user';
+        setUserRole(role);
+        console.log('CreateContent: role set to:', role);
+        
+        if (role !== 'admin') {
+          console.log('CreateContent: user is not admin, redirecting to home');
+          setRedirecting(true);
+          navigate('/', { replace: true });
+          return;
+        }
       } catch (error) {
         console.error('Error fetching user role:', error);
         setUserRole('user');
+        setRedirecting(true);
+        navigate('/', { replace: true });
+        return;
       } finally {
-        setCheckingRole(false);
+        setRoleLoading(false);
       }
     };
 
     checkUserRole();
-  }, [user]);
+  }, [user, authLoading, navigate]);
 
   // Show loading while checking authentication and role
-  if (loading || checkingRole) {
+  if (authLoading || roleLoading || redirecting) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -76,13 +90,13 @@ export default function CreateContent() {
     );
   }
 
-  // Redirect if not authenticated or not admin
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  if (userRole !== 'admin') {
-    return <Navigate to="/" replace />;
+  // This should not happen anymore due to useEffect redirect logic, but keeping as fallback
+  if (!user || userRole !== 'admin') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   const fetchCategories = async () => {
