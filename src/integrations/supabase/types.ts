@@ -234,6 +234,7 @@ export type Database = {
           display_name: string | null
           id: string
           role: string | null
+          shadow_banned: boolean | null
           updated_at: string
           user_id: string
         }
@@ -243,6 +244,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           role?: string | null
+          shadow_banned?: boolean | null
           updated_at?: string
           user_id: string
         }
@@ -252,6 +254,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           role?: string | null
+          shadow_banned?: boolean | null
           updated_at?: string
           user_id?: string
         }
@@ -381,12 +384,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_user_comment: {
+        Args: { user_id_param: string }
+        Returns: boolean
+      }
       promote_to_admin: {
         Args: { user_email: string }
         Returns: undefined
       }
       setup_admin_account: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      toggle_shadow_ban: {
+        Args: { target_user_id: string }
         Returns: undefined
       }
     }
