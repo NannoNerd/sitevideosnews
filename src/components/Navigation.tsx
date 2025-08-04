@@ -42,7 +42,7 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
-      <div className="container flex h-20 items-center justify-between px-4">
+      <div className="container flex h-12 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center">
           <img 
