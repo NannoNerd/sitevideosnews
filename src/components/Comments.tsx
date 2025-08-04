@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { MessageCircle, Reply, Send, User } from 'lucide-react';
+import { MessageCircle, Reply, Send, User, Trash2, Ban, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -38,6 +38,29 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [userRole, setUserRole] = useState<string>('user');
+  const [userShadowBanned, setUserShadowBanned] = useState(false);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, shadow_banned')
+          .eq('user_id', user.id)
+          .single();
+        
+        setUserRole(profile?.role || 'user');
+        setUserShadowBanned(profile?.shadow_banned || false);
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+
+    fetchUserRole();
+  }, [user]);
 
   const fetchComments = async () => {
     try {
@@ -137,6 +160,15 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       return;
     }
 
+    if (userShadowBanned) {
+      toast({
+        title: 'Comentário não permitido',
+        description: 'Você não tem permissão para comentar.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     if (!newComment.trim()) return;
 
     setSubmitting(true);
@@ -149,7 +181,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
           content: newComment.trim(),
           user_id: user.id,
           [foreignKey]: contentId,
-          approved: true // Auto-approve for now
+          approved: true
         });
 
       if (error) throw error;
@@ -170,6 +202,58 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (userRole !== 'admin') return;
+
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Sucesso!',
+        description: 'Comentário excluído.',
+      });
+      
+      fetchComments();
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao excluir comentário.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleToggleShadowBan = async (userId: string) => {
+    if (userRole !== 'admin') return;
+
+    try {
+      const { error } = await supabase
+        .rpc('toggle_shadow_ban', { target_user_id: userId });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Sucesso!',
+        description: 'Status do usuário alterado.',
+      });
+      
+      fetchComments();
+    } catch (error) {
+      console.error('Error toggling shadow ban:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao alterar status do usuário.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -235,7 +319,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       </div>
 
       {/* New Comment Form */}
-      {user ? (
+      {user && !userShadowBanned ? (
         <Card>
           <CardContent className="p-4">
             <div className="space-y-4">
@@ -256,6 +340,13 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
                 </Button>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      ) : userShadowBanned ? (
+        <Card>
+          <CardContent className="p-4 text-center text-muted-foreground">
+            <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-destructive" />
+            <p>Você não tem permissão para comentar</p>
           </CardContent>
         </Card>
       ) : (
@@ -305,6 +396,29 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
                   <Reply className="h-3 w-3 mr-1" />
                   Responder
                 </Button>
+                
+                {userRole === 'admin' && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="text-xs text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Excluir
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleToggleShadowBan(comment.user_id)}
+                      className="text-xs text-orange-600 hover:text-orange-700"
+                    >
+                      <Ban className="h-3 w-3 mr-1" />
+                      Shadow Ban
+                    </Button>
+                  </>
+                )}
               </div>
 
               {/* Reply Form */}

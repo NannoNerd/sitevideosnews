@@ -29,12 +29,50 @@ export default function CreateContent() {
   const [videoDescription, setVideoDescription] = useState('');
   const [postTitle, setPostTitle] = useState('');
   const [videoTitle, setVideoTitle] = useState('');
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [checkingRole, setCheckingRole] = useState(true);
 
   const MAX_TITLE_LENGTH = 120;
 
-  // Redirect if not authenticated
+  // Check user role
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        
+        setUserRole(profile?.role || 'user');
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+        setUserRole('user');
+      } finally {
+        setCheckingRole(false);
+      }
+    };
+
+    checkUserRole();
+  }, [user]);
+
+  // Redirect if not authenticated or not admin
   if (!loading && !user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (!checkingRole && userRole !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  if (loading || checkingRole) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   const fetchCategories = async () => {

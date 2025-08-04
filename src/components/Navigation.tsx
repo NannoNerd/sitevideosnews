@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Plus, LogOut, User, Search } from "lucide-react";
 
 const Navigation = () => {
@@ -13,6 +14,28 @@ const Navigation = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        
+        setUserRole(profile?.role || 'user');
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+        setUserRole('user');
+      }
+    };
+
+    fetchUserRole();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -78,7 +101,7 @@ const Navigation = () => {
                   {user.email}
                 </span>
               </Link>
-              {location.pathname !== "/create" && (
+              {location.pathname !== "/create" && userRole === 'admin' && (
                 <Button
                   asChild
                   size="sm"
@@ -152,7 +175,7 @@ const Navigation = () => {
                     <User className="h-4 w-4" />
                     <span>{user.email}</span>
                   </Link>
-                  {location.pathname !== "/create" && (
+                  {location.pathname !== "/create" && userRole === 'admin' && (
                     <Button
                       asChild
                       size="sm"

@@ -37,10 +37,10 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userContent, setUserContent] = useState<UserContent[]>([]);
   const [loadingContent, setLoadingContent] = useState(true);
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState("account");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [editingContent, setEditingContent] = useState<{id: string, type: 'post' | 'video'} | null>(null);
-  const [userProfile, setUserProfile] = useState<{display_name?: string} | null>(null);
+  const [userProfile, setUserProfile] = useState<{display_name?: string, role?: string, shadow_banned?: boolean} | null>(null);
 
   const fetchUserContent = async () => {
     if (!user) return;
@@ -107,7 +107,9 @@ const Profile = () => {
           setAvatarUrl((profile as any).avatar_url);
         }
         setUserProfile({
-          display_name: (profile as any).display_name
+          display_name: (profile as any).display_name,
+          role: (profile as any).role,
+          shadow_banned: (profile as any).shadow_banned
         });
       }
     } catch (error) {
@@ -271,6 +273,15 @@ const Profile = () => {
     }
   }, [user]);
 
+  // Set initial tab based on user role
+  useEffect(() => {
+    if (userProfile?.role === 'admin') {
+      setActiveTab("posts");
+    } else {
+      setActiveTab("account");
+    }
+  }, [userProfile?.role]);
+
   if (!user) {
     return <div>Carregando...</div>;
   }
@@ -310,11 +321,13 @@ const Profile = () => {
               
               <CardContent className="pt-0">
                 <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
-                  <TabsList className="grid w-full grid-cols-1 gap-2 h-auto bg-transparent p-0">
-                    <TabsTrigger value="posts" className="w-full justify-start bg-background">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Posts
-                    </TabsTrigger>
+                   <TabsList className="grid w-full grid-cols-1 gap-2 h-auto bg-transparent p-0">
+                    {userProfile?.role === 'admin' && (
+                      <TabsTrigger value="posts" className="w-full justify-start bg-background">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Meus Conteúdos
+                      </TabsTrigger>
+                    )}
                     <TabsTrigger value="account" className="w-full justify-start bg-background">
                       <User className="h-4 w-4 mr-2" />
                       Conta
@@ -327,7 +340,7 @@ const Profile = () => {
 
           {/* Main Content */}
           <div className="flex-1 max-w-[calc(100%-320px-1.5rem)]">
-            {activeTab === "posts" && (
+            {activeTab === "posts" && userProfile?.role === 'admin' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Meus Conteúdos</CardTitle>
