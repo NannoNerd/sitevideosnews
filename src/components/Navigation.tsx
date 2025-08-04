@@ -45,8 +45,12 @@ const Navigation = () => {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 hover-lift">
-          <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">N</span>
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/ffe260a2-df9a-4ce0-ae33-5d76f7e56231.png" 
+              alt="VidNews Logo" 
+              className="h-8 w-8 rounded-lg"
+            />
           </div>
           <span className="text-white font-bold text-xl hidden sm:inline">
             Ivo Fernandes News
