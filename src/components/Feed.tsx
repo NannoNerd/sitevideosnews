@@ -24,7 +24,7 @@ interface ContentItem {
   youtube_video_id?: string;
   duration?: string;
   category: { name: string; slug: string };
-  author: { display_name: string };
+  author: { display_name: string; avatar_url?: string };
   published_at: string;
   views_count: number;
   likes_count: number;
@@ -79,7 +79,7 @@ export default function Feed() {
       // Fetch author profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, display_name')
+        .select('user_id, display_name, avatar_url')
         .in('user_id', authorIds);
 
       if (profilesError) throw profilesError;
@@ -96,13 +96,19 @@ export default function Feed() {
           ...post, 
           type: 'post' as const,
           category: post.categories || { name: 'Sem categoria', slug: '' },
-          author: { display_name: authorMap[post.author_id]?.display_name || 'Anônimo' }
+          author: { 
+            display_name: authorMap[post.author_id]?.display_name || 'Anônimo',
+            avatar_url: authorMap[post.author_id]?.avatar_url
+          }
         })),
         ...(videos || []).map(video => ({ 
           ...video, 
           type: 'video' as const,
           category: video.categories || { name: 'Sem categoria', slug: '' },
-          author: { display_name: authorMap[video.author_id]?.display_name || 'Anônimo' }
+          author: { 
+            display_name: authorMap[video.author_id]?.display_name || 'Anônimo',
+            avatar_url: authorMap[video.author_id]?.avatar_url
+          }
         }))
       ].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
 
@@ -363,11 +369,26 @@ export default function Feed() {
                         />
                     </CardHeader>
                     
-                    <CardContent>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span className="truncate">Por {item.author?.display_name}</span>
-                        <span className="whitespace-nowrap">{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
-                      </div>
+                     <CardContent>
+                       <div className="flex items-center justify-between text-sm text-muted-foreground">
+                         <div className="flex items-center gap-2">
+                           <Avatar className="h-6 w-6">
+                             <img 
+                               src={item.author?.avatar_url || ''} 
+                               alt={item.author?.display_name || 'Avatar'} 
+                               className="h-full w-full object-cover"
+                               onError={(e) => {
+                                 e.currentTarget.style.display = 'none';
+                               }}
+                             />
+                             <AvatarFallback className="h-6 w-6 text-xs bg-muted">
+                               {item.author?.display_name?.charAt(0)?.toUpperCase() || 'A'}
+                             </AvatarFallback>
+                           </Avatar>
+                           <span className="truncate">Por {item.author?.display_name}</span>
+                         </div>
+                         <span className="whitespace-nowrap">{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
+                       </div>
                       
                       <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-1">

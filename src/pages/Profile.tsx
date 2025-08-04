@@ -117,24 +117,34 @@ const Profile = () => {
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    if (!file || !user) {
+      console.log('No file selected or user not found');
+      return;
+    }
 
+    console.log('Starting avatar upload for user:', user.id);
     setIsLoading(true);
     try {
       // Upload image to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `avatar_${user.id}_${Date.now()}.${fileExt}`;
       
+      console.log('Uploading file:', fileName);
       const { error: uploadError } = await supabase.storage
         .from('content-images')
         .upload(`avatars/${fileName}`, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('content-images')
         .getPublicUrl(`avatars/${fileName}`);
+
+      console.log('Public URL:', publicUrl);
 
       // Update profile with avatar URL
       const { error: updateError } = await supabase
@@ -142,12 +152,17 @@ const Profile = () => {
         .upsert({
           user_id: user.id,
           avatar_url: publicUrl,
-          display_name: user.email?.split('@')[0] || 'Usuário'
+          display_name: userProfile?.display_name || user.email?.split('@')[0] || 'Usuário'
         });
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Profile update error:', updateError);
+        throw updateError;
+      }
 
+      console.log('Avatar updated successfully');
       setAvatarUrl(publicUrl);
+      await fetchUserProfile(); // Refresh profile data
       toast({
         title: "Sucesso!",
         description: "Foto de perfil atualizada.",
@@ -156,7 +171,7 @@ const Profile = () => {
       console.error('Error uploading avatar:', error);
       toast({
         title: "Erro",
-        description: "Erro ao atualizar foto de perfil.",
+        description: error instanceof Error ? error.message : "Erro ao atualizar foto de perfil.",
         variant: "destructive",
       });
     } finally {
