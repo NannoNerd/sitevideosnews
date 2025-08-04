@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { MessageCircle, Reply, Send, User, Trash2, Ban, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -20,6 +20,7 @@ interface Comment {
   user_profile: {
     display_name: string;
     role?: string;
+    avatar_url?: string;
   };
   replies?: Comment[];
 }
@@ -87,7 +88,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
       const userIds = (commentsData || []).map(comment => comment.user_id);
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, display_name, role')
+        .select('user_id, display_name, role, avatar_url')
         .in('user_id', userIds);
 
       const profileMap = (profiles || []).reduce((acc, profile) => {
@@ -118,7 +119,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
           const replyUserIds = (replies || []).map(reply => reply.user_id);
           const { data: replyProfiles } = await supabase
             .from('profiles')
-            .select('user_id, display_name, role')
+            .select('user_id, display_name, role, avatar_url')
             .in('user_id', replyUserIds);
 
           const replyProfileMap = (replyProfiles || []).reduce((acc, profile) => {
@@ -364,6 +365,9 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
           <CardHeader className="pb-3">
             <div className={`flex items-start gap-3 p-4 rounded-lg ${comment.user_profile?.role === 'admin' ? 'gradient-bg' : ''}`}>
               <Avatar className="h-8 w-8">
+                {comment.user_profile?.avatar_url && (
+                  <AvatarImage src={comment.user_profile.avatar_url} alt={comment.user_profile.display_name || 'Usuário'} />
+                )}
                 <AvatarFallback>
                   <User className="h-4 w-4" />
                 </AvatarFallback>
@@ -459,6 +463,9 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
                   {comment.replies.map((reply) => (
                     <div key={reply.id} className={`flex gap-3 p-3 rounded-lg ${reply.user_profile?.role === 'admin' ? 'gradient-bg' : ''}`}>
                       <Avatar className="h-6 w-6">
+                        {reply.user_profile?.avatar_url && (
+                          <AvatarImage src={reply.user_profile.avatar_url} alt={reply.user_profile.display_name || 'Usuário'} />
+                        )}
                         <AvatarFallback>
                           <User className="h-3 w-3" />
                         </AvatarFallback>
