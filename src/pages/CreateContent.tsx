@@ -23,6 +23,8 @@ export default function CreateContent() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // All state hooks first
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [postContent, setPostContent] = useState('');
@@ -31,18 +33,16 @@ export default function CreateContent() {
   const [videoTitle, setVideoTitle] = useState('');
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
-  const [redirecting, setRedirecting] = useState(false);
 
   const MAX_TITLE_LENGTH = 120;
 
-  // Check user role
+  // All useEffect hooks
   useEffect(() => {
     const checkUserRole = async () => {
-      if (authLoading) return; // Wait for auth to complete
+      if (authLoading) return;
       
       if (!user) {
         console.log('CreateContent: no user found, redirecting to auth');
-        setRedirecting(true);
         navigate('/auth', { replace: true });
         return;
       }
@@ -63,14 +63,12 @@ export default function CreateContent() {
         
         if (role !== 'admin') {
           console.log('CreateContent: user is not admin, redirecting to home');
-          setRedirecting(true);
           navigate('/', { replace: true });
           return;
         }
       } catch (error) {
         console.error('Error fetching user role:', error);
         setUserRole('user');
-        setRedirecting(true);
         navigate('/', { replace: true });
         return;
       } finally {
@@ -81,8 +79,46 @@ export default function CreateContent() {
     checkUserRole();
   }, [user, authLoading, navigate]);
 
-  // Show loading while checking authentication and role
-  if (authLoading || roleLoading || redirecting) {
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name');
+        
+        if (error) throw error;
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    // Only fetch categories if user is admin
+    if (userRole === 'admin') {
+      fetchCategories();
+    }
+  }, [userRole]);
+
+  // Function definitions
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const extractYouTubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  // Conditional rendering - all hooks have been called by this point
+  if (authLoading || roleLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -90,7 +126,6 @@ export default function CreateContent() {
     );
   }
 
-  // This should not happen anymore due to useEffect redirect logic, but keeping as fallback
   if (!user || userRole !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -99,39 +134,6 @@ export default function CreateContent() {
     );
   }
 
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-');
-  };
-
-  const extractYouTubeVideoId = (url: string) => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
 
   const handleCreatePost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
