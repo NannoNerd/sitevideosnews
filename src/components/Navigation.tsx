@@ -44,17 +44,12 @@ const Navigation = () => {
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2 hover-lift">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-            <img 
-              src="/lovable-uploads/ffe260a2-df9a-4ce0-ae33-5d76f7e56231.png" 
-              alt="VidNews Logo" 
-              className="h-8 w-8 rounded-lg"
-            />
-          </div>
-          <span className="text-white font-bold text-xl hidden sm:inline">
-            Ivo Fernandes News
-          </span>
+        <Link to="/" className="flex items-center hover-lift">
+          <img 
+            src="/lovable-uploads/ffe260a2-df9a-4ce0-ae33-5d76f7e56231.png" 
+            alt="VidNews Logo" 
+            className="h-8 rounded-lg"
+          />
         </Link>
 
         {/* Search Bar */}
