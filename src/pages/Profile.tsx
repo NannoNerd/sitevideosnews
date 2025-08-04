@@ -395,9 +395,14 @@ const Profile = () => {
                                          <Edit className="h-3 w-3 opacity-60" />
                                        </div>
                                      </div>
-                                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                       {item.type === 'post' ? item.content?.substring(0, 100) + '...' : item.description}
-                                     </p>
+                                      <div 
+                                        className="text-sm text-muted-foreground mt-1 line-clamp-2"
+                                        dangerouslySetInnerHTML={{
+                                          __html: item.type === 'post' 
+                                            ? (item.content?.substring(0, 100) + '...' || '') 
+                                            : (item.description || '')
+                                        }}
+                                      />
                                    </div>
                                 </div>
                                 
