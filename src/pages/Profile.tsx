@@ -116,27 +116,52 @@ const Profile = () => {
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('=== AVATAR UPLOAD DEBUG START ===');
     const file = event.target.files?.[0];
-    if (!file || !user) {
-      console.log('No file selected or user not found');
+    
+    console.log('File selected:', file?.name, file?.size);
+    console.log('User state:', user?.id, user?.email);
+    
+    if (!file) {
+      console.log('ERROR: No file selected');
+      toast({
+        title: "Erro",
+        description: "Nenhum arquivo selecionado.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!user) {
+      console.log('ERROR: User not authenticated');
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado.",
+        variant: "destructive",
+      });
       return;
     }
 
     console.log('Starting avatar upload for user:', user.id);
     setIsLoading(true);
+    
     try {
       // Upload image to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `avatar_${user.id}_${Date.now()}.${fileExt}`;
       
-      console.log('Uploading file:', fileName);
-      const { error: uploadError } = await supabase.storage
+      console.log('Uploading file to storage:', fileName);
+      console.log('Storage path:', `avatars/${fileName}`);
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('content-images')
         .upload(`avatars/${fileName}`, file);
 
+      console.log('Upload result:', { uploadData, uploadError });
+
       if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
+        console.error('Upload error details:', uploadError);
+        throw new Error(`Storage upload failed: ${uploadError.message}`);
       }
 
       // Get public URL
@@ -144,31 +169,48 @@ const Profile = () => {
         .from('content-images')
         .getPublicUrl(`avatars/${fileName}`);
 
-      console.log('Public URL:', publicUrl);
+      console.log('Generated public URL:', publicUrl);
 
-      // Update profile with avatar URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: user.id,
-          avatar_url: publicUrl,
-          display_name: userProfile?.display_name || user.email?.split('@')[0] || 'Usuário'
-        });
-
-      if (updateError) {
-        console.error('Profile update error:', updateError);
-        throw updateError;
+      if (!publicUrl) {
+        throw new Error('Failed to generate public URL');
       }
 
-      console.log('Avatar updated successfully');
+      // Update profile with avatar URL
+      console.log('Updating profile with avatar URL...');
+      const profileData = {
+        user_id: user.id,
+        avatar_url: publicUrl,
+        display_name: userProfile?.display_name || user.email?.split('@')[0] || 'Usuário'
+      };
+      
+      console.log('Profile data to upsert:', profileData);
+      
+      const { data: updateData, error: updateError } = await supabase
+        .from('profiles')
+        .upsert(profileData)
+        .select();
+
+      console.log('Profile update result:', { updateData, updateError });
+
+      if (updateError) {
+        console.error('Profile update error details:', updateError);
+        throw new Error(`Profile update failed: ${updateError.message}`);
+      }
+
+      console.log('Avatar updated successfully!');
       setAvatarUrl(publicUrl);
       await fetchUserProfile(); // Refresh profile data
+      
       toast({
         title: "Sucesso!",
         description: "Foto de perfil atualizada.",
       });
+      
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      console.error('=== AVATAR UPLOAD ERROR ===');
+      console.error('Error details:', error);
+      console.error('Error message:', error instanceof Error ? error.message : String(error));
+      
       toast({
         title: "Erro",
         description: error instanceof Error ? error.message : "Erro ao atualizar foto de perfil.",
@@ -176,6 +218,7 @@ const Profile = () => {
       });
     } finally {
       setIsLoading(false);
+      console.log('=== AVATAR UPLOAD DEBUG END ===');
     }
   };
 
