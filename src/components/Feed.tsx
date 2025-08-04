@@ -343,14 +343,14 @@ export default function Feed() {
                             {item.title}
                           </Link>
                         </CardTitle>
-                        <div className="flex gap-1 mt-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {item.category?.name}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {item.type === 'post' ? 'Post' : 'Vídeo'}
-                          </Badge>
-                        </div>
+                         <div className="flex justify-between items-center mt-2">
+                           <Badge variant="secondary" className="text-xs">
+                             {item.category?.name}
+                           </Badge>
+                           <Badge variant="outline" className="text-xs">
+                             {item.type === 'post' ? 'Post' : 'Vídeo'}
+                           </Badge>
+                         </div>
                         <CardDescription 
                           className="line-clamp-2 break-anywhere"
                           dangerouslySetInnerHTML={{
