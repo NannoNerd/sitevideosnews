@@ -187,7 +187,9 @@ const Profile = () => {
       
       const { data: updateData, error: updateError } = await supabase
         .from('profiles')
-        .upsert(profileData)
+        .upsert(profileData, {
+          onConflict: 'user_id'
+        })
         .select();
 
       console.log('Profile update result:', { updateData, updateError });
