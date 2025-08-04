@@ -42,13 +42,13 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
-      <div className="container flex h-16 items-center justify-between px-4">
+      <div className="container flex h-20 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center hover-lift">
           <img 
             src="/lovable-uploads/ffe260a2-df9a-4ce0-ae33-5d76f7e56231.png" 
             alt="VidNews Logo" 
-            className="h-15 rounded-lg"
+            className="h-14 rounded-lg"
           />
         </Link>
 
