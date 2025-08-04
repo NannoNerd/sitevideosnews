@@ -385,7 +385,7 @@ export default function Feed() {
                                {item.author?.display_name?.charAt(0)?.toUpperCase() || 'A'}
                              </AvatarFallback>
                            </Avatar>
-                           <span className="truncate">Por {item.author?.display_name}</span>
+                           <span className="truncate">{item.author?.display_name}</span>
                          </div>
                          <span className="whitespace-nowrap">{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
                        </div>
