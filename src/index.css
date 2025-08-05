@@ -66,10 +66,10 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 220 13% 9%;
+    --background: 222 84% 5%; /* #0f172a */
     --foreground: 220 9% 93%;
 
-    --card: 220 13% 12%;
+    --card: 222 84% 8%; /* Slightly lighter than background */
     --card-foreground: 220 9% 93%;
 
     --popover: 220 13% 12%;
@@ -78,10 +78,10 @@ All colors MUST be HSL.
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 13% 15%;
+    --secondary: 222 84% 12%;
     --secondary-foreground: 220 9% 93%;
 
-    --muted: 220 13% 15%;
+    --muted: 222 84% 12%;
     --muted-foreground: 220 9% 63%;
 
     --accent: 262 90% 20%;
@@ -90,8 +90,8 @@ All colors MUST be HSL.
     --destructive: 0 75% 42%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 13% 18%;
-    --input: 220 13% 18%;
+    --border: 222 84% 15%;
+    --input: 222 84% 15%;
     --ring: 262 83% 58%;
     
     /* Custom dark theme colors */
@@ -146,8 +146,17 @@ All colors MUST be HSL.
   }
   
   .hover-lift:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-glow);
+  }
+  
+  .card-hover {
+    transition: var(--transition-smooth);
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px hsl(0 0% 0% / 0.3);
   }
   
   .gradient-bg {
