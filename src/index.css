@@ -197,6 +197,18 @@ All colors MUST be HSL.
     max-width: 100%;
     height: auto;
   }
+
+  /* Prevent dropdowns and popovers from breaking layout */
+  [data-radix-popper-content-wrapper] {
+    max-width: calc(100vw - 16px) !important;
+    overflow: visible !important;
+  }
+  
+  /* Ensure container doesn't overflow when dropdowns open */
+  .container {
+    max-width: 100%;
+    overflow-x: visible;
+  }
 }
 
 @keyframes fadeIn {
