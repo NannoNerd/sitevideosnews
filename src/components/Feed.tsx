@@ -299,7 +299,7 @@ export default function Feed() {
   if (categoryFilter === 'engenharia') {
     return (
       <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 w-full overflow-x-hidden">
+        <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#020818' }}>
           <main className="container mx-auto px-4 py-16 max-w-6xl">
             {/* Hero Section */}
             <div className="text-center mb-16">
@@ -407,7 +407,7 @@ export default function Feed() {
   if (categoryFilter === 'crypto') {
     return (
       <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 w-full overflow-x-hidden">
+        <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#020818' }}>
           <main className="container mx-auto px-4 py-16 max-w-6xl">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -476,7 +476,7 @@ export default function Feed() {
   if (categoryFilter === 'musica') {
     return (
       <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-slate-900 w-full overflow-x-hidden">
+        <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#020818' }}>
           <main className="container mx-auto px-4 py-16 max-w-6xl">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -556,7 +556,7 @@ export default function Feed() {
   if (categoryFilter === 'motivacional') {
     return (
       <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-br from-orange-900 via-red-900 to-slate-900 w-full overflow-x-hidden">
+        <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#020818' }}>
           <main className="container mx-auto px-4 py-16 max-w-6xl">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
