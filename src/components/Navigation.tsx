@@ -76,35 +76,26 @@ const Navigation = () => {
           />
         </Link>
 
-        {/* Search Bar */}
-        <div className="hidden md:flex flex-1 max-w-sm mx-8">
-          <form onSubmit={handleSearch} className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
-            <Input
-              placeholder="Buscar conteúdo..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/20"
-            />
-          </form>
+        {/* Navigation Menu */}
+        <div className="hidden md:flex items-center space-x-6 flex-1 max-w-lg mx-8">
+          <Link to="/?category=engenharia" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+            Engenharia
+          </Link>
+          <Link to="/?category=crypto" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+            Crypto
+          </Link>
+          <Link to="/?category=musica" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+            Música
+          </Link>
+          <Link to="/?category=motivacional" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+            Motivacional
+          </Link>
         </div>
 
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <div className="flex items-center space-x-3">
-              {location.pathname !== "/create" && userRole === 'admin' && (
-                <Button
-                  asChild
-                  size="sm"
-                  className="bg-white/20 text-white hover:bg-white/30 border-white/20"
-                >
-                  <Link to="/create">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Criar
-                  </Link>
-                </Button>
-              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-2">
@@ -134,6 +125,18 @@ const Navigation = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              {location.pathname !== "/create" && userRole === 'admin' && (
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-white/20 text-white hover:bg-white/30 border-white/20"
+                >
+                  <Link to="/create">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Criar
+                  </Link>
+                </Button>
+              )}
             </div>
           ) : (
             <div className="flex items-center space-x-3">

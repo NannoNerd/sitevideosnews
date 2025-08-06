@@ -280,6 +280,30 @@ export default function Feed() {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 w-full overflow-x-hidden">
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8 max-w-full">
+          {/* Search Bar */}
+          <div className="mb-6 flex justify-center">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              // Handled by useSearchParams already
+            }} className="relative w-full max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Buscar conteúdo..."
+                defaultValue={searchQuery}
+                className="pl-10"
+                onChange={(e) => {
+                  const url = new URL(window.location.href);
+                  if (e.target.value) {
+                    url.searchParams.set('search', e.target.value);
+                  } else {
+                    url.searchParams.delete('search');
+                  }
+                  window.history.replaceState({}, '', url);
+                }}
+              />
+            </form>
+          </div>
+
           <div className="mb-6 flex justify-center">
             <Tabs value={filter} onValueChange={(value) => setFilter(value as any)}>
               <TabsList>
