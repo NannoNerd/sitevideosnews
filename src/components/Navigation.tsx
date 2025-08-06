@@ -16,26 +16,33 @@ const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      if (!user) return;
+    const fetchUserProfile = async () => {
+      if (!user) {
+        setUserRole(null);
+        setAvatarUrl(null);
+        return;
+      }
       
       try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, avatar_url')
           .eq('user_id', user.id)
           .single();
         
         setUserRole(profile?.role || 'user');
+        setAvatarUrl(profile?.avatar_url || null);
       } catch (error) {
-        console.error('Error fetching user role:', error);
+        console.error('Error fetching user profile:', error);
         setUserRole('user');
+        setAvatarUrl(null);
       }
     };
 
-    fetchUserRole();
+    fetchUserProfile();
   }, [user]);
 
   const handleLogout = async () => {
@@ -99,36 +106,19 @@ const Navigation = () => {
         <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <div className="flex items-center space-x-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-2">
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-2" asChild>
+                <Link to="/profile">
+                  {avatarUrl ? (
+                    <img 
+                      src={avatarUrl} 
+                      alt="Perfil" 
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
                     <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  className="w-36 bg-background border border-border/50 shadow-lg z-50" 
-                  sideOffset={8}
-                  side="bottom"
-                  avoidCollisions={true}
-                  collisionPadding={16}
-                  style={{ backgroundColor: 'hsl(var(--background))', zIndex: 9999 }}
-                >
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    {user.email}
-                  </div>
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
-                      <User className="h-4 w-4 mr-2" />
-                      Meu perfil
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sair
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  )}
+                </Link>
+              </Button>
               {location.pathname !== "/create" && userRole === 'admin' && (
                 <Button
                   asChild
@@ -141,6 +131,14 @@ const Navigation = () => {
                   </Link>
                 </Button>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-white hover:bg-white/10 p-2"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
           ) : (
             <div className="flex items-center space-x-3">
