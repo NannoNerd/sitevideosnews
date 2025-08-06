@@ -673,7 +673,7 @@ export default function Feed() {
   // Default layout for "Notícias" (main page) - shows cards
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 w-full overflow-x-hidden">
+      <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8 max-w-full">
           {/* Search Bar */}
