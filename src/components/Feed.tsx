@@ -397,134 +397,74 @@ export default function Feed() {
                 </div>
               </div>
             </div>
+          </main>
+        </div>
+      </TooltipProvider>
+    );
+  }
 
-            {/* Engineering Content Section */}
-            <div className="mt-20">
-              <h2 className="text-3xl font-bold text-white text-center mb-12">
-                Conteúdos de Engenharia
-              </h2>
-              
-              {filteredContent.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-400">Nenhum conteúdo de engenharia encontrado.</p>
+  // Special layout for crypto category
+  if (categoryFilter === 'crypto') {
+    return (
+      <TooltipProvider>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 w-full overflow-x-hidden">
+          <main className="container mx-auto px-4 py-16 max-w-6xl">
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                🚀 Mundo das Criptomoedas
+              </h1>
+              <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+                Descubra o universo das moedas digitais, blockchain e o futuro das finanças descentralizadas.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-12 mb-16">
+              <div className="bg-gradient-to-br from-purple-800/30 to-blue-800/30 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30">
+                <h2 className="text-2xl font-bold text-white mb-4">📈 Análise de Mercado</h2>
+                <p className="text-gray-300 mb-6">
+                  Acompanhe as tendências do mercado cripto com análises técnicas e fundamentais atualizadas diariamente.
+                </p>
+                <ul className="space-y-2 text-gray-400">
+                  <li>• Bitcoin e principais altcoins</li>
+                  <li>• Indicadores técnicos avançados</li>
+                  <li>• Previsões e projeções</li>
+                  <li>• Análise de sentimento do mercado</li>
+                </ul>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-800/30 to-cyan-800/30 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/30">
+                <h2 className="text-2xl font-bold text-white mb-4">🔗 Tecnologia Blockchain</h2>
+                <p className="text-gray-300 mb-6">
+                  Entenda a tecnologia por trás das criptomoedas e como ela está revolucionando diversos setores.
+                </p>
+                <ul className="space-y-2 text-gray-400">
+                  <li>• Conceitos fundamentais</li>
+                  <li>• Smart Contracts e DApps</li>
+                  <li>• NFTs e Metaverso</li>
+                  <li>• DeFi e protocolos emergentes</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 backdrop-blur-sm rounded-2xl p-8 border border-yellow-500/30 mb-12">
+              <h2 className="text-3xl font-bold text-white text-center mb-6">💡 Dicas de Investimento</h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-4xl mb-4">🛡️</div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Segurança</h3>
+                  <p className="text-gray-400 text-sm">Proteja seus ativos com carteiras seguras e boas práticas.</p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
-                  {filteredContent.map((item) => {
-                    const isLiked = userLikes.has(item.id);
-                    
-                    return (
-                      <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow w-full bg-slate-800/50 border-slate-700/50">
-                        <Link to={`/${item.type}/${item.slug}`}>
-                          <div className="aspect-video bg-muted relative overflow-hidden">
-                            {item.type === 'video' && item.youtube_video_id ? (
-                              <>
-                                <img
-                                  src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`}
-                                  alt={item.title}
-                                  className="w-full h-full object-cover"
-                                />
-                                {item.duration && (
-                                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                                    {item.duration}
-                                  </div>
-                                )}
-                              </>
-                            ) : item.cover_image_url ? (
-                              <img
-                                src={item.cover_image_url}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-slate-700">
-                                {item.type === 'video' ? (
-                                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                                    <div className="w-0 h-0 border-l-[6px] border-l-primary border-y-[4px] border-y-transparent ml-1"></div>
-                                  </div>
-                                ) : (
-                                  <div className="text-gray-400 text-sm">Sem imagem</div>
-                                )}
-                              </div>
-                            )}
-                           </div>
-                         </Link>
-                         
-                          <CardHeader>
-                            <CardTitle className="break-anywhere leading-tight text-white">
-                              <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
-                                {item.title}
-                              </Link>
-                            </CardTitle>
-                             <div className="flex justify-between items-center mt-2">
-                               <Badge variant="secondary" className="text-xs bg-slate-700 text-gray-300">
-                                 {item.category?.name}
-                               </Badge>
-                               <Badge variant="outline" className="text-xs border-slate-600 text-gray-400">
-                                 {item.type === 'post' ? 'Post' : 'Vídeo'}
-                               </Badge>
-                             </div>
-                            <CardDescription 
-                              className="line-clamp-2 break-anywhere text-gray-400"
-                              dangerouslySetInnerHTML={{
-                                __html: processTextWithLinks(
-                                  item.type === 'post' 
-                                    ? truncateText(item.content || '', 150)
-                                    : truncateText(item.description || '', 150)
-                                )
-                              }}
-                            />
-                        </CardHeader>
-                        
-                         <CardContent>
-                           <div className="flex items-center justify-between text-sm text-gray-400">
-                             <div className="flex items-center gap-2">
-                               <Avatar className="h-6 w-6">
-                                 <img 
-                                   src={item.author?.avatar_url || ''} 
-                                   alt={item.author?.display_name || 'Avatar'} 
-                                   className="h-full w-full object-cover"
-                                   onError={(e) => {
-                                     e.currentTarget.style.display = 'none';
-                                   }}
-                                 />
-                                 <AvatarFallback className="h-6 w-6 text-xs bg-slate-700">
-                                   {item.author?.display_name?.charAt(0)?.toUpperCase() || 'A'}
-                                 </AvatarFallback>
-                               </Avatar>
-                               <span className="truncate">{item.author?.display_name}</span>
-                             </div>
-                             <span className="whitespace-nowrap">{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
-                           </div>
-                          
-                          <div className="flex items-center justify-between mt-3 text-sm text-gray-400">
-                            <div className="flex items-center space-x-1">
-                              <Eye className="h-4 w-4" />
-                              <span>{item.views_count}</span>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleLike(item);
-                              }}
-                              className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-white'}`}
-                            >
-                              <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-                              <span>{item.likes_count}</span>
-                            </Button>
-                            <div className="flex items-center space-x-1">
-                              <MessageCircle className="h-4 w-4" />
-                              <span>{item.comments_count}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                <div className="text-center">
+                  <div className="text-4xl mb-4">📊</div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Diversificação</h3>
+                  <p className="text-gray-400 text-sm">Distribua riscos com um portfólio balanceado.</p>
                 </div>
-              )}
+                <div className="text-center">
+                  <div className="text-4xl mb-4">🎯</div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Estratégia</h3>
+                  <p className="text-gray-400 text-sm">Defina objetivos claros e mantenha disciplina.</p>
+                </div>
+              </div>
             </div>
           </main>
         </div>
@@ -532,6 +472,205 @@ export default function Feed() {
     );
   }
 
+  // Special layout for music category
+  if (categoryFilter === 'musica') {
+    return (
+      <TooltipProvider>
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-slate-900 w-full overflow-x-hidden">
+          <main className="container mx-auto px-4 py-16 max-w-6xl">
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                🎵 Universo Musical
+              </h1>
+              <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+                Explore a música em todas as suas formas: produção, teoria, tecnologia e cultura musical.
+              </p>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-8 mb-16">
+              <div className="bg-gradient-to-br from-pink-800/40 to-purple-800/40 backdrop-blur-sm rounded-2xl p-6 border border-pink-500/30">
+                <h2 className="text-xl font-bold text-white mb-4">🎛️ Produção Musical</h2>
+                <ul className="space-y-3 text-gray-300">
+                  <li>• Home Studio Setup</li>
+                  <li>• DAWs e Plugins</li>
+                  <li>• Mixagem e Masterização</li>
+                  <li>• Gravação e Edição</li>
+                </ul>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-800/40 to-blue-800/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30">
+                <h2 className="text-xl font-bold text-white mb-4">🎼 Teoria Musical</h2>
+                <ul className="space-y-3 text-gray-300">
+                  <li>• Harmonia e Melodia</li>
+                  <li>• Escalas e Acordes</li>
+                  <li>• Composição</li>
+                  <li>• Análise Musical</li>
+                </ul>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-800/40 to-cyan-800/40 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/30">
+                <h2 className="text-xl font-bold text-white mb-4">🎸 Instrumentos</h2>
+                <ul className="space-y-3 text-gray-300">
+                  <li>• Guitarra e Baixo</li>
+                  <li>• Piano e Teclados</li>
+                  <li>• Bateria e Percussão</li>
+                  <li>• Instrumentos Virtuais</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-orange-600/20 to-red-600/20 backdrop-blur-sm rounded-2xl p-8 border border-orange-500/30">
+              <h2 className="text-3xl font-bold text-white text-center mb-8">🌟 Tendências Musicais</h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-4">🎧 Streaming e Distribuição</h3>
+                  <p className="text-gray-300 mb-4">
+                    Como artistas independentes podem alcançar milhões de ouvintes através das plataformas digitais.
+                  </p>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Spotify, Apple Music, YouTube Music</li>
+                    <li>• Marketing musical digital</li>
+                    <li>• Monetização e royalties</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-4">🤖 IA na Música</h3>
+                  <p className="text-gray-300 mb-4">
+                    Inteligência artificial está revolucionando a criação, produção e distribuição musical.
+                  </p>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Composição assistida por IA</li>
+                    <li>• Masterização automática</li>
+                    <li>• Recomendações personalizadas</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
+  // Special layout for motivational category
+  if (categoryFilter === 'motivacional') {
+    return (
+      <TooltipProvider>
+        <div className="min-h-screen bg-gradient-to-br from-orange-900 via-red-900 to-slate-900 w-full overflow-x-hidden">
+          <main className="container mx-auto px-4 py-16 max-w-6xl">
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                🔥 Crescimento Pessoal
+              </h1>
+              <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+                Desenvolva seu potencial máximo com estratégias comprovadas de produtividade, liderança e sucesso.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 mb-16">
+              <div className="bg-gradient-to-br from-orange-800/40 to-red-800/40 backdrop-blur-sm rounded-2xl p-8 border border-orange-500/30">
+                <h2 className="text-2xl font-bold text-white mb-6">🎯 Produtividade</h2>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-orange-400 text-xl">⏰</span>
+                    <div>
+                      <h3 className="font-semibold text-white">Gestão de Tempo</h3>
+                      <p className="text-gray-400 text-sm">Técnicas como Pomodoro, Time Blocking e GTD</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-orange-400 text-xl">🧠</span>
+                    <div>
+                      <h3 className="font-semibold text-white">Foco e Concentração</h3>
+                      <p className="text-gray-400 text-sm">Elimine distrações e maximize sua performance</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-orange-400 text-xl">📈</span>
+                    <div>
+                      <h3 className="font-semibold text-white">Hábitos de Sucesso</h3>
+                      <p className="text-gray-400 text-sm">Construa rotinas que levam a resultados extraordinários</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-800/40 to-pink-800/40 backdrop-blur-sm rounded-2xl p-8 border border-red-500/30">
+                <h2 className="text-2xl font-bold text-white mb-6">🚀 Liderança</h2>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-red-400 text-xl">💪</span>
+                    <div>
+                      <h3 className="font-semibold text-white">Autoconfiança</h3>
+                      <p className="text-gray-400 text-sm">Desenvolva uma mentalidade de crescimento</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-red-400 text-xl">🤝</span>
+                    <div>
+                      <h3 className="font-semibold text-white">Comunicação</h3>
+                      <p className="text-gray-400 text-sm">Habilidades para inspirar e influenciar pessoas</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-red-400 text-xl">🎖️</span>
+                    <div>
+                      <h3 className="font-semibold text-white">Tomada de Decisão</h3>
+                      <p className="text-gray-400 text-sm">Estratégias para decisões assertivas e rápidas</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-6 mb-12">
+              <div className="bg-gradient-to-b from-yellow-600/30 to-orange-600/30 backdrop-blur-sm rounded-xl p-6 border border-yellow-500/30 text-center">
+                <div className="text-4xl mb-4">🏆</div>
+                <h3 className="text-lg font-bold text-white mb-2">Metas e Objetivos</h3>
+                <p className="text-gray-400 text-sm">Defina, planeje e alcance seus sonhos com metodologias comprovadas.</p>
+              </div>
+              <div className="bg-gradient-to-b from-green-600/30 to-emerald-600/30 backdrop-blur-sm rounded-xl p-6 border border-green-500/30 text-center">
+                <div className="text-4xl mb-4">💰</div>
+                <h3 className="text-lg font-bold text-white mb-2">Inteligência Financeira</h3>
+                <p className="text-gray-400 text-sm">Estratégias para construir riqueza e liberdade financeira.</p>
+              </div>
+              <div className="bg-gradient-to-b from-blue-600/30 to-indigo-600/30 backdrop-blur-sm rounded-xl p-6 border border-blue-500/30 text-center">
+                <div className="text-4xl mb-4">🧘</div>
+                <h3 className="text-lg font-bold text-white mb-2">Bem-estar Mental</h3>
+                <p className="text-gray-400 text-sm">Cuide da sua saúde mental e emocional para uma vida plena.</p>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30">
+              <h2 className="text-2xl font-bold text-white text-center mb-6">📚 Biblioteca de Crescimento</h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3">📖 Livros Recomendados</h3>
+                  <ul className="text-gray-300 space-y-1">
+                    <li>• Hábitos Atômicos - James Clear</li>
+                    <li>• Mindset - Carol Dweck</li>
+                    <li>• O Poder do Agora - Eckhart Tolle</li>
+                    <li>• Pai Rico, Pai Pobre - Robert Kiyosaki</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3">🎧 Podcasts Inspiradores</h3>
+                  <ul className="text-gray-300 space-y-1">
+                    <li>• Flow Podcast</li>
+                    <li>• PodPeople</li>
+                    <li>• Mais1 Podcast</li>
+                    <li>• Café da Manhã</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
+  // Default layout for "Notícias" (main page) - shows cards
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 w-full overflow-x-hidden">
