@@ -107,11 +107,12 @@ const Navigation = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-36 bg-background border border-border/50" 
+                  className="w-36 bg-background border border-border/50 shadow-lg z-50" 
                   sideOffset={8}
                   side="bottom"
                   avoidCollisions={true}
                   collisionPadding={16}
+                  style={{ backgroundColor: 'hsl(var(--background))', zIndex: 9999 }}
                 >
                   <div className="px-2 py-1.5 text-sm text-muted-foreground">
                     {user.email}
