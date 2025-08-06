@@ -35,36 +35,56 @@ interface ContentItem {
 export default function Feed() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'posts' | 'videos'>('all');
   const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
-  const searchQuery = searchParams.get('search') || '';
+  const [searchQuery, setSearchQuery] = useState('');
+  const categoryFilter = searchParams.get('category') || '';
+
+  // Initialize search query from URL
+  useEffect(() => {
+    setSearchQuery(searchParams.get('search') || '');
+  }, [searchParams]);
 
   const fetchContent = async () => {
     try {
-      // Fetch posts with author info
-      const { data: posts, error: postsError } = await supabase
+      // Build posts query
+      let postsQuery = supabase
         .from('posts')
         .select(`
           *,
           categories(name, slug)
         `)
-        .eq('published', true)
+        .eq('published', true);
+
+      // Add category filter if specified
+      if (categoryFilter) {
+        postsQuery = postsQuery.eq('categories.slug', categoryFilter);
+      }
+
+      const { data: posts, error: postsError } = await postsQuery
         .order('published_at', { ascending: false })
         .limit(10);
 
       if (postsError) throw postsError;
 
-      // Fetch videos with author info
-      const { data: videos, error: videosError } = await supabase
+      // Build videos query
+      let videosQuery = supabase
         .from('videos')
         .select(`
           *,
           categories(name, slug)
         `)
-        .eq('published', true)
+        .eq('published', true);
+
+      // Add category filter if specified
+      if (categoryFilter) {
+        videosQuery = videosQuery.eq('categories.slug', categoryFilter);
+      }
+
+      const { data: videos, error: videosError } = await videosQuery
         .order('published_at', { ascending: false })
         .limit(10);
 
@@ -249,7 +269,7 @@ export default function Feed() {
     return () => {
       supabase.removeChannel(commentsChannel);
     };
-  }, [user]);
+  }, [user, categoryFilter]);
 
   const filteredContent = content.filter(item => {
     const matchesFilter = filter === 'all' || 
@@ -284,22 +304,20 @@ export default function Feed() {
           <div className="mb-6 flex justify-center">
             <form onSubmit={(e) => {
               e.preventDefault();
-              // Handled by useSearchParams already
+              const newParams = new URLSearchParams(searchParams);
+              if (searchQuery.trim()) {
+                newParams.set('search', searchQuery.trim());
+              } else {
+                newParams.delete('search');
+              }
+              setSearchParams(newParams);
             }} className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Buscar conteúdo..."
-                defaultValue={searchQuery}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
-                onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  if (e.target.value) {
-                    url.searchParams.set('search', e.target.value);
-                  } else {
-                    url.searchParams.delete('search');
-                  }
-                  window.history.replaceState({}, '', url);
-                }}
               />
             </form>
           </div>

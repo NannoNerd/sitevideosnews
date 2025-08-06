@@ -78,6 +78,9 @@ const Navigation = () => {
 
         {/* Navigation Menu */}
         <div className="hidden md:flex items-center space-x-6 flex-1 max-w-lg mx-8">
+          <Link to="/" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+            Notícias
+          </Link>
           <Link to="/?category=engenharia" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Engenharia
           </Link>
@@ -104,11 +107,11 @@ const Navigation = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-40 bg-background border" 
-                  sideOffset={4}
+                  className="w-36 bg-background border border-border/50" 
+                  sideOffset={8}
                   side="bottom"
-                  avoidCollisions={false}
-                  collisionPadding={0}
+                  avoidCollisions={true}
+                  collisionPadding={16}
                 >
                   <div className="px-2 py-1.5 text-sm text-muted-foreground">
                     {user.email}
