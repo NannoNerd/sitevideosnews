@@ -300,7 +300,7 @@ export default function Feed() {
     return (
       <TooltipProvider>
         <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
-          <main className="container mx-auto px-4 py-16 max-w-6xl">
+          <main className="container mx-auto px-4 py-8 max-w-full">
             {/* Hero Section */}
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -408,7 +408,7 @@ export default function Feed() {
     return (
       <TooltipProvider>
         <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
-          <main className="container mx-auto px-4 py-16 max-w-6xl">
+          <main className="container mx-auto px-4 py-8 max-w-full">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
                 🚀 Mundo das Criptomoedas
@@ -477,7 +477,7 @@ export default function Feed() {
     return (
       <TooltipProvider>
         <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
-          <main className="container mx-auto px-4 py-16 max-w-6xl">
+          <main className="container mx-auto px-4 py-8 max-w-full">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
                 🎵 Universo Musical
@@ -557,7 +557,7 @@ export default function Feed() {
     return (
       <TooltipProvider>
         <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
-          <main className="container mx-auto px-4 py-16 max-w-6xl">
+          <main className="container mx-auto px-4 py-8 max-w-full">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
                 🔥 Crescimento Pessoal
