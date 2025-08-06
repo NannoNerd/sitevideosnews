@@ -295,6 +295,243 @@ export default function Feed() {
     );
   }
 
+  // Special layout for engineering category
+  if (categoryFilter === 'engenharia') {
+    return (
+      <TooltipProvider>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 w-full overflow-x-hidden">
+          <main className="container mx-auto px-4 py-16 max-w-6xl">
+            {/* Hero Section */}
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Explore o Futuro com Tecnologia e Conhecimento
+              </h1>
+              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Aprenda, evolua e acompanhe o crescimento do nosso ativo digital.
+              </p>
+              <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold">
+                Gerar Mensagem Positiva
+              </Button>
+            </div>
+
+            {/* Three Cards Section */}
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Engenharia e Designer */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div className="text-white text-2xl">⚙️</div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    Engenharia e Designer
+                  </h3>
+                  <p className="text-gray-400 mb-6">
+                    Gere scripts e comandos para softwares de engenharia usando IA.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold">
+                    Geração de Comandos por IA
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                    Manuais e Tutoriais
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                    Projetos de Engenharia Civil
+                  </Button>
+                </div>
+              </div>
+
+              {/* CryptoMoeda + IA */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div className="text-white text-2xl">🧠</div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    CryptoMoeda + IA
+                  </h3>
+                  <p className="text-gray-400 mb-6">
+                    Tire suas dúvidas sobre criptomoedas e blockchain com nosso assistente.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 rounded-lg font-semibold">
+                    Crypto IA / Pergunte
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                    Análise de Gráficos
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                    Notícias e Atualidades
+                  </Button>
+                </div>
+              </div>
+
+              {/* Conteúdo + Motivação */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gray-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div className="text-white text-2xl">💭</div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    Conteúdo + Motivação
+                  </h3>
+                  <p className="text-gray-400 mb-6">
+                    Receba conselhos e insights para seu desenvolvimento pessoal e carreira.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold">
+                    Crescimento Pessoal IA
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                    Atualidades IA
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                    Conteúdo Vlog
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Engineering Content Section */}
+            <div className="mt-20">
+              <h2 className="text-3xl font-bold text-white text-center mb-12">
+                Conteúdos de Engenharia
+              </h2>
+              
+              {filteredContent.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-400">Nenhum conteúdo de engenharia encontrado.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
+                  {filteredContent.map((item) => {
+                    const isLiked = userLikes.has(item.id);
+                    
+                    return (
+                      <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow w-full bg-slate-800/50 border-slate-700/50">
+                        <Link to={`/${item.type}/${item.slug}`}>
+                          <div className="aspect-video bg-muted relative overflow-hidden">
+                            {item.type === 'video' && item.youtube_video_id ? (
+                              <>
+                                <img
+                                  src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                />
+                                {item.duration && (
+                                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                                    {item.duration}
+                                  </div>
+                                )}
+                              </>
+                            ) : item.cover_image_url ? (
+                              <img
+                                src={item.cover_image_url}
+                                alt={item.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-slate-700">
+                                {item.type === 'video' ? (
+                                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <div className="w-0 h-0 border-l-[6px] border-l-primary border-y-[4px] border-y-transparent ml-1"></div>
+                                  </div>
+                                ) : (
+                                  <div className="text-gray-400 text-sm">Sem imagem</div>
+                                )}
+                              </div>
+                            )}
+                           </div>
+                         </Link>
+                         
+                          <CardHeader>
+                            <CardTitle className="break-anywhere leading-tight text-white">
+                              <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
+                                {item.title}
+                              </Link>
+                            </CardTitle>
+                             <div className="flex justify-between items-center mt-2">
+                               <Badge variant="secondary" className="text-xs bg-slate-700 text-gray-300">
+                                 {item.category?.name}
+                               </Badge>
+                               <Badge variant="outline" className="text-xs border-slate-600 text-gray-400">
+                                 {item.type === 'post' ? 'Post' : 'Vídeo'}
+                               </Badge>
+                             </div>
+                            <CardDescription 
+                              className="line-clamp-2 break-anywhere text-gray-400"
+                              dangerouslySetInnerHTML={{
+                                __html: processTextWithLinks(
+                                  item.type === 'post' 
+                                    ? truncateText(item.content || '', 150)
+                                    : truncateText(item.description || '', 150)
+                                )
+                              }}
+                            />
+                        </CardHeader>
+                        
+                         <CardContent>
+                           <div className="flex items-center justify-between text-sm text-gray-400">
+                             <div className="flex items-center gap-2">
+                               <Avatar className="h-6 w-6">
+                                 <img 
+                                   src={item.author?.avatar_url || ''} 
+                                   alt={item.author?.display_name || 'Avatar'} 
+                                   className="h-full w-full object-cover"
+                                   onError={(e) => {
+                                     e.currentTarget.style.display = 'none';
+                                   }}
+                                 />
+                                 <AvatarFallback className="h-6 w-6 text-xs bg-slate-700">
+                                   {item.author?.display_name?.charAt(0)?.toUpperCase() || 'A'}
+                                 </AvatarFallback>
+                               </Avatar>
+                               <span className="truncate">{item.author?.display_name}</span>
+                             </div>
+                             <span className="whitespace-nowrap">{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
+                           </div>
+                          
+                          <div className="flex items-center justify-between mt-3 text-sm text-gray-400">
+                            <div className="flex items-center space-x-1">
+                              <Eye className="h-4 w-4" />
+                              <span>{item.views_count}</span>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleLike(item);
+                              }}
+                              className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-white'}`}
+                            >
+                              <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                              <span>{item.likes_count}</span>
+                            </Button>
+                            <div className="flex items-center space-x-1">
+                              <MessageCircle className="h-4 w-4" />
+                              <span>{item.comments_count}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 w-full overflow-x-hidden">
