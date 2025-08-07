@@ -295,7 +295,7 @@ export default function CreateContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-full">
+      <div className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
         <div className="mb-6">
           <Button variant="outline" onClick={() => navigate('/')}>
             <ArrowLeft className="h-4 w-4 mr-2" />

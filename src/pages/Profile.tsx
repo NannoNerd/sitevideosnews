@@ -288,7 +288,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
-      <div className="container mx-auto px-4 py-8 max-w-full">
+      <div className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <div className="lg:w-64 space-y-4">
