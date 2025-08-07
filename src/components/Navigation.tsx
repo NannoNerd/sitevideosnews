@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Plus, LogOut, User, Search } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
@@ -17,6 +18,12 @@ const Navigation = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  const [collapseMenu, setCollapseMenu] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLAnchorElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -44,6 +51,22 @@ const Navigation = () => {
 
     fetchUserProfile();
   }, [user]);
+
+  useEffect(() => {
+    const check = () => {
+      const containerWidth = containerRef.current?.clientWidth ?? 0;
+      const logoW = logoRef.current?.offsetWidth ?? 0;
+      const menuW = menuRef.current?.scrollWidth ?? 0;
+      const actionsW = actionsRef.current?.offsetWidth ?? 0;
+      const gap = 32; // padding/margins allowance
+      if (containerWidth > 0) {
+        setCollapseMenu(logoW + menuW + actionsW + gap > containerWidth);
+      }
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [isMobile, user, userRole, avatarUrl]);
 
   const handleLogout = async () => {
     try {
@@ -73,9 +96,9 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
-      <div className="container flex h-12 items-center justify-between px-4">
+      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-12 items-center justify-between px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center">
+        <Link ref={logoRef} to="/" className="flex items-center">
           <img 
             src="/lovable-uploads/ffe260a2-df9a-4ce0-ae33-5d76f7e56231.png" 
             alt="VidNews Logo" 
@@ -84,7 +107,7 @@ const Navigation = () => {
         </Link>
 
         {/* Navigation Menu */}
-        <div className="hidden md:flex items-center space-x-6 flex-1 max-w-lg mx-8">
+        <div ref={menuRef} className={`${(!isMobile && !collapseMenu) ? "flex" : "hidden"} items-center space-x-6 flex-1 mx-8`}>
           <Link to="/" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Notícias
           </Link>
@@ -103,7 +126,7 @@ const Navigation = () => {
         </div>
 
         {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div ref={actionsRef} className={`${(!isMobile && !collapseMenu) ? "flex" : "hidden"} items-center space-x-4`}>
           {user ? (
             <div className="flex items-center space-x-3">
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-2" asChild>
@@ -156,7 +179,7 @@ const Navigation = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="md:hidden"
+          className={`${(isMobile || collapseMenu) ? "" : "hidden"}`}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? (
@@ -169,8 +192,8 @@ const Navigation = () => {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background/95 backdrop-blur animate-slide-up">
-          <div className="container py-4 px-4 space-y-4">
+        <div className="border-t bg-background z-50 animate-slide-up">
+          <div className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] py-4 px-4 space-y-4">
             {/* Mobile Search */}
             <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
