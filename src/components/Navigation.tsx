@@ -96,7 +96,7 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
-      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-12 items-center justify-between px-4">
+      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-12 items-center justify-between px-4 relative">
         {/* Logo */}
         <Link ref={logoRef} to="/" className="flex items-center">
           <img 
@@ -107,7 +107,7 @@ const Navigation = () => {
         </Link>
 
         {/* Navigation Menu */}
-        <div ref={menuRef} className={`${(!isMobile && !collapseMenu) ? "flex" : "hidden"} items-center space-x-6 flex-1 mx-8`}>
+        <div ref={menuRef} className={`${(!isMobile && !collapseMenu) ? "flex absolute left-1/2 -translate-x-1/2" : "hidden"} items-center space-x-6`}>
           <Link to="/" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Notícias
           </Link>
