@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Heart, MessageCircle, Eye, Search, Plus, Settings, User } from 'lucide-react';
@@ -36,12 +38,18 @@ export default function Feed() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [content, setContent] = useState<ContentItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'posts' | 'videos'>('all');
-  const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState('');
-  const categoryFilter = searchParams.get('category') || '';
+const [content, setContent] = useState<ContentItem[]>([]);
+const [loading, setLoading] = useState(true);
+const [filter, setFilter] = useState<'all' | 'posts' | 'videos'>('all');
+const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
+const [searchQuery, setSearchQuery] = useState('');
+const categoryFilter = searchParams.get('category') || '';
+
+// IA Commands dialog state
+const [iaOpen, setIaOpen] = useState(false);
+const [iaPrompt, setIaPrompt] = useState('');
+const [iaLoading, setIaLoading] = useState(false);
+const [iaResult, setIaResult] = useState<string | null>(null);
 
   // Initialize search query from URL
   useEffect(() => {
@@ -283,9 +291,36 @@ export default function Feed() {
     return matchesFilter && matchesSearch;
   });
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+const handleSignOut = async () => {
+  await signOut();
+};
+
+// Generate engineering command via Edge Function
+const handleGenerateIaCommand = async () => {
+  if (!iaPrompt.trim()) {
+    toast({ title: 'Digite um comando', description: 'Descreva o que você precisa que a IA gere.', variant: 'destructive' });
+    return;
+  }
+  try {
+    setIaLoading(true);
+    setIaResult(null);
+    const { data, error } = await supabase.functions.invoke('generate-with-ai', {
+      body: {
+        prompt: `Você é um assistente técnico que gera comandos/scripts para ferramentas de engenharia (AutoCAD, Revit, SAP2000, MATLAB, Python para engenharia, etc.). Produza a resposta em português do Brasil, com passos claros e, quando aplicável, blocos de código ou comandos prontos para copiar. Solicitação do usuário: ${iaPrompt}`
+      }
+    });
+
+    if (error) throw error;
+
+    const generated = (data as any)?.generatedText || (data as any)?.text || JSON.stringify(data);
+    setIaResult(generated);
+  } catch (err) {
+    console.error('Erro ao gerar comando:', err);
+    toast({ title: 'Erro ao gerar comando', description: 'Verifique sua conexão ou tente novamente em instantes.', variant: 'destructive' });
+  } finally {
+    setIaLoading(false);
+  }
+};
 
   if (loading) {
     return (
@@ -314,6 +349,45 @@ export default function Feed() {
               </Button>
             </div>
 
+            {/* IA Commands Dialog */}
+            <Dialog open={iaOpen} onOpenChange={setIaOpen}>
+              <DialogContent className="sm:max-w-[680px] bg-slate-900 text-white border border-slate-700">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">Geração de Comandos por IA</DialogTitle>
+                  <DialogDescription className="text-slate-300">
+                    Descreva a tarefa ou comando que você precisa e nossa IA gerará o script ou instruções para ferramentas de engenharia.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                  <Textarea
+                    value={iaPrompt}
+                    onChange={(e) => setIaPrompt(e.target.value)}
+                    placeholder={"Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD', 'Comando para criar uma parede de 20cm no Revit', 'Instruções para modelar uma viga de concreto armado no SAP2000'"}
+                    className="min-h-[140px] bg-slate-800/60 text-white placeholder:text-slate-400"
+                  />
+
+                  <div className="flex items-center gap-3">
+                    <Button onClick={handleGenerateIaCommand} disabled={iaLoading} className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white">
+                      {iaLoading ? 'Gerando...' : 'Gerar Comando'}
+                    </Button>
+                    <Button variant="secondary" onClick={() => setIaOpen(false)} className="bg-slate-700 hover:bg-slate-600 text-gray-200">
+                      Fechar
+                    </Button>
+                  </div>
+
+                  {iaResult && (
+                    <div className="mt-2 rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
+                      <div className="px-4 py-2 text-sm text-slate-300 border-b border-slate-700">Resultado</div>
+                      <pre className="max-h-[320px] overflow-auto p-4 text-sm text-slate-200 whitespace-pre-wrap">{iaResult}</pre>
+                    </div>
+                  )}
+                </div>
+
+                <DialogFooter />
+              </DialogContent>
+            </Dialog>
+
             {/* Three Cards Section */}
             <div className="grid md:grid-cols-3 gap-8">
               {/* Engenharia e Designer */}
@@ -331,7 +405,7 @@ export default function Feed() {
                 </div>
                 
                 <div className="space-y-3">
-                  <Button className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold">
+                  <Button onClick={() => setIaOpen(true)} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold">
                     Geração de Comandos por IA
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
