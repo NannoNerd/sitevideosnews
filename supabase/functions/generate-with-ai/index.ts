@@ -41,20 +41,24 @@ serve(async (req) => {
           { role: 'user', content: prompt }
         ],
         temperature: 0.2,
+        max_tokens: 1000,
       }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('OpenAI error:', data);
+      console.error('DeepSeek error:', data);
       return new Response(JSON.stringify({ error: data.error?.message || 'Erro ao chamar o provedor de IA' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const generatedText = data.choices?.[0]?.message?.content ?? '';
+    const message = data.choices?.[0]?.message ?? {};
+    const reasoning = message?.reasoning_content ?? '';
+    const content = message?.content ?? '';
+    const generatedText = [reasoning, content].filter(Boolean).join('\n\n');
 
     return new Response(JSON.stringify({ generatedText }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
