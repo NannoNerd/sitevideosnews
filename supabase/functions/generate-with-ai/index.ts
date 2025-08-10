@@ -15,7 +15,25 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt } = await req.json();
+    // Safely parse body
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch (e) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const prompt: string | undefined = body?.prompt;
+
+    if (!prompt || !prompt.trim()) {
+      return new Response(JSON.stringify({ error: 'Campo "prompt" é obrigatório' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!deepSeekApiKey) {
       return new Response(JSON.stringify({ error: 'DEEPSEEK_API_KEY não configurada' }), {
@@ -24,48 +42,91 @@ serve(async (req) => {
       });
     }
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${deepSeekApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'deepseek-reasoner',
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Você é um assistente técnico que gera comandos e scripts para ferramentas de engenharia (AutoCAD, Revit, SAP2000, MATLAB, Python para engenharia, etc.). Responda SEMPRE em português do Brasil, com passos claros, listas numeradas e trechos de código/comandos em blocos markdown. Inclua observações de segurança quando aplicável.'
-          },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.2,
-        max_tokens: 1000,
-      }),
-    });
+    // Helper to call DeepSeek with a model
+    const callDeepSeek = async (model: string) => {
+      const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${deepSeekApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: 'system',
+              content:
+                'Você é um assistente técnico que gera comandos e scripts para ferramentas de engenharia (AutoCAD, Revit, SAP2000, MATLAB, Python para engenharia, etc.). Responda SEMPRE em português do Brasil, com passos claros, listas numeradas e trechos de código/comandos em blocos markdown. Inclua observações de segurança quando aplicável.'
+            },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.2,
+          max_tokens: 1200,
+        }),
+      });
 
-    const data = await response.json();
+      let rawText = '';
+      let json: any = null;
+      try {
+        rawText = await res.text();
+        json = rawText ? JSON.parse(rawText) : null;
+      } catch { /* keep rawText */ }
 
-    if (!response.ok) {
-      console.error('DeepSeek error:', data);
-      return new Response(JSON.stringify({ error: data.error?.message || 'Erro ao chamar o provedor de IA' }), {
-        status: 500,
+      if (!res.ok) {
+        const message = json?.error?.message || json?.message || rawText || 'Erro ao chamar o provedor de IA';
+        return {
+          ok: false as const,
+          status: res.status,
+          error: {
+            provider: 'deepseek',
+            status: res.status,
+            message,
+            raw: json ?? rawText
+          }
+        };
+      }
+
+      const data = json;
+      const messageObj = data?.choices?.[0]?.message ?? {};
+      const reasoning = messageObj?.reasoning_content ?? '';
+      const content = messageObj?.content ?? '';
+      const generatedText = [reasoning, content].filter(Boolean).join('\n\n');
+      return { ok: true as const, data, generatedText };
+    };
+
+    // Try Reasoner first, then fallback to chat model if permission/model error
+    const primary = await callDeepSeek('deepseek-reasoner');
+
+    if (!primary.ok && [400, 401, 403, 404].includes(primary.status)) {
+      console.error('[DeepSeek primary error]', primary.error);
+      const fallback = await callDeepSeek('deepseek-chat');
+      if (!fallback.ok) {
+        console.error('[DeepSeek fallback error]', fallback.error);
+        return new Response(JSON.stringify({ error: fallback.error }), {
+          status: fallback.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      return new Response(JSON.stringify({ generatedText: fallback.generatedText, provider: 'deepseek-chat' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const message = data.choices?.[0]?.message ?? {};
-    const reasoning = message?.reasoning_content ?? '';
-    const content = message?.content ?? '';
-    const generatedText = [reasoning, content].filter(Boolean).join('\n\n');
+    if (!primary.ok) {
+      console.error('[DeepSeek error]', primary.error);
+      return new Response(JSON.stringify({ error: primary.error }), {
+        status: primary.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    return new Response(JSON.stringify({ generatedText }), {
+    return new Response(JSON.stringify({ generatedText: primary.generatedText, provider: 'deepseek-reasoner' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in generate-with-ai function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error?.message || 'Erro inesperado no Edge Function' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

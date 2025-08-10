@@ -316,7 +316,9 @@ const handleGenerateIaCommand = async () => {
     setIaResult(generated);
   } catch (err) {
     console.error('Erro ao gerar comando:', err);
-    const description = (err as any)?.message || (typeof err === 'string' ? err : 'Verifique sua conexão ou tente novamente em instantes.');
+    const ctx = (err as any)?.context;
+    const providerMessage = (ctx?.response?.text) || (typeof ctx?.body === 'string' ? ctx.body : undefined) || (ctx?.response?.error ? JSON.stringify(ctx.response.error) : undefined);
+    const description = providerMessage || (err as any)?.message || (typeof err === 'string' ? err : 'Verifique sua conexão ou tente novamente em instantes.');
     toast({ title: 'Erro ao gerar comando', description, variant: 'destructive' });
   } finally {
     setIaLoading(false);
