@@ -316,7 +316,8 @@ const handleGenerateIaCommand = async () => {
     setIaResult(generated);
   } catch (err) {
     console.error('Erro ao gerar comando:', err);
-    toast({ title: 'Erro ao gerar comando', description: 'Verifique sua conexão ou tente novamente em instantes.', variant: 'destructive' });
+    const description = (err as any)?.message || (typeof err === 'string' ? err : 'Verifique sua conexão ou tente novamente em instantes.');
+    toast({ title: 'Erro ao gerar comando', description, variant: 'destructive' });
   } finally {
     setIaLoading(false);
   }
