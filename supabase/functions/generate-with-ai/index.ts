@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const deepSeekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
+const openRouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,8 +35,8 @@ serve(async (req) => {
       });
     }
 
-    if (!deepSeekApiKey) {
-      return new Response(JSON.stringify({ error: 'DEEPSEEK_API_KEY não configurada' }), {
+    if (!openRouterApiKey) {
+      return new Response(JSON.stringify({ error: 'OPENROUTER_API_KEY não configurada' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -44,10 +44,12 @@ serve(async (req) => {
 
     // Helper to call DeepSeek with a model
     const callDeepSeek = async (model: string) => {
-      const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${deepSeekApiKey}`,
+          'Authorization': `Bearer ${openRouterApiKey}`,
+          'HTTP-Referer': req.headers.get('origin') || 'https://opbtbgtzinpysokwfaqn.supabase.co',
+          'X-Title': 'Ivo Fernandes News - AI Generator',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -78,7 +80,7 @@ serve(async (req) => {
           ok: false as const,
           status: res.status,
           error: {
-            provider: 'deepseek',
+            provider: 'openrouter',
             status: res.status,
             message,
             raw: json ?? rawText
@@ -98,17 +100,17 @@ serve(async (req) => {
     const primary = await callDeepSeek('deepseek/deepseek-r1-0528:free');
 
     if (!primary.ok && [400, 401, 403, 404].includes(primary.status)) {
-      console.error('[DeepSeek primary error]', primary.error);
-      const fallback = await callDeepSeek('deepseek-chat');
+      console.error('[OpenRouter primary error]', primary.error);
+      const fallback = await callDeepSeek('deepseek/deepseek-chat:free');
       if (!fallback.ok) {
-        console.error('[DeepSeek fallback error]', fallback.error);
+        console.error('[OpenRouter fallback error]', fallback.error);
         return new Response(JSON.stringify({ error: fallback.error }), {
           status: fallback.status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      return new Response(JSON.stringify({ generatedText: fallback.generatedText, provider: 'deepseek-chat' }), {
+      return new Response(JSON.stringify({ generatedText: fallback.generatedText, provider: 'deepseek/deepseek-chat:free' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
