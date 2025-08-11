@@ -95,7 +95,7 @@ serve(async (req) => {
     };
 
     // Try Reasoner first, then fallback to chat model if permission/model error
-    const primary = await callDeepSeek('deepseek-reasoner');
+    const primary = await callDeepSeek('deepseek/deepseek-r1-0528:free');
 
     if (!primary.ok && [400, 401, 403, 404].includes(primary.status)) {
       console.error('[DeepSeek primary error]', primary.error);
@@ -121,7 +121,7 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ generatedText: primary.generatedText, provider: 'deepseek-reasoner' }), {
+    return new Response(JSON.stringify({ generatedText: primary.generatedText, provider: 'deepseek/deepseek-r1-0528:free' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
