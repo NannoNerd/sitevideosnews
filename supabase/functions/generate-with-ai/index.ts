@@ -90,10 +90,39 @@ serve(async (req) => {
 
       const data = json;
       const messageObj = data?.choices?.[0]?.message ?? {};
-      const reasoning = messageObj?.reasoning_content ?? '';
-      const content = messageObj?.content ?? '';
-      const generatedText = [reasoning, content].filter(Boolean).join('\n\n');
-      return { ok: true as const, data, generatedText };
+
+      // OpenRouter pode retornar o conteúdo como string OU como array de segmentos
+      // (ex.: DeepSeek R1: [{ type: 'reasoning', text: '...' }, { type: 'output_text', text: '...' }])
+      let reasoning = '';
+      let contentText = '';
+      const msgContent: any = messageObj?.content;
+
+      if (Array.isArray(msgContent)) {
+        const toLower = (v: any) => (typeof v === 'string' ? v.toLowerCase() : v);
+        const reasoningParts = msgContent
+          .filter((p: any) => toLower(p?.type) === 'reasoning' || toLower(p?.type) === 'thinking')
+          .map((p: any) => p?.text)
+          .filter(Boolean);
+        const outputParts = msgContent
+          .filter((p: any) => toLower(p?.type) === 'output_text' || toLower(p?.type) === 'text')
+          .map((p: any) => p?.text)
+          .filter(Boolean);
+        reasoning = reasoningParts.join('\n');
+        contentText = outputParts.join('\n');
+      } else if (typeof msgContent === 'string') {
+        contentText = msgContent;
+      }
+
+      // Alguns provedores retornam reasoning_content como string separada
+      if (!reasoning && typeof (messageObj as any)?.reasoning_content === 'string') {
+        reasoning = (messageObj as any).reasoning_content;
+      }
+
+      const finalText = [reasoning, contentText]
+        .filter((s) => s && String(s).trim().length > 0)
+        .join('\n\n');
+
+      return { ok: true as const, data, generatedText: finalText };
     };
 
     // Try Reasoner first, then fallback to chat model if permission/model error
