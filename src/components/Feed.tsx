@@ -406,13 +406,19 @@ const handleGenerateIaCommand = async () => {
                   <Textarea
                     value={iaPrompt}
                     onChange={(e) => setIaPrompt(e.target.value)}
-                    placeholder={"Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD', 'Comando para criar uma parede de 20cm no Revit', 'Instruções para modelar uma viga de concreto armado no SAP2000'"}
+                    placeholder={
+                      iaMode === 'engenharia'
+                        ? "Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD'; 'Comando para criar uma parede de 20cm no Revit'; 'Modelar uma viga no SAP2000'"
+                        : iaMode === 'crypto'
+                        ? "Ex: 'O que é staking e quais os riscos?'; 'Como funciona a rede Ethereum e o gas?'; 'Diferença entre token e coin?'; 'Como guardar minhas chaves com segurança?'"
+                        : "Ex: 'Como montar uma rotina matinal produtiva?'; 'Técnicas para foco profundo (deep work)?'; 'Como criar o hábito de estudar diariamente?'; 'Framework para metas SMART?'"
+                    }
                     className="min-h-[140px] bg-slate-800/60 text-white placeholder:text-slate-400"
                   />
 
                   <div className="flex items-center gap-3">
                     <Button onClick={handleGenerateIaCommand} disabled={iaLoading} className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white">
-                      {iaLoading ? 'Gerando...' : 'Gerar Comando'}
+                      {iaLoading ? 'Gerando...' : iaMode === 'engenharia' ? 'Gerar Comando' : iaMode === 'crypto' ? 'Pergunte IA' : 'Gerar Dica'}
                     </Button>
                     <Button variant="secondary" onClick={() => setIaOpen(false)} className="bg-slate-700 hover:bg-slate-600 text-gray-200">
                       Fechar
@@ -437,7 +443,7 @@ const handleGenerateIaCommand = async () => {
             {/* Three Cards Section */}
             <div className="grid md:grid-cols-3 gap-8">
               {/* Engenharia e Designer */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50">
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover">
                 <div className="text-center mb-6">
                   <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <div className="text-white text-2xl">⚙️</div>
@@ -451,7 +457,7 @@ const handleGenerateIaCommand = async () => {
                 </div>
                 
                 <div className="space-y-3">
-                  <Button onClick={() => setIaOpen(true)} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold">
+                  <Button onClick={() => { setIaMode('engenharia'); setIaOpen(true); }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold">
                     Geração de Comandos por IA
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
@@ -464,7 +470,7 @@ const handleGenerateIaCommand = async () => {
               </div>
 
               {/* CryptoMoeda + IA */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50">
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover">
                 <div className="text-center mb-6">
                   <div className="w-16 h-16 bg-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <div className="text-white text-2xl">🧠</div>
@@ -491,7 +497,7 @@ const handleGenerateIaCommand = async () => {
               </div>
 
               {/* Conteúdo + Motivação */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50">
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover">
                 <div className="text-center mb-6">
                   <div className="w-16 h-16 bg-gray-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <div className="text-white text-2xl">💭</div>
