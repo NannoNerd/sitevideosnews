@@ -152,10 +152,11 @@ All colors MUST be HSL.
   
   .card-hover {
     transition: var(--transition-smooth);
+    will-change: transform;
   }
   
   .card-hover:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.02);
     box-shadow: 0 8px 25px hsl(0 0% 0% / 0.3);
   }
   
