@@ -534,7 +534,7 @@ const handleGenerateIaCommand = async () => {
                   <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
                     <div className="flex flex-col items-center mb-4">
                       <img 
-                        src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+                        src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face"
                         alt="Mariana L."
                         className="w-12 h-12 rounded-full object-cover mb-2"
                       />
