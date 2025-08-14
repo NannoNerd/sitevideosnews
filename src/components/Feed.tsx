@@ -14,7 +14,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { truncateWithTooltip, processTextWithLinks, truncateText } from '@/lib/text-utils';
-
 interface ContentItem {
   id: string;
   title: string;
@@ -25,92 +24,93 @@ interface ContentItem {
   thumbnail_url?: string;
   youtube_video_id?: string;
   duration?: string;
-  category: { name: string; slug: string };
-  author: { display_name: string; avatar_url?: string };
+  category: {
+    name: string;
+    slug: string;
+  };
+  author: {
+    display_name: string;
+    avatar_url?: string;
+  };
   published_at: string;
   views_count: number;
   likes_count: number;
   comments_count: number;
   type: 'post' | 'video';
 }
-
 export default function Feed() {
-  const { user, signOut } = useAuth();
-  const { toast } = useToast();
+  const {
+    user,
+    signOut
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-const [content, setContent] = useState<ContentItem[]>([]);
-const [loading, setLoading] = useState(true);
-const [filter, setFilter] = useState<'all' | 'posts' | 'videos'>('all');
-const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
-const [searchQuery, setSearchQuery] = useState('');
-const categoryFilter = searchParams.get('category') || '';
+  const [content, setContent] = useState<ContentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'posts' | 'videos'>('all');
+  const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const categoryFilter = searchParams.get('category') || '';
 
-// IA Commands dialog state
-const [iaOpen, setIaOpen] = useState(false);
-const [iaMode, setIaMode] = useState<'engenharia' | 'crypto' | 'growth'>('engenharia');
-const [iaPrompt, setIaPrompt] = useState('');
-const [iaLoading, setIaLoading] = useState(false);
-const [iaResult, setIaResult] = useState<string | null>(null);
+  // IA Commands dialog state
+  const [iaOpen, setIaOpen] = useState(false);
+  const [iaMode, setIaMode] = useState<'engenharia' | 'crypto' | 'growth'>('engenharia');
+  const [iaPrompt, setIaPrompt] = useState('');
+  const [iaLoading, setIaLoading] = useState(false);
+  const [iaResult, setIaResult] = useState<string | null>(null);
 
   // Initialize search query from URL
   useEffect(() => {
     setSearchQuery(searchParams.get('search') || '');
   }, [searchParams]);
-
   const fetchContent = async () => {
     try {
       // Build posts query
-      let postsQuery = supabase
-        .from('posts')
-        .select(`
+      let postsQuery = supabase.from('posts').select(`
           *,
           categories(name, slug)
-        `)
-        .eq('published', true);
+        `).eq('published', true);
 
       // Add category filter if specified
       if (categoryFilter) {
         postsQuery = postsQuery.eq('categories.slug', categoryFilter);
       }
-
-      const { data: posts, error: postsError } = await postsQuery
-        .order('published_at', { ascending: false })
-        .limit(10);
-
+      const {
+        data: posts,
+        error: postsError
+      } = await postsQuery.order('published_at', {
+        ascending: false
+      }).limit(10);
       if (postsError) throw postsError;
 
       // Build videos query
-      let videosQuery = supabase
-        .from('videos')
-        .select(`
+      let videosQuery = supabase.from('videos').select(`
           *,
           categories(name, slug)
-        `)
-        .eq('published', true);
+        `).eq('published', true);
 
       // Add category filter if specified
       if (categoryFilter) {
         videosQuery = videosQuery.eq('categories.slug', categoryFilter);
       }
-
-      const { data: videos, error: videosError } = await videosQuery
-        .order('published_at', { ascending: false })
-        .limit(10);
-
+      const {
+        data: videos,
+        error: videosError
+      } = await videosQuery.order('published_at', {
+        ascending: false
+      }).limit(10);
       if (videosError) throw videosError;
 
       // Get unique author IDs
-      const authorIds = [
-        ...(posts || []).map(p => p.author_id),
-        ...(videos || []).map(v => v.author_id)
-      ].filter((id, index, arr) => arr.indexOf(id) === index);
+      const authorIds = [...(posts || []).map(p => p.author_id), ...(videos || []).map(v => v.author_id)].filter((id, index, arr) => arr.indexOf(id) === index);
 
       // Fetch author profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, display_name, avatar_url')
-        .in('user_id', authorIds);
-
+      const {
+        data: profiles,
+        error: profilesError
+      } = await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', authorIds);
       if (profilesError) throw profilesError;
 
       // Create author lookup map
@@ -120,38 +120,37 @@ const [iaResult, setIaResult] = useState<string | null>(null);
       }, {} as Record<string, any>);
 
       // Combine and sort content
-      const allContent: ContentItem[] = [
-        ...(posts || []).map(post => ({ 
-          ...post, 
-          type: 'post' as const,
-          category: post.categories || { name: 'Sem categoria', slug: '' },
-          author: { 
-            display_name: authorMap[post.author_id]?.display_name || 'Anônimo',
-            avatar_url: authorMap[post.author_id]?.avatar_url
-          }
-        })),
-        ...(videos || []).map(video => ({ 
-          ...video, 
-          type: 'video' as const,
-          category: video.categories || { name: 'Sem categoria', slug: '' },
-          author: { 
-            display_name: authorMap[video.author_id]?.display_name || 'Anônimo',
-            avatar_url: authorMap[video.author_id]?.avatar_url
-          }
-        }))
-      ].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
-
+      const allContent: ContentItem[] = [...(posts || []).map(post => ({
+        ...post,
+        type: 'post' as const,
+        category: post.categories || {
+          name: 'Sem categoria',
+          slug: ''
+        },
+        author: {
+          display_name: authorMap[post.author_id]?.display_name || 'Anônimo',
+          avatar_url: authorMap[post.author_id]?.avatar_url
+        }
+      })), ...(videos || []).map(video => ({
+        ...video,
+        type: 'video' as const,
+        category: video.categories || {
+          name: 'Sem categoria',
+          slug: ''
+        },
+        author: {
+          display_name: authorMap[video.author_id]?.display_name || 'Anônimo',
+          avatar_url: authorMap[video.author_id]?.avatar_url
+        }
+      }))].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
       setContent(allContent);
 
       // Fetch user likes if authenticated
       if (user) {
         const contentIds = allContent.map(item => item.id);
-        const { data: likes } = await supabase
-          .from('likes')
-          .select('post_id, video_id')
-          .eq('user_id', user.id)
-          .or(`post_id.in.(${contentIds.join(',')}),video_id.in.(${contentIds.join(',')})`);
-
+        const {
+          data: likes
+        } = await supabase.from('likes').select('post_id, video_id').eq('user_id', user.id).or(`post_id.in.(${contentIds.join(',')}),video_id.in.(${contentIds.join(',')})`);
         if (likes) {
           const likedIds = new Set(likes.map(like => like.post_id || like.video_id).filter(Boolean));
           setUserLikes(likedIds);
@@ -168,7 +167,6 @@ const [iaResult, setIaResult] = useState<string | null>(null);
       setLoading(false);
     }
   };
-
   const handleLike = async (item: ContentItem) => {
     if (!user) {
       toast({
@@ -178,18 +176,12 @@ const [iaResult, setIaResult] = useState<string | null>(null);
       });
       return;
     }
-
     const isLiked = userLikes.has(item.id);
     const foreignKey = item.type === 'post' ? 'post_id' : 'video_id';
-
     try {
       if (isLiked) {
         // Remove like
-        await supabase
-          .from('likes')
-          .delete()
-          .eq(foreignKey, item.id)
-          .eq('user_id', user.id);
+        await supabase.from('likes').delete().eq(foreignKey, item.id).eq('user_id', user.id);
 
         // Update UI
         setUserLikes(prev => {
@@ -197,29 +189,23 @@ const [iaResult, setIaResult] = useState<string | null>(null);
           newSet.delete(item.id);
           return newSet;
         });
-
-        setContent(prev => prev.map(contentItem => 
-          contentItem.id === item.id 
-            ? { ...contentItem, likes_count: contentItem.likes_count - 1 }
-            : contentItem
-        ));
+        setContent(prev => prev.map(contentItem => contentItem.id === item.id ? {
+          ...contentItem,
+          likes_count: contentItem.likes_count - 1
+        } : contentItem));
       } else {
         // Add like
-        await supabase
-          .from('likes')
-          .insert({
-            [foreignKey]: item.id,
-            user_id: user.id
-          });
+        await supabase.from('likes').insert({
+          [foreignKey]: item.id,
+          user_id: user.id
+        });
 
         // Update UI
         setUserLikes(prev => new Set([...prev, item.id]));
-
-        setContent(prev => prev.map(contentItem => 
-          contentItem.id === item.id 
-            ? { ...contentItem, likes_count: contentItem.likes_count + 1 }
-            : contentItem
-        ));
+        setContent(prev => prev.map(contentItem => contentItem.id === item.id ? {
+          ...contentItem,
+          likes_count: contentItem.likes_count + 1
+        } : contentItem));
       }
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -230,144 +216,109 @@ const [iaResult, setIaResult] = useState<string | null>(null);
       });
     }
   };
-
   useEffect(() => {
     fetchContent();
 
     // Set up real-time subscription to update comment counts
-    const commentsChannel = supabase
-      .channel('comments-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'comments'
-        },
-        () => {
-          // Refetch content to update comment counts
-          fetchContent();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'posts'
-        },
-        () => {
-          // Refetch content when posts are updated (for comment counts)
-          fetchContent();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'videos'
-        },
-        () => {
-          // Refetch content when videos are updated (for comment counts)
-          fetchContent();
-        }
-      )
-      .subscribe();
-
+    const commentsChannel = supabase.channel('comments-updates').on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'comments'
+    }, () => {
+      // Refetch content to update comment counts
+      fetchContent();
+    }).on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'posts'
+    }, () => {
+      // Refetch content when posts are updated (for comment counts)
+      fetchContent();
+    }).on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'videos'
+    }, () => {
+      // Refetch content when videos are updated (for comment counts)
+      fetchContent();
+    }).subscribe();
     return () => {
       supabase.removeChannel(commentsChannel);
     };
   }, [user, categoryFilter]);
-
   const filteredContent = content.filter(item => {
-    const matchesFilter = filter === 'all' || 
-      (filter === 'posts' && item.type === 'post') ||
-      (filter === 'videos' && item.type === 'video');
-    
-    const matchesSearch = searchQuery === '' || 
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.content || item.description || '').toLowerCase().includes(searchQuery.toLowerCase());
-
+    const matchesFilter = filter === 'all' || filter === 'posts' && item.type === 'post' || filter === 'videos' && item.type === 'video';
+    const matchesSearch = searchQuery === '' || item.title.toLowerCase().includes(searchQuery.toLowerCase()) || (item.content || item.description || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
-const handleSignOut = async () => {
-  await signOut();
-};
-
-// Generate IA content via Edge Function (multi-mode)
-const handleGenerateIaCommand = async () => {
-  if (!iaPrompt.trim()) {
-    toast({ title: 'Digite um comando', description: 'Descreva o que você precisa que a IA gere.', variant: 'destructive' });
-    return;
-  }
-  try {
-    setIaLoading(true);
-    setIaResult(null);
-
-    const baseInstructionByMode: Record<typeof iaMode, string> = {
-      engenharia:
-        'Você é um assistente técnico que gera comandos/scripts para ferramentas de engenharia (AutoCAD, Revit, SAP2000, MATLAB, Python para engenharia, etc.). Forneça passos claros e, quando aplicável, blocos de código ou comandos prontos para copiar.',
-      crypto:
-        'Você é um especialista em criptomoedas e tecnologia blockchain. Explique conceitos, riscos e boas práticas de forma clara e educativa (isto não é aconselhamento financeiro).',
-      growth:
-        'Você é um mentor de crescimento pessoal e produtividade. Forneça conselhos práticos, listas numeradas e frameworks simples para aplicação imediata.',
-    };
-
-    const formatInstruction = 'Formate a resposta em HTML simples (sem markdown). Use <h2>, <h3>, <p>, <ul>, <li>, <code>, <pre> quando apropriado. Não use asteriscos para negrito; use <strong>. Responda em português do Brasil.';
-
-    const fullPrompt = `${baseInstructionByMode[iaMode]}\n\n${formatInstruction}\n\nSolicitação do usuário: ${iaPrompt}`;
-
-    const { data, error } = await supabase.functions.invoke('generate-with-ai', {
-      body: { prompt: fullPrompt }
-    });
-
-    if (error) throw error;
-
-    const generated = (data as any)?.generatedText || (data as any)?.text || '';
-
-    // Fallback: se não vier em HTML, converte marcações básicas e quebra de linhas
-    let html = generated;
-    if (!/<[a-z][\s\S]*>/i.test(html)) {
-      html = html
-        .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/__([^_]+)__/g, '<strong>$1</strong>')
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        .replace(/_([^_]+)_/g, '<em>$1</em>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br />');
-      html = `<p>${html}</p>`;
+  // Generate IA content via Edge Function (multi-mode)
+  const handleGenerateIaCommand = async () => {
+    if (!iaPrompt.trim()) {
+      toast({
+        title: 'Digite um comando',
+        description: 'Descreva o que você precisa que a IA gere.',
+        variant: 'destructive'
+      });
+      return;
     }
+    try {
+      setIaLoading(true);
+      setIaResult(null);
+      const baseInstructionByMode: Record<typeof iaMode, string> = {
+        engenharia: 'Você é um assistente técnico que gera comandos/scripts para ferramentas de engenharia (AutoCAD, Revit, SAP2000, MATLAB, Python para engenharia, etc.). Forneça passos claros e, quando aplicável, blocos de código ou comandos prontos para copiar.',
+        crypto: 'Você é um especialista em criptomoedas e tecnologia blockchain. Explique conceitos, riscos e boas práticas de forma clara e educativa (isto não é aconselhamento financeiro).',
+        growth: 'Você é um mentor de crescimento pessoal e produtividade. Forneça conselhos práticos, listas numeradas e frameworks simples para aplicação imediata.'
+      };
+      const formatInstruction = 'Formate a resposta em HTML simples (sem markdown). Use <h2>, <h3>, <p>, <ul>, <li>, <code>, <pre> quando apropriado. Não use asteriscos para negrito; use <strong>. Responda em português do Brasil.';
+      const fullPrompt = `${baseInstructionByMode[iaMode]}\n\n${formatInstruction}\n\nSolicitação do usuário: ${iaPrompt}`;
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('generate-with-ai', {
+        body: {
+          prompt: fullPrompt
+        }
+      });
+      if (error) throw error;
+      const generated = (data as any)?.generatedText || (data as any)?.text || '';
 
-    setIaResult(html);
-  } catch (err) {
-    console.error('Erro ao gerar comando:', err);
-    const ctx = (err as any)?.context;
-    const providerMessage = (ctx?.response?.text) || (typeof ctx?.body === 'string' ? ctx.body : undefined) || (ctx?.response?.error ? JSON.stringify(ctx.response.error) : undefined);
-    const description = providerMessage || (err as any)?.message || (typeof err === 'string' ? err : 'Verifique sua conexão ou tente novamente em instantes.');
-    toast({ title: 'Erro ao gerar comando', description, variant: 'destructive' });
-  } finally {
-    setIaLoading(false);
-  }
-};
-
-
+      // Fallback: se não vier em HTML, converte marcações básicas e quebra de linhas
+      let html = generated;
+      if (!/<[a-z][\s\S]*>/i.test(html)) {
+        html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/__([^_]+)__/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>').replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br />');
+        html = `<p>${html}</p>`;
+      }
+      setIaResult(html);
+    } catch (err) {
+      console.error('Erro ao gerar comando:', err);
+      const ctx = (err as any)?.context;
+      const providerMessage = ctx?.response?.text || (typeof ctx?.body === 'string' ? ctx.body : undefined) || (ctx?.response?.error ? JSON.stringify(ctx.response.error) : undefined);
+      const description = providerMessage || (err as any)?.message || (typeof err === 'string' ? err : 'Verifique sua conexão ou tente novamente em instantes.');
+      toast({
+        title: 'Erro ao gerar comando',
+        description,
+        variant: 'destructive'
+      });
+    } finally {
+      setIaLoading(false);
+    }
+  };
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
 
   // Special layout for engineering category
   if (categoryFilter === 'engenharia') {
-    return (
-      <TooltipProvider>
-        <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
+    return <TooltipProvider>
+        <div className="min-h-screen w-full overflow-x-hidden" style={{
+        backgroundColor: '#0f172a'
+      }}>
             <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
             {/* Hero Section */}
             <div className="text-center mb-16">
@@ -387,34 +338,15 @@ const handleGenerateIaCommand = async () => {
               <DialogContent className="sm:max-w-[680px] bg-slate-900 text-white border border-slate-700">
                 <DialogHeader>
                   <DialogTitle className="text-2xl">
-                    {iaMode === 'engenharia'
-                      ? 'Geração de Comandos por IA'
-                      : iaMode === 'crypto'
-                        ? 'Crypto IA — Pergunte'
-                        : 'Crescimento Pessoal IA'}
+                    {iaMode === 'engenharia' ? 'Geração de Comandos por IA' : iaMode === 'crypto' ? 'Crypto IA — Pergunte' : 'Crescimento Pessoal IA'}
                   </DialogTitle>
                   <DialogDescription className="text-slate-300">
-                    {iaMode === 'engenharia'
-                      ? 'Descreva a tarefa ou comando que você precisa e nossa IA gerará o script ou instruções para ferramentas de engenharia.'
-                      : iaMode === 'crypto'
-                        ? 'Faça sua pergunta sobre criptomoedas e blockchain (educacional, sem aconselhamento financeiro).'
-                        : 'Peça conselhos práticos de produtividade, hábitos e carreira.'}
+                    {iaMode === 'engenharia' ? 'Descreva a tarefa ou comando que você precisa e nossa IA gerará o script ou instruções para ferramentas de engenharia.' : iaMode === 'crypto' ? 'Faça sua pergunta sobre criptomoedas e blockchain (educacional, sem aconselhamento financeiro).' : 'Peça conselhos práticos de produtividade, hábitos e carreira.'}
                   </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
-                  <Textarea
-                    value={iaPrompt}
-                    onChange={(e) => setIaPrompt(e.target.value)}
-                    placeholder={
-                      iaMode === 'engenharia'
-                        ? "Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD'; 'Comando para criar uma parede de 20cm no Revit'; 'Modelar uma viga no SAP2000'"
-                        : iaMode === 'crypto'
-                        ? "Ex: 'O que é staking e quais os riscos?'; 'Como funciona a rede Ethereum e o gas?'; 'Diferença entre token e coin?'; 'Como guardar minhas chaves com segurança?'"
-                        : "Ex: 'Como montar uma rotina matinal produtiva?'; 'Técnicas para foco profundo (deep work)?'; 'Como criar o hábito de estudar diariamente?'; 'Framework para metas SMART?'"
-                    }
-                    className="min-h-[140px] bg-slate-800/60 text-white placeholder:text-slate-400"
-                  />
+                  <Textarea value={iaPrompt} onChange={e => setIaPrompt(e.target.value)} placeholder={iaMode === 'engenharia' ? "Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD'; 'Comando para criar uma parede de 20cm no Revit'; 'Modelar uma viga no SAP2000'" : iaMode === 'crypto' ? "Ex: 'O que é staking e quais os riscos?'; 'Como funciona a rede Ethereum e o gas?'; 'Diferença entre token e coin?'; 'Como guardar minhas chaves com segurança?'" : "Ex: 'Como montar uma rotina matinal produtiva?'; 'Técnicas para foco profundo (deep work)?'; 'Como criar o hábito de estudar diariamente?'; 'Framework para metas SMART?'"} className="min-h-[140px] bg-slate-800/60 text-white placeholder:text-slate-400" />
 
                   <div className="flex items-center gap-3">
                     <Button onClick={handleGenerateIaCommand} disabled={iaLoading} className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white">
@@ -425,15 +357,12 @@ const handleGenerateIaCommand = async () => {
                     </Button>
                   </div>
 
-                  {iaResult && (
-                    <div className="mt-2 rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
+                  {iaResult && <div className="mt-2 rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
                       <div className="px-4 py-2 text-sm text-slate-300 border-b border-slate-700">Resultado</div>
-                      <div
-                        className="max-h-[320px] overflow-auto p-4 text-sm text-slate-200 leading-relaxed space-y-3 [&_h2]:text-white [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-6 [&_code]:bg-black/40 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_pre]:bg-black/40 [&_pre]:p-3 [&_pre]:rounded"
-                        dangerouslySetInnerHTML={{ __html: iaResult }}
-                      />
-                    </div>
-                  )}
+                      <div className="max-h-[320px] overflow-auto p-4 text-sm text-slate-200 leading-relaxed space-y-3 [&_h2]:text-white [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-6 [&_code]:bg-black/40 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_pre]:bg-black/40 [&_pre]:p-3 [&_pre]:rounded" dangerouslySetInnerHTML={{
+                    __html: iaResult
+                  }} />
+                    </div>}
                 </div>
 
                 <DialogFooter />
@@ -445,7 +374,7 @@ const handleGenerateIaCommand = async () => {
               {/* Engenharia e Designer */}
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover">
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-orange-500 flex items-center justify-center mx-auto mb-4 rounded-2xl">
                     <div className="text-white text-2xl">⚙️</div>
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-3">
@@ -457,7 +386,10 @@ const handleGenerateIaCommand = async () => {
                 </div>
                 
                 <div className="space-y-3">
-                  <Button onClick={() => { setIaMode('engenharia'); setIaOpen(true); }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold">
+                  <Button onClick={() => {
+                  setIaMode('engenharia');
+                  setIaOpen(true);
+                }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold">
                     Geração de Comandos por IA
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
@@ -484,7 +416,10 @@ const handleGenerateIaCommand = async () => {
                 </div>
                 
                 <div className="space-y-3">
-                  <Button onClick={() => { setIaMode('crypto'); setIaOpen(true); }} className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 rounded-lg font-semibold">
+                  <Button onClick={() => {
+                  setIaMode('crypto');
+                  setIaOpen(true);
+                }} className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 rounded-lg font-semibold">
                     Crypto IA / Pergunte
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
@@ -511,7 +446,10 @@ const handleGenerateIaCommand = async () => {
                 </div>
                 
                 <div className="space-y-3">
-                  <Button onClick={() => { setIaMode('growth'); setIaOpen(true); }} className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold">
+                  <Button onClick={() => {
+                  setIaMode('growth');
+                  setIaOpen(true);
+                }} className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold">
                     Crescimento Pessoal IA
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
@@ -525,19 +463,19 @@ const handleGenerateIaCommand = async () => {
             </div>
 
             {/* Testimonials Section */}
-            <div style={{ backgroundColor: '#111828' }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mt-24 mb-16">
+            <div style={{
+            backgroundColor: '#111828'
+          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mt-24 mb-16">
               <div className="max-w-6xl mx-auto">
                 <h2 className="text-4xl font-bold text-white text-center mb-16">
                   O que as pessoas estão dizendo
                 </h2>
                 <div className="grid md:grid-cols-4 gap-8">
-                  <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                  <div style={{
+                  backgroundColor: '#202938'
+                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
                     <div className="flex flex-col items-center mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face"
-                        alt="Mariana L."
-                        className="w-12 h-12 rounded-full object-cover mb-2"
-                      />
+                      <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face" alt="Mariana L." className="w-12 h-12 rounded-full object-cover mb-2" />
                       <div>
                         <div className="text-white font-medium">Mariana L.</div>
                         <div className="text-gray-400 text-sm">Engenheira Civil</div>
@@ -548,13 +486,11 @@ const handleGenerateIaCommand = async () => {
                     </p>
                   </div>
 
-                  <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                  <div style={{
+                  backgroundColor: '#202938'
+                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
                     <div className="flex flex-col items-center mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
-                        alt="João V."
-                        className="w-12 h-12 rounded-full object-cover mb-2"
-                      />
+                      <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face" alt="João V." className="w-12 h-12 rounded-full object-cover mb-2" />
                       <div>
                         <div className="text-white font-medium">João V.</div>
                         <div className="text-gray-400 text-sm">Arquiteto</div>
@@ -565,13 +501,11 @@ const handleGenerateIaCommand = async () => {
                     </p>
                   </div>
 
-                  <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                  <div style={{
+                  backgroundColor: '#202938'
+                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
                     <div className="flex flex-col items-center mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-                        alt="Camila F."
-                        className="w-12 h-12 rounded-full object-cover mb-2"
-                      />
+                      <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face" alt="Camila F." className="w-12 h-12 rounded-full object-cover mb-2" />
                       <div>
                         <div className="text-white font-medium">Camila F.</div>
                         <div className="text-gray-400 text-sm">Designer</div>
@@ -582,13 +516,11 @@ const handleGenerateIaCommand = async () => {
                     </p>
                   </div>
 
-                  <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                  <div style={{
+                  backgroundColor: '#202938'
+                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
                     <div className="flex flex-col items-center mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-                        alt="Ricardo T."
-                        className="w-12 h-12 rounded-full object-cover mb-2"
-                      />
+                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Ricardo T." className="w-12 h-12 rounded-full object-cover mb-2" />
                       <div>
                         <div className="text-white font-medium">Ricardo T.</div>
                         <div className="text-gray-400 text-sm">Desenvolvedor</div>
@@ -603,7 +535,9 @@ const handleGenerateIaCommand = async () => {
             </div>
 
             {/* About Us Section */}
-            <div style={{ backgroundColor: '#030712' }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+            <div style={{
+            backgroundColor: '#030712'
+          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
               <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-4xl font-bold text-white mb-8">
                   Sobre Nós
@@ -618,7 +552,9 @@ const handleGenerateIaCommand = async () => {
             </div>
 
             {/* Novidades & Atualizações Section */}
-            <div style={{ backgroundColor: '#111828' }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+            <div style={{
+            backgroundColor: '#111828'
+          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
               <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-4xl font-bold text-white mb-8">
                   Novidades & Atualizações
@@ -645,7 +581,9 @@ const handleGenerateIaCommand = async () => {
             </div>
 
             {/* Perguntas Frequentes Section */}
-            <div style={{ backgroundColor: '#111828' }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+            <div style={{
+            backgroundColor: '#030712'
+          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
               <div className="max-w-4xl mx-auto">
                 <h2 className="text-4xl font-bold text-white text-center mb-12">
                   Perguntas Frequentes
@@ -692,15 +630,15 @@ const handleGenerateIaCommand = async () => {
             </div>
           </main>
         </div>
-      </TooltipProvider>
-    );
+      </TooltipProvider>;
   }
 
   // Special layout for crypto category
   if (categoryFilter === 'crypto') {
-    return (
-      <TooltipProvider>
-        <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
+    return <TooltipProvider>
+        <div className="min-h-screen w-full overflow-x-hidden" style={{
+        backgroundColor: '#0f172a'
+      }}>
             <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -761,15 +699,15 @@ const handleGenerateIaCommand = async () => {
             </div>
           </main>
         </div>
-      </TooltipProvider>
-    );
+      </TooltipProvider>;
   }
 
   // Special layout for music category
   if (categoryFilter === 'musica') {
-    return (
-      <TooltipProvider>
-        <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
+    return <TooltipProvider>
+        <div className="min-h-screen w-full overflow-x-hidden" style={{
+        backgroundColor: '#0f172a'
+      }}>
             <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -841,15 +779,15 @@ const handleGenerateIaCommand = async () => {
             </div>
           </main>
         </div>
-      </TooltipProvider>
-    );
+      </TooltipProvider>;
   }
 
   // Special layout for motivational category
   if (categoryFilter === 'motivacional') {
-    return (
-      <TooltipProvider>
-        <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
+    return <TooltipProvider>
+        <div className="min-h-screen w-full overflow-x-hidden" style={{
+        backgroundColor: '#0f172a'
+      }}>
             <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -959,40 +897,35 @@ const handleGenerateIaCommand = async () => {
             </div>
           </main>
         </div>
-      </TooltipProvider>
-    );
+      </TooltipProvider>;
   }
 
   // Default layout for "Notícias" (main page) - shows cards
-  return (
-    <TooltipProvider>
-      <div className="min-h-screen w-full overflow-x-hidden" style={{ backgroundColor: '#0f172a' }}>
+  return <TooltipProvider>
+      <div className="min-h-screen w-full overflow-x-hidden" style={{
+      backgroundColor: '#0f172a'
+    }}>
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8 max-w-full">
           {/* Search Bar */}
           <div className="mb-6 flex justify-center">
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const newParams = new URLSearchParams(searchParams);
-              if (searchQuery.trim()) {
-                newParams.set('search', searchQuery.trim());
-              } else {
-                newParams.delete('search');
-              }
-              setSearchParams(newParams);
-            }} className="relative w-full max-w-sm">
+            <form onSubmit={e => {
+            e.preventDefault();
+            const newParams = new URLSearchParams(searchParams);
+            if (searchQuery.trim()) {
+              newParams.set('search', searchQuery.trim());
+            } else {
+              newParams.delete('search');
+            }
+            setSearchParams(newParams);
+          }} className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar conteúdo..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Buscar conteúdo..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
             </form>
           </div>
 
           <div className="mb-6 flex justify-center">
-            <Tabs value={filter} onValueChange={(value) => setFilter(value as any)}>
+            <Tabs value={filter} onValueChange={value => setFilter(value as any)}>
               <TabsList>
                 <TabsTrigger value="all">Todos</TabsTrigger>
                 <TabsTrigger value="posts">Notícias</TabsTrigger>
@@ -1002,55 +935,28 @@ const handleGenerateIaCommand = async () => {
           </div>
 
           {/* Search Results Info */}
-          {searchQuery && (
-            <div className="mb-4 text-center text-muted-foreground">
+          {searchQuery && <div className="mb-4 text-center text-muted-foreground">
               <p>{filteredContent.length} resultado(s) para o termo "{searchQuery}"</p>
-            </div>
-          )}
+            </div>}
 
-          {filteredContent.length === 0 ? (
-            <div className="text-center py-12">
+          {filteredContent.length === 0 ? <div className="text-center py-12">
               <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
-              {filteredContent.map((item) => {
-                const isLiked = userLikes.has(item.id);
-                
-                return (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow w-full">
+            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
+              {filteredContent.map(item => {
+            const isLiked = userLikes.has(item.id);
+            return <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow w-full">
                     <Link to={`/${item.type}/${item.slug}`}>
                       <div className="aspect-video bg-muted relative overflow-hidden">
-                        {item.type === 'video' && item.youtube_video_id ? (
-                          <>
-                            <img
-                              src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`}
-                              alt={item.title}
-                              className="w-full h-full object-cover"
-                            />
-                            {item.duration && (
-                              <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                        {item.type === 'video' && item.youtube_video_id ? <>
+                            <img src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`} alt={item.title} className="w-full h-full object-cover" />
+                            {item.duration && <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
                                 {item.duration}
-                              </div>
-                            )}
-                          </>
-                        ) : item.cover_image_url ? (
-                          <img
-                            src={item.cover_image_url}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted">
-                            {item.type === 'video' ? (
-                              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                              </div>}
+                          </> : item.cover_image_url ? <img src={item.cover_image_url} alt={item.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-muted">
+                            {item.type === 'video' ? <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                                 <div className="w-0 h-0 border-l-[6px] border-l-primary border-y-[4px] border-y-transparent ml-1"></div>
-                              </div>
-                            ) : (
-                              <div className="text-muted-foreground text-sm">Sem imagem</div>
-                            )}
-                          </div>
-                        )}
+                              </div> : <div className="text-muted-foreground text-sm">Sem imagem</div>}
+                          </div>}
                        </div>
                      </Link>
                      
@@ -1068,30 +974,18 @@ const handleGenerateIaCommand = async () => {
                              {item.type === 'post' ? 'Post' : 'Vídeo'}
                            </Badge>
                          </div>
-                        <CardDescription 
-                          className="line-clamp-2 break-anywhere"
-                          dangerouslySetInnerHTML={{
-                            __html: processTextWithLinks(
-                              item.type === 'post' 
-                                ? truncateText(item.content || '', 150)
-                                : truncateText(item.description || '', 150)
-                            )
-                          }}
-                        />
+                        <CardDescription className="line-clamp-2 break-anywhere" dangerouslySetInnerHTML={{
+                  __html: processTextWithLinks(item.type === 'post' ? truncateText(item.content || '', 150) : truncateText(item.description || '', 150))
+                }} />
                     </CardHeader>
                     
                      <CardContent>
                        <div className="flex items-center justify-between text-sm text-muted-foreground">
                          <div className="flex items-center gap-2">
                            <Avatar className="h-6 w-6">
-                             <img 
-                               src={item.author?.avatar_url || ''} 
-                               alt={item.author?.display_name || 'Avatar'} 
-                               className="h-full w-full object-cover"
-                               onError={(e) => {
-                                 e.currentTarget.style.display = 'none';
-                               }}
-                             />
+                             <img src={item.author?.avatar_url || ''} alt={item.author?.display_name || 'Avatar'} className="h-full w-full object-cover" onError={e => {
+                        e.currentTarget.style.display = 'none';
+                      }} />
                              <AvatarFallback className="h-6 w-6 text-xs bg-muted">
                                {item.author?.display_name?.charAt(0)?.toUpperCase() || 'A'}
                              </AvatarFallback>
@@ -1106,15 +1000,10 @@ const handleGenerateIaCommand = async () => {
                           <Eye className="h-4 w-4" />
                           <span>{item.views_count}</span>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleLike(item);
-                          }}
-                          className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}
-                        >
+                        <Button variant="ghost" size="sm" onClick={e => {
+                    e.preventDefault();
+                    handleLike(item);
+                  }} className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}>
                           <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
                           <span>{item.likes_count}</span>
                         </Button>
@@ -1124,13 +1013,10 @@ const handleGenerateIaCommand = async () => {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+                  </Card>;
+          })}
+            </div>}
         </main>
       </div>
-    </TooltipProvider>
-  );
+    </TooltipProvider>;
 }
