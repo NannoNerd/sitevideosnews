@@ -111,7 +111,7 @@ const Navigation = () => {
           <Link to="/?category=engenharia" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Engenharia
           </Link>
-          <Link to="/" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+          <Link to="/?category=noticias" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Notícias
           </Link>
           <Link to="/?category=crypto" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
