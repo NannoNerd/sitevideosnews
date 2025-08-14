@@ -525,83 +525,85 @@ const handleGenerateIaCommand = async () => {
             </div>
 
             {/* Testimonials Section */}
-            <div className="mt-24 mb-16">
-              <h2 className="text-4xl font-bold text-white text-center mb-16">
-                O que as pessoas estão dizendo
-              </h2>
-              <div className="grid md:grid-cols-4 gap-8">
-                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 card-hover">
-                  <div className="flex items-center mb-4">
-                    <img 
-                      src="https://images.unsplash.com/photo-1494790108755-2616b332c3c7?w=150&h=150&fit=crop&crop=face"
-                      alt="Mariana L."
-                      className="w-12 h-12 rounded-full object-cover mr-3"
-                    />
-                    <div>
-                      <div className="text-white font-medium">Mariana L.</div>
-                      <div className="text-gray-400 text-sm">Engenheira Civil</div>
+            <div style={{ backgroundColor: '#111828' }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mt-24 mb-16">
+              <div className="max-w-6xl mx-auto">
+                <h2 className="text-4xl font-bold text-white text-center mb-16">
+                  O que as pessoas estão dizendo
+                </h2>
+                <div className="grid md:grid-cols-4 gap-8">
+                  <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <img 
+                        src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+                        alt="Mariana L."
+                        className="w-12 h-12 rounded-full object-cover mb-2"
+                      />
+                      <div>
+                        <div className="text-white font-medium">Mariana L.</div>
+                        <div className="text-gray-400 text-sm">Engenheira Civil</div>
+                      </div>
                     </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "Esse projeto me inspira todos os dias a buscar mais conhecimento. Parabéns pela iniciativa!"
+                    </p>
                   </div>
-                  <p className="text-gray-300 text-sm italic mb-4">
-                    "Esse projeto me inspira todos os dias a buscar mais conhecimento. Parabéns pela iniciativa!"
-                  </p>
-                </div>
 
-                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 card-hover">
-                  <div className="flex items-center mb-4">
-                    <img 
-                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
-                      alt="João V."
-                      className="w-12 h-12 rounded-full object-cover mr-3"
-                    />
-                    <div>
-                      <div className="text-white font-medium">João V.</div>
-                      <div className="text-gray-400 text-sm">Arquiteto</div>
+                  <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <img 
+                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+                        alt="João V."
+                        className="w-12 h-12 rounded-full object-cover mb-2"
+                      />
+                      <div>
+                        <div className="text-white font-medium">João V.</div>
+                        <div className="text-gray-400 text-sm">Arquiteto</div>
+                      </div>
                     </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "Muito além de um site comum. É uma experiência completa com conteúdo útil de verdade."
+                    </p>
                   </div>
-                  <p className="text-gray-300 text-sm italic mb-4">
-                    "Muito além de um site comum. É uma experiência completa com conteúdo útil de verdade."
-                  </p>
-                </div>
 
-                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 card-hover">
-                  <div className="flex items-center mb-4">
-                    <img 
-                      src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-                      alt="Camila F."
-                      className="w-12 h-12 rounded-full object-cover mr-3"
-                    />
-                    <div>
-                      <div className="text-white font-medium">Camila F.</div>
-                      <div className="text-gray-400 text-sm">Designer</div>
+                  <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <img 
+                        src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
+                        alt="Camila F."
+                        className="w-12 h-12 rounded-full object-cover mb-2"
+                      />
+                      <div>
+                        <div className="text-white font-medium">Camila F.</div>
+                        <div className="text-gray-400 text-sm">Designer</div>
+                      </div>
                     </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "Gostei da parte da IA motivacional. Às vezes, é exatamente o que a gente precisa."
+                    </p>
                   </div>
-                  <p className="text-gray-300 text-sm italic mb-4">
-                    "Gostei da parte da IA motivacional. Às vezes, é exatamente o que a gente precisa."
-                  </p>
-                </div>
 
-                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 card-hover">
-                  <div className="flex items-center mb-4">
-                    <img 
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-                      alt="Ricardo T."
-                      className="w-12 h-12 rounded-full object-cover mr-3"
-                    />
-                    <div>
-                      <div className="text-white font-medium">Ricardo T.</div>
-                      <div className="text-gray-400 text-sm">Desenvolvedor</div>
+                  <div style={{ backgroundColor: '#202938' }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <img 
+                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                        alt="Ricardo T."
+                        className="w-12 h-12 rounded-full object-cover mb-2"
+                      />
+                      <div>
+                        <div className="text-white font-medium">Ricardo T.</div>
+                        <div className="text-gray-400 text-sm">Desenvolvedor</div>
+                      </div>
                     </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "A proposta de ativos digitais é bem original. Estou curioso para ver como isso vai evoluir."
+                    </p>
                   </div>
-                  <p className="text-gray-300 text-sm italic mb-4">
-                    "A proposta de ativos digitais é bem original. Estou curioso para ver como isso vai evoluir."
-                  </p>
                 </div>
               </div>
             </div>
 
             {/* About Us Section */}
-            <div className="bg-slate-900/60 backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+            <div style={{ backgroundColor: '#030712' }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
               <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-4xl font-bold text-white mb-8">
                   Sobre Nós
@@ -613,6 +615,80 @@ const handleGenerateIaCommand = async () => {
                   inteligência coletiva.
                 </p>
               </div>
+            </div>
+
+            {/* Novidades & Atualizações Section */}
+            <div style={{ backgroundColor: '#111828' }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+              <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-4xl font-bold text-white mb-8">
+                  Novidades & Atualizações
+                </h2>
+                <div className="space-y-4 text-gray-300 text-lg">
+                  <div className="flex items-start justify-center gap-3">
+                    <span className="text-orange-400 text-xl">🚀</span>
+                    <p>Lançamento oficial do site e início da fase beta!</p>
+                  </div>
+                  <div className="flex items-start justify-center gap-3">
+                    <span className="text-blue-400 text-xl">💡</span>
+                    <p>Nova IA para conselhos motivacionais já em funcionamento.</p>
+                  </div>
+                  <div className="flex items-start justify-center gap-3">
+                    <span className="text-green-400 text-xl">📱</span>
+                    <p>Monitoramento de Ativo Digital agora disponível.</p>
+                  </div>
+                  <div className="flex items-start justify-center gap-3">
+                    <span className="text-purple-400 text-xl">📚</span>
+                    <p>Mais recursos chegando em breve, fique ligado!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Perguntas Frequentes Section */}
+            <div style={{ backgroundColor: '#030712' }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-4xl font-bold text-white text-center mb-12">
+                  Perguntas Frequentes
+                </h2>
+                <div className="space-y-8">
+                  <div>
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-blue-400 text-xl">🔍</span>
+                      <h3 className="text-xl font-bold text-white">O que é o Ativo Digital?</h3>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed ml-8">
+                      É um valor construído com base nas transações positivas de Ivo Fernandes, disponível para consulta e participação.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-green-400 text-xl">📊</span>
+                      <h3 className="text-xl font-bold text-white">Como posso acompanhar os lucros?</h3>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed ml-8">
+                      Os lucros são exibidos na seção "Nosso Ativo Digital". Em breve, teremos gráficos dinâmicos!
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-pink-400 text-xl">🧠</span>
+                      <h3 className="text-xl font-bold text-white">Como funciona a IA Motivacional?</h3>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed ml-8">
+                      Ao clicar no botão, você recebe uma mensagem gerada automaticamente com foco em bem-estar e motivação.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center py-8 border-t border-slate-700/50">
+              <p className="text-gray-400">
+                © 2025 Ivo Fernandes. Todos os direitos reservados.
+              </p>
             </div>
           </main>
         </div>
