@@ -108,11 +108,11 @@ const Navigation = () => {
 
         {/* Navigation Menu */}
         <div ref={menuRef} className={`${(!isMobile && !collapseMenu) ? "flex absolute left-1/2 -translate-x-1/2" : "hidden"} items-center space-x-6`}>
-          <Link to="/" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-            Notícias
-          </Link>
           <Link to="/?category=engenharia" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Engenharia
+          </Link>
+          <Link to="/" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+            Notícias
           </Link>
           <Link to="/?category=crypto" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Crypto

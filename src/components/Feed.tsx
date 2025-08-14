@@ -523,6 +523,97 @@ const handleGenerateIaCommand = async () => {
                 </div>
               </div>
             </div>
+
+            {/* Testimonials Section */}
+            <div className="mt-24 mb-16">
+              <h2 className="text-4xl font-bold text-white text-center mb-16">
+                O que as pessoas estão dizendo
+              </h2>
+              <div className="grid md:grid-cols-4 gap-8">
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 card-hover">
+                  <div className="flex items-center mb-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1494790108755-2616b332c3c7?w=150&h=150&fit=crop&crop=face"
+                      alt="Mariana L."
+                      className="w-12 h-12 rounded-full object-cover mr-3"
+                    />
+                    <div>
+                      <div className="text-white font-medium">Mariana L.</div>
+                      <div className="text-gray-400 text-sm">Engenheira Civil</div>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 text-sm italic mb-4">
+                    "Esse projeto me inspira todos os dias a buscar mais conhecimento. Parabéns pela iniciativa!"
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 card-hover">
+                  <div className="flex items-center mb-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+                      alt="João V."
+                      className="w-12 h-12 rounded-full object-cover mr-3"
+                    />
+                    <div>
+                      <div className="text-white font-medium">João V.</div>
+                      <div className="text-gray-400 text-sm">Arquiteto</div>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 text-sm italic mb-4">
+                    "Muito além de um site comum. É uma experiência completa com conteúdo útil de verdade."
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 card-hover">
+                  <div className="flex items-center mb-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
+                      alt="Camila F."
+                      className="w-12 h-12 rounded-full object-cover mr-3"
+                    />
+                    <div>
+                      <div className="text-white font-medium">Camila F.</div>
+                      <div className="text-gray-400 text-sm">Designer</div>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 text-sm italic mb-4">
+                    "Gostei da parte da IA motivacional. Às vezes, é exatamente o que a gente precisa."
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 card-hover">
+                  <div className="flex items-center mb-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                      alt="Ricardo T."
+                      className="w-12 h-12 rounded-full object-cover mr-3"
+                    />
+                    <div>
+                      <div className="text-white font-medium">Ricardo T.</div>
+                      <div className="text-gray-400 text-sm">Desenvolvedor</div>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 text-sm italic mb-4">
+                    "A proposta de ativos digitais é bem original. Estou curioso para ver como isso vai evoluir."
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* About Us Section */}
+            <div className="bg-slate-900/60 backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+              <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-4xl font-bold text-white mb-8">
+                  Sobre Nós
+                </h2>
+                <p className="text-lg text-gray-300 leading-relaxed">
+                  Somos movidos pela vontade de transformar ideias em realidade. Nosso projeto une 
+                  engenharia, inteligência artificial, criação de conteúdo e ativos digitais em um só lugar. Aqui 
+                  você aprende, investe, se motiva e evolui — sempre com apoio de tecnologia de ponta e 
+                  inteligência coletiva.
+                </p>
+              </div>
+            </div>
           </main>
         </div>
       </TooltipProvider>
