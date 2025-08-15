@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Heart, MessageCircle, Eye, Search, Plus, Settings, User } from 'lucide-react';
+import { Heart, MessageCircle, Eye, Search, Plus, Settings, User, Cog, CreditCard, Brain } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -60,10 +60,12 @@ export default function Feed() {
   const [iaPrompt, setIaPrompt] = useState('');
   const [iaLoading, setIaLoading] = useState(false);
   const [iaResult, setIaResult] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Initialize search query from URL
+  // Initialize search query from URL and set mounted state
   useEffect(() => {
     setSearchQuery(searchParams.get('search') || '');
+    setMounted(true);
   }, [searchParams]);
   const fetchContent = async () => {
     try {
@@ -321,16 +323,32 @@ export default function Feed() {
       }}>
             <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
             {/* Hero Section */}
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <div className={`text-center mb-16 transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="relative mb-8">
+                <div className="flex justify-center items-center space-x-8 mb-8">
+                  <div className="animate-bounce" style={{ animationDelay: '0s' }}>
+                    <Cog className="w-16 h-16 text-orange-400 drop-shadow-lg" />
+                  </div>
+                  <div className="animate-bounce" style={{ animationDelay: '0.5s' }}>
+                    <CreditCard className="w-16 h-16 text-cyan-400 drop-shadow-lg" />
+                  </div>
+                  <div className="animate-bounce" style={{ animationDelay: '1s' }}>
+                    <Brain className="w-16 h-16 text-pink-400 drop-shadow-lg" />
+                  </div>
+                </div>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent mb-6">
                 Explore o Futuro com Tecnologia e Conhecimento
               </h1>
               <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
                 Aprenda, evolua e acompanhe o crescimento do nosso ativo digital.
               </p>
-              <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold">
-                Gerar Mensagem Positiva
-              </Button>
+              <div className="relative inline-block">
+                <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25">
+                  Gerar Mensagem Positiva
+                </Button>
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 animate-pulse"></div>
+              </div>
             </div>
 
             {/* IA Commands Dialog */}
@@ -370,17 +388,17 @@ export default function Feed() {
             </Dialog>
 
             {/* Three Cards Section */}
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className={`grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               {/* Engenharia e Designer */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover">
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10 group">
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-orange-500 flex items-center justify-center mx-auto mb-4 rounded-2xl">
-                    <div className="text-white text-2xl">⚙️</div>
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-4 rounded-2xl transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
+                    <div className="text-white text-2xl animate-pulse">⚙️</div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-orange-400 transition-colors duration-300">
                     Engenharia e Designer
                   </h3>
-                  <p className="text-gray-400 mb-6">
+                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
                     Gere scripts e comandos para softwares de engenharia usando IA.
                   </p>
                 </div>
@@ -389,28 +407,28 @@ export default function Feed() {
                   <Button onClick={() => {
                   setIaMode('engenharia');
                   setIaOpen(true);
-                }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold">
+                }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-cyan-500/25">
                     Geração de Comandos por IA
                   </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
                     Manuais e Tutoriais
                   </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
                     Projetos de Engenharia Civil
                   </Button>
                 </div>
               </div>
 
               {/* CryptoMoeda + IA */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover">
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/10 group">
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <div className="text-white text-2xl">🧠</div>
+                  <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
+                    <div className="text-white text-2xl animate-pulse">🧠</div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-pink-400 transition-colors duration-300">
                     CryptoMoeda + IA
                   </h3>
-                  <p className="text-gray-400 mb-6">
+                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
                     Tire suas dúvidas sobre criptomoedas e blockchain com nosso assistente.
                   </p>
                 </div>
@@ -419,28 +437,28 @@ export default function Feed() {
                   <Button onClick={() => {
                   setIaMode('crypto');
                   setIaOpen(true);
-                }} className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 rounded-lg font-semibold">
+                }} className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-purple-500/25">
                     Crypto IA / Pergunte
                   </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
                     Análise de Gráficos
                   </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
                     Notícias e Atualidades
                   </Button>
                 </div>
               </div>
 
               {/* Conteúdo + Motivação */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover">
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-gray-500/10 group">
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gray-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <div className="text-white text-2xl">💭</div>
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
+                    <div className="text-white text-2xl animate-pulse">💭</div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-gray-400 transition-colors duration-300">
                     Conteúdo + Motivação
                   </h3>
-                  <p className="text-gray-400 mb-6">
+                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
                     Receba conselhos e insights para seu desenvolvimento pessoal e carreira.
                   </p>
                 </div>
@@ -449,13 +467,13 @@ export default function Feed() {
                   <Button onClick={() => {
                   setIaMode('growth');
                   setIaOpen(true);
-                }} className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold">
+                }} className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-pink-500/25">
                     Crescimento Pessoal IA
                   </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
                     Atualidades IA
                   </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg">
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
                     Conteúdo Vlog
                   </Button>
                 </div>
@@ -465,7 +483,7 @@ export default function Feed() {
             {/* Testimonials Section */}
             <div style={{
             backgroundColor: '#111828'
-          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mt-24 mb-16">
+          }} className={`backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mt-24 mb-16 transition-all duration-1000 delay-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <div className="max-w-6xl mx-auto">
                 <h2 className="text-4xl font-bold text-white text-center mb-16">
                   O que as pessoas estão dizendo
