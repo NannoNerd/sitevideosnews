@@ -114,13 +114,13 @@ const Navigation = () => {
           <Link to="/?category=noticias" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Notícias
           </Link>
-          <Link to="/?category=crypto" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+          <Link to="/crypto" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Crypto
           </Link>
-          <Link to="/?category=musica" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+          <Link to="/musica" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Música
           </Link>
-          <Link to="/?category=motivacional" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+          <Link to="/motivacional" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
             Motivacional
           </Link>
         </div>

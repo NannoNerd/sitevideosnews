@@ -12,6 +12,9 @@ import PostView from "./pages/PostView";
 import VideoView from "./pages/VideoView";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import ComingSoonCrypto from "./pages/ComingSoonCrypto";
+import ComingSoonMusic from "./pages/ComingSoonMusic";
+import ComingSoonMotivational from "./pages/ComingSoonMotivational";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,9 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/post/:slug" element={<PostView />} />
                 <Route path="/video/:slug" element={<VideoView />} />
+                <Route path="/crypto" element={<ComingSoonCrypto />} />
+                <Route path="/musica" element={<ComingSoonMusic />} />
+                <Route path="/motivacional" element={<ComingSoonMotivational />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
