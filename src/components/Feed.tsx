@@ -481,10 +481,10 @@ export default function Feed() {
                     Geração de Comandos por IA
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Manuais e Tutoriais
+                    Manuais e Tutoriais (Em Breve...)
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Projetos de Engenharia Civil
+                    Projetos de Engenharia Civil  (Em Breve...)
                   </Button>
                 </div>
               </div>
