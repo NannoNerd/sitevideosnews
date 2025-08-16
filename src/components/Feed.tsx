@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import PositiveMessageModal from "./PositiveMessageModal";
 
+
 const Feed = () => {
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category") || "engenharia";
@@ -20,60 +21,46 @@ const Feed = () => {
   const [generatingPositiveMessage, setGeneratingPositiveMessage] = useState(false);
 
   const {
-    data: posts,
+    data: posts = [],
     isLoading,
     error,
-  } = useQuery(
-    ["posts", category, searchQuery],
-    async () => {
-      let query = supabase
+  } = useQuery({
+    queryKey: ["posts", category, searchQuery],
+    queryFn: async (): Promise<any[]> => {
+      const { data, error } = await (supabase as any)
         .from("posts")
-        .select("*")
+        .select("id, title, excerpt, created_at, views_count, slug")
         .eq("category", category)
-        .order("created_at", { ascending: false });
-
-      if (searchQuery) {
-        query = query.ilike("title", `%${searchQuery}%`);
-      }
-
-      const { data, error } = await query;
+        .order("created_at", { ascending: false })
+        .ilike("title", searchQuery ? `%${searchQuery}%` : "%");
 
       if (error) {
         throw new Error(error.message);
       }
 
-      return data;
+      return data || [];
     },
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
+    refetchOnWindowFocus: false,
+  });
 
-  const { data: videos } = useQuery(
-    ["videos", category, searchQuery],
-    async () => {
-      let query = supabase
+  const { data: videos = [] } = useQuery({
+    queryKey: ["videos", category, searchQuery],
+    queryFn: async (): Promise<any[]> => {
+      const { data, error } = await (supabase as any)
         .from("videos")
-        .select("*")
+        .select("id, title, description, created_at, views_count, slug")
         .eq("category", category)
-        .order("created_at", { ascending: false });
-
-      if (searchQuery) {
-        query = query.ilike("title", `%${searchQuery}%`);
-      }
-
-      const { data, error } = await query;
+        .order("created_at", { ascending: false })
+        .ilike("title", searchQuery ? `%${searchQuery}%` : "%");
 
       if (error) {
         throw new Error(error.message);
       }
 
-      return data;
+      return data || [];
     },
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
+    refetchOnWindowFocus: false,
+  });
 
   const handleGeneratePositiveMessage = async () => {
     try {
@@ -99,10 +86,22 @@ const Feed = () => {
   };
 
   const getFilteredContent = () => {
-    if (!posts || !videos) return [];
-
-    const allContent = [...posts, ...videos].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    const postsWithType = posts.map((post: any) => ({ 
+      ...post, 
+      type: "post" as const, 
+      description: post.excerpt, 
+      views: post.views_count 
+    }));
+    
+    const videosWithType = videos.map((video: any) => ({ 
+      ...video, 
+      type: "video" as const, 
+      description: video.description, 
+      views: video.views_count
+    }));
+    
+    const allContent = [...postsWithType, ...videosWithType].sort(
+      (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
     return allContent;
@@ -280,7 +279,7 @@ const Feed = () => {
 
       <PositiveMessageModal
         open={positiveMessageModalOpen}
-        onClose={() => setPositiveMessageModalOpen(false)}
+        onOpenChange={setPositiveMessageModalOpen}
         initialMessage={positiveMessage}
       />
     </div>
