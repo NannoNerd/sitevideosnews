@@ -62,7 +62,7 @@ export default function Feed() {
   const [iaLoading, setIaLoading] = useState(false);
   const [iaResult, setIaResult] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  
+
   // Positive Message Modal state
   const [positiveMessageOpen, setPositiveMessageOpen] = useState(false);
   const [positiveMessage, setPositiveMessage] = useState<string | null>(null);
@@ -332,13 +332,19 @@ export default function Feed() {
             <div className={`text-center mb-16 transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <div className="relative mb-8">
                 <div className="flex justify-center items-center space-x-8 mb-8">
-                  <div className="animate-bounce" style={{ animationDelay: '0s' }}>
+                  <div className="animate-bounce" style={{
+                  animationDelay: '0s'
+                }}>
                     <Cog className="w-16 h-16 text-orange-400 drop-shadow-lg" />
                   </div>
-                  <div className="animate-bounce" style={{ animationDelay: '0.5s' }}>
+                  <div className="animate-bounce" style={{
+                  animationDelay: '0.5s'
+                }}>
                     <CreditCard className="w-16 h-16 text-cyan-400 drop-shadow-lg" />
                   </div>
-                  <div className="animate-bounce" style={{ animationDelay: '1s' }}>
+                  <div className="animate-bounce" style={{
+                  animationDelay: '1s'
+                }}>
                     <Brain className="w-16 h-16 text-pink-400 drop-shadow-lg" />
                   </div>
                 </div>
@@ -351,15 +357,12 @@ export default function Feed() {
               </p>
               <div className="relative inline-block">
                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 animate-pulse pointer-events-none"></div>
-                <Button 
-                  onClick={async () => {
-                    try {
-                      setGeneratingPositiveMessage(true);
-                      setPositiveMessage(null);
-                      
-                      console.log('Gerando mensagem positiva...');
-                      
-                      const prompt = `Gere uma mensagem motivacional e inspiradora em português do Brasil. 
+                <Button onClick={async () => {
+                try {
+                  setGeneratingPositiveMessage(true);
+                  setPositiveMessage(null);
+                  console.log('Gerando mensagem positiva...');
+                  const prompt = `Gere uma mensagem motivacional e inspiradora em português do Brasil. 
                       A mensagem deve ser:
                       - Curta (máximo 2 frases)
                       - Poética e bonita
@@ -367,41 +370,37 @@ export default function Feed() {
                       - No estilo da frase: "A fé que vibra no coração é a semente que germina o destino."
                       
                       Retorne apenas a mensagem, sem aspas ou formatação adicional.`;
-
-                      const { data, error } = await supabase.functions.invoke('generate-with-ai', {
-                        body: { prompt }
-                      });
-
-                      console.log('Resposta da IA:', data, error);
-
-                      if (error) throw error;
-
-                      const generatedMessage = (data as any)?.generatedText || (data as any)?.text || '';
-                      
-                      // Clean the message - remove quotes and extra formatting
-                      const cleanMessage = generatedMessage
-                        .replace(/^["']|["']$/g, '') // Remove quotes from start/end
-                        .replace(/^\s*["""'']\s*|\s*["""'']\s*$/g, '') // Remove fancy quotes
-                        .trim();
-
-                      console.log('Mensagem limpa:', cleanMessage);
-                      const finalMessage = cleanMessage || 'Mensagem não disponível no momento.';
-                      setPositiveMessage(finalMessage);
-                      setPositiveMessageOpen(true); // Só abre o modal quando a mensagem estiver pronta
-                    } catch (err) {
-                      console.error('Erro ao gerar mensagem:', err);
-                      toast({
-                        title: 'Erro ao gerar mensagem',
-                        description: 'Tente novamente em alguns momentos.',
-                        variant: 'destructive'
-                      });
-                    } finally {
-                      setGeneratingPositiveMessage(false);
+                  const {
+                    data,
+                    error
+                  } = await supabase.functions.invoke('generate-with-ai', {
+                    body: {
+                      prompt
                     }
-                  }}
-                  disabled={generatingPositiveMessage}
-                  className="relative z-10 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25 cursor-pointer"
-                >
+                  });
+                  console.log('Resposta da IA:', data, error);
+                  if (error) throw error;
+                  const generatedMessage = (data as any)?.generatedText || (data as any)?.text || '';
+
+                  // Clean the message - remove quotes and extra formatting
+                  const cleanMessage = generatedMessage.replace(/^["']|["']$/g, '') // Remove quotes from start/end
+                  .replace(/^\s*["""'']\s*|\s*["""'']\s*$/g, '') // Remove fancy quotes
+                  .trim();
+                  console.log('Mensagem limpa:', cleanMessage);
+                  const finalMessage = cleanMessage || 'Mensagem não disponível no momento.';
+                  setPositiveMessage(finalMessage);
+                  setPositiveMessageOpen(true); // Só abre o modal quando a mensagem estiver pronta
+                } catch (err) {
+                  console.error('Erro ao gerar mensagem:', err);
+                  toast({
+                    title: 'Erro ao gerar mensagem',
+                    description: 'Tente novamente em alguns momentos.',
+                    variant: 'destructive'
+                  });
+                } finally {
+                  setGeneratingPositiveMessage(false);
+                }
+              }} disabled={generatingPositiveMessage} className="relative z-10 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25 cursor-pointer">
                   <Sparkles className="w-5 h-5 mr-2" />
                   {generatingPositiveMessage ? 'Gerando...' : 'Gerar Mensagem Positiva'}
                 </Button>
@@ -409,17 +408,13 @@ export default function Feed() {
             </div>
 
             {/* Positive Message Modal */}
-            <PositiveMessageModal 
-              open={positiveMessageOpen} 
-              onOpenChange={(open) => {
-                console.log('Modal state changing to:', open);
-                setPositiveMessageOpen(open);
-                if (!open) {
-                  setPositiveMessage(null); // Reset message when closing
-                }
-              }}
-              initialMessage={positiveMessage}
-            />
+            <PositiveMessageModal open={positiveMessageOpen} onOpenChange={open => {
+            console.log('Modal state changing to:', open);
+            setPositiveMessageOpen(open);
+            if (!open) {
+              setPositiveMessage(null); // Reset message when closing
+            }
+          }} initialMessage={positiveMessage} />
 
             {/* IA Commands Dialog */}
             <Dialog open={iaOpen} onOpenChange={setIaOpen}>
@@ -483,7 +478,7 @@ export default function Feed() {
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
                     Manuais e Tutoriais (Em Breve...)
                   </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200 text-xs">
                     Projetos de Engenharia Civil  (Em Breve...)
                   </Button>
                 </div>
