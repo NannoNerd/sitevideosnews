@@ -541,10 +541,10 @@ export default function Feed() {
                     Crescimento Pessoal IA
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Atualidades IA
+                    Atualidades IA (Em Breve...)
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Conteúdo Vlog
+                    Conteúdo Vlog (Em Breve...)
                   </Button>
                 </div>
               </div>
