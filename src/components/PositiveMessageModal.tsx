@@ -75,7 +75,7 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent 
-        className="sm:max-w-[500px] bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white border border-purple-500/30 shadow-2xl"
+        className="sm:max-w-[500px] bg-gray-900 text-white border border-gray-700 shadow-2xl [&>button]:hidden"
         onPointerDownOutside={() => onOpenChange(false)}
       >
         <DialogHeader className="relative">
