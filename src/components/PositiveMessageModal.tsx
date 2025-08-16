@@ -64,7 +64,10 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
   // Auto-generate first message when modal opens
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen && !message && !loading) {
-      generatePositiveMessage();
+      // Small delay to ensure modal is fully rendered before generating
+      setTimeout(() => {
+        generatePositiveMessage();
+      }, 100);
     }
     if (!newOpen) {
       setMessage(null); // Reset message when closing
@@ -77,6 +80,7 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
       <DialogContent 
         className="sm:max-w-[500px] bg-gray-900 text-white border border-gray-700 shadow-2xl [&>button]:hidden"
         onPointerDownOutside={() => onOpenChange(false)}
+        aria-describedby="positive-message-description"
       >
         <DialogHeader className="relative">
           <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent pr-8">
@@ -92,6 +96,10 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
           </Button>
         </DialogHeader>
 
+        <div id="positive-message-description" className="sr-only">
+          Modal para exibir mensagens inspiradoras geradas por IA
+        </div>
+        
         <div className="py-8">
           {loading ? (
             <div className="flex flex-col items-center justify-center space-y-4">
