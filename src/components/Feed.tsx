@@ -348,16 +348,16 @@ export default function Feed() {
                 Aprenda, evolua e acompanhe o crescimento do nosso ativo digital.
               </p>
               <div className="relative inline-block">
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 animate-pulse pointer-events-none"></div>
                 <Button 
                   onClick={() => {
                     console.log('Botão Gerar Mensagem Positiva clicado!');
                     setPositiveMessageOpen(true);
                   }}
-                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+                  className="relative z-10 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25 cursor-pointer"
                 >
                   Gerar Mensagem Positiva
                 </Button>
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 animate-pulse"></div>
               </div>
             </div>
 
