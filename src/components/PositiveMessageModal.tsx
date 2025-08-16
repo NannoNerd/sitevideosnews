@@ -18,6 +18,9 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
   const generatePositiveMessage = async () => {
     try {
       setLoading(true);
+      setMessage(null);
+      
+      console.log('Gerando mensagem positiva...');
       
       const prompt = `Gere uma mensagem motivacional e inspiradora em português do Brasil. 
       A mensagem deve ser:
@@ -32,6 +35,8 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
         body: { prompt }
       });
 
+      console.log('Resposta da IA:', data, error);
+
       if (error) throw error;
 
       const generatedMessage = (data as any)?.generatedText || (data as any)?.text || '';
@@ -42,7 +47,8 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
         .replace(/^\s*["""'']\s*|\s*["""'']\s*$/g, '') // Remove fancy quotes
         .trim();
 
-      setMessage(cleanMessage);
+      console.log('Mensagem limpa:', cleanMessage);
+      setMessage(cleanMessage || 'Mensagem não disponível no momento.');
     } catch (err) {
       console.error('Erro ao gerar mensagem:', err);
       toast({
@@ -55,17 +61,23 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
     }
   };
 
+  // Auto-generate first message when modal opens
   const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen && !message) {
-      // Auto-generate first message when modal opens
+    if (newOpen && !message && !loading) {
       generatePositiveMessage();
+    }
+    if (!newOpen) {
+      setMessage(null); // Reset message when closing
     }
     onOpenChange(newOpen);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white border border-purple-500/30 shadow-2xl">
+      <DialogContent 
+        className="sm:max-w-[500px] bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white border border-purple-500/30 shadow-2xl"
+        onPointerDownOutside={() => onOpenChange(false)}
+      >
         <DialogHeader className="relative">
           <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent pr-8">
             Mensagem Inspiradora
@@ -110,14 +122,14 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
               </div>
             </div>
           ) : (
-            <div className="text-center">
-              <p className="text-gray-300 mb-4">Clique para gerar uma mensagem inspiradora</p>
+            <div className="text-center space-y-4">
+              <p className="text-gray-300">Ops! Algo deu errado.</p>
               <Button
                 onClick={generatePositiveMessage}
                 className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-3 rounded-full font-semibold"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                Gerar Mensagem
+                Tentar Novamente
               </Button>
             </div>
           )}

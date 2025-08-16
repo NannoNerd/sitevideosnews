@@ -349,7 +349,10 @@ export default function Feed() {
               </p>
               <div className="relative inline-block">
                 <Button 
-                  onClick={() => setPositiveMessageOpen(true)}
+                  onClick={() => {
+                    console.log('Botão Gerar Mensagem Positiva clicado!');
+                    setPositiveMessageOpen(true);
+                  }}
                   className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
                 >
                   Gerar Mensagem Positiva
@@ -361,7 +364,10 @@ export default function Feed() {
             {/* Positive Message Modal */}
             <PositiveMessageModal 
               open={positiveMessageOpen} 
-              onOpenChange={setPositiveMessageOpen} 
+              onOpenChange={(open) => {
+                console.log('Modal state changing to:', open);
+                setPositiveMessageOpen(open);
+              }} 
             />
 
             {/* IA Commands Dialog */}
