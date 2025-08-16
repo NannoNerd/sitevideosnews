@@ -511,10 +511,10 @@ export default function Feed() {
                     Crypto IA / Pergunte
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Análise de Gráficos
+                    Análise de Gráficos (Em Breve...)
                   </Button>
                   <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Notícias e Atualidades
+                    Notícias e Atualidades (Em Breve...)
                   </Button>
                 </div>
               </div>
