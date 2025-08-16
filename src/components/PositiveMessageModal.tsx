@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, Sparkles, RefreshCw } from 'lucide-react';
@@ -8,12 +8,18 @@ import { useToast } from '@/hooks/use-toast';
 interface PositiveMessageModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialMessage?: string | null;
 }
 
-export default function PositiveMessageModal({ open, onOpenChange }: PositiveMessageModalProps) {
-  const [message, setMessage] = useState<string | null>(null);
+export default function PositiveMessageModal({ open, onOpenChange, initialMessage }: PositiveMessageModalProps) {
+  const [message, setMessage] = useState<string | null>(initialMessage || null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Update message when initialMessage changes
+  useEffect(() => {
+    setMessage(initialMessage || null);
+  }, [initialMessage]);
 
   const generatePositiveMessage = async () => {
     try {
@@ -61,17 +67,8 @@ export default function PositiveMessageModal({ open, onOpenChange }: PositiveMes
     }
   };
 
-  // Auto-generate first message when modal opens
+  // Handle modal open/close
   const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen && !message && !loading) {
-      // Small delay to ensure modal is fully rendered before generating
-      setTimeout(() => {
-        generatePositiveMessage();
-      }, 100);
-    }
-    if (!newOpen) {
-      setMessage(null); // Reset message when closing
-    }
     onOpenChange(newOpen);
   };
 

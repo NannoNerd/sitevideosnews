@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Heart, MessageCircle, Eye, Search, Plus, Settings, User, Cog, CreditCard, Brain } from 'lucide-react';
+import { Heart, MessageCircle, Eye, Search, Plus, Settings, User, Cog, CreditCard, Brain, Sparkles } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -65,6 +65,8 @@ export default function Feed() {
   
   // Positive Message Modal state
   const [positiveMessageOpen, setPositiveMessageOpen] = useState(false);
+  const [positiveMessage, setPositiveMessage] = useState<string | null>(null);
+  const [generatingPositiveMessage, setGeneratingPositiveMessage] = useState(false);
 
   // Initialize search query from URL and set mounted state
   useEffect(() => {
@@ -350,13 +352,58 @@ export default function Feed() {
               <div className="relative inline-block">
                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 animate-pulse pointer-events-none"></div>
                 <Button 
-                  onClick={() => {
-                    console.log('Botão Gerar Mensagem Positiva clicado!');
-                    setPositiveMessageOpen(true);
+                  onClick={async () => {
+                    try {
+                      setGeneratingPositiveMessage(true);
+                      setPositiveMessage(null);
+                      
+                      console.log('Gerando mensagem positiva...');
+                      
+                      const prompt = `Gere uma mensagem motivacional e inspiradora em português do Brasil. 
+                      A mensagem deve ser:
+                      - Curta (máximo 2 frases)
+                      - Poética e bonita
+                      - Sobre fé, destino, sucesso, perseverança ou crescimento pessoal
+                      - No estilo da frase: "A fé que vibra no coração é a semente que germina o destino."
+                      
+                      Retorne apenas a mensagem, sem aspas ou formatação adicional.`;
+
+                      const { data, error } = await supabase.functions.invoke('generate-with-ai', {
+                        body: { prompt }
+                      });
+
+                      console.log('Resposta da IA:', data, error);
+
+                      if (error) throw error;
+
+                      const generatedMessage = (data as any)?.generatedText || (data as any)?.text || '';
+                      
+                      // Clean the message - remove quotes and extra formatting
+                      const cleanMessage = generatedMessage
+                        .replace(/^["']|["']$/g, '') // Remove quotes from start/end
+                        .replace(/^\s*["""'']\s*|\s*["""'']\s*$/g, '') // Remove fancy quotes
+                        .trim();
+
+                      console.log('Mensagem limpa:', cleanMessage);
+                      const finalMessage = cleanMessage || 'Mensagem não disponível no momento.';
+                      setPositiveMessage(finalMessage);
+                      setPositiveMessageOpen(true); // Só abre o modal quando a mensagem estiver pronta
+                    } catch (err) {
+                      console.error('Erro ao gerar mensagem:', err);
+                      toast({
+                        title: 'Erro ao gerar mensagem',
+                        description: 'Tente novamente em alguns momentos.',
+                        variant: 'destructive'
+                      });
+                    } finally {
+                      setGeneratingPositiveMessage(false);
+                    }
                   }}
+                  disabled={generatingPositiveMessage}
                   className="relative z-10 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25 cursor-pointer"
                 >
-                  Gerar Mensagem Positiva
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  {generatingPositiveMessage ? 'Gerando...' : 'Gerar Mensagem Positiva'}
                 </Button>
               </div>
             </div>
@@ -367,7 +414,11 @@ export default function Feed() {
               onOpenChange={(open) => {
                 console.log('Modal state changing to:', open);
                 setPositiveMessageOpen(open);
-              }} 
+                if (!open) {
+                  setPositiveMessage(null); // Reset message when closing
+                }
+              }}
+              initialMessage={positiveMessage}
             />
 
             {/* IA Commands Dialog */}
