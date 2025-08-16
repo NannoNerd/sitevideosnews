@@ -14,6 +14,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { truncateWithTooltip, processTextWithLinks, truncateText } from '@/lib/text-utils';
+import PositiveMessageModal from '@/components/PositiveMessageModal';
 interface ContentItem {
   id: string;
   title: string;
@@ -61,6 +62,9 @@ export default function Feed() {
   const [iaLoading, setIaLoading] = useState(false);
   const [iaResult, setIaResult] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  
+  // Positive Message Modal state
+  const [positiveMessageOpen, setPositiveMessageOpen] = useState(false);
 
   // Initialize search query from URL and set mounted state
   useEffect(() => {
@@ -344,12 +348,21 @@ export default function Feed() {
                 Aprenda, evolua e acompanhe o crescimento do nosso ativo digital.
               </p>
               <div className="relative inline-block">
-                <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25">
+                <Button 
+                  onClick={() => setPositiveMessageOpen(true)}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+                >
                   Gerar Mensagem Positiva
                 </Button>
                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 animate-pulse"></div>
               </div>
             </div>
+
+            {/* Positive Message Modal */}
+            <PositiveMessageModal 
+              open={positiveMessageOpen} 
+              onOpenChange={setPositiveMessageOpen} 
+            />
 
             {/* IA Commands Dialog */}
             <Dialog open={iaOpen} onOpenChange={setIaOpen}>
