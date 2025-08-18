@@ -211,22 +211,10 @@ All colors MUST be HSL.
     overflow-x: visible;
   }
   
-  /* Fix dropdown content shift by preventing scroll lock behavior */
+  /* Fix scroll lock preventing body shift WITHOUT affecting positioning */
   body[data-scroll-locked] {
-    overflow: visible !important;
     margin-right: 0 !important;
     padding-right: 0 !important;
-  }
-  
-  /* Alternative approach - prevent body from being scroll locked */
-  [data-radix-dropdown-menu-content],
-  [data-radix-popover-content] {
-    --scrollbar-width: 0px;
-  }
-  
-  /* Ensure dropdown positioning doesn't cause layout shifts */
-  [data-radix-popper-content-wrapper] {
-    transform: none !important;
   }
 }
 
