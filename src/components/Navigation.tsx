@@ -100,7 +100,7 @@ const Navigation = () => {
         {/* Logo */}
         <Link ref={logoRef} to="/" className="flex items-center">
           <img 
-            src="/lovable-uploads/ffe260a2-df9a-4ce0-ae33-5d76f7e56231.png" 
+            src="/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png" 
             alt="VidNews Logo" 
             className="h-[60px] rounded-lg"
           />
