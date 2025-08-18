@@ -96,13 +96,13 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
-      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-12 items-center justify-between px-4 relative">
+      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-20 items-center justify-between px-4 relative">
         {/* Logo */}
         <Link ref={logoRef} to="/" className="flex items-center">
           <img 
             src="/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png" 
             alt="VidNews Logo" 
-            className="h-[60px] rounded-lg"
+            className="h-[70px] rounded-lg"
           />
         </Link>
 
