@@ -102,7 +102,7 @@ const Navigation = () => {
           <img 
             src="/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png" 
             alt="VidNews Logo" 
-            className="h-[140px] rounded-lg"
+            className="h-[180px] rounded-lg"
           />
         </Link>
 
