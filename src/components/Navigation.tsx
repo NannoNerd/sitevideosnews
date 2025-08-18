@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X, Plus, LogOut, User, Search } from "lucide-react";
+import { Menu, X, Plus, LogOut, User, Search, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navigation = () => {
@@ -96,37 +97,61 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
-      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-20 items-center justify-between px-4 relative">
-        {/* Logo */}
-        <Link ref={logoRef} to="/" className="flex items-center">
-          <img 
-            src="/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png" 
-            alt="VidNews Logo" 
-            className="h-[180px] rounded-lg"
-          />
-        </Link>
+      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-20 items-center px-4 relative">
+        
+        {/* Menu Dropdown na Esquerda */}
+        <div className="flex items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 flex items-center gap-2">
+                <Menu className="h-5 w-5" />
+                <span className="hidden md:inline">Menu</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background border-border">
+              <DropdownMenuItem asChild>
+                <Link to="/?category=engenharia" className="w-full cursor-pointer">
+                  Engenharia
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/?category=noticias" className="w-full cursor-pointer">
+                  Notícias
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/crypto" className="w-full cursor-pointer">
+                  Crypto
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/musica" className="w-full cursor-pointer">
+                  Música
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/motivacional" className="w-full cursor-pointer">
+                  Motivacional
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-        {/* Navigation Menu */}
-        <div ref={menuRef} className={`${(!isMobile && !collapseMenu) ? "flex absolute left-1/2 -translate-x-1/2" : "hidden"} items-center space-x-6`}>
-          <Link to="/?category=engenharia" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-            Engenharia
-          </Link>
-          <Link to="/?category=noticias" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-            Notícias
-          </Link>
-          <Link to="/crypto" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-            Crypto
-          </Link>
-          <Link to="/musica" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-            Música
-          </Link>
-          <Link to="/motivacional" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-            Motivacional
+        {/* Logo Centralizado */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <Link ref={logoRef} to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png" 
+              alt="VidNews Logo" 
+              className="h-[180px] rounded-lg"
+            />
           </Link>
         </div>
 
-        {/* Desktop Auth Buttons */}
-        <div ref={actionsRef} className={`${(!isMobile && !collapseMenu) ? "flex" : "hidden"} items-center space-x-4`}>
+        {/* Actions na Direita */}
+        <div ref={actionsRef} className="ml-auto flex items-center space-x-4">
           {user ? (
             <div className="flex items-center space-x-3">
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-2" asChild>
@@ -150,7 +175,7 @@ const Navigation = () => {
                 >
                   <Link to="/create">
                     <Plus className="h-4 w-4 mr-1" />
-                    Criar
+                    <span className="hidden md:inline">Criar</span>
                   </Link>
                 </Button>
               )}
@@ -175,17 +200,17 @@ const Navigation = () => {
           )}
         </div>
 
-        {/* Mobile menu button */}
+        {/* Mobile menu button (para mobile adicional se necessário) */}
         <Button
           variant="ghost"
           size="sm"
-          className={`${(isMobile || collapseMenu) ? "" : "hidden"}`}
+          className="md:hidden ml-2"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? (
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5 text-white" />
           ) : (
-            <Menu className="h-5 w-5" />
+            <Search className="h-5 w-5 text-white" />
           )}
         </Button>
       </div>
@@ -204,6 +229,45 @@ const Navigation = () => {
                 className="pl-10"
               />
             </form>
+
+            {/* Mobile Navigation Links */}
+            <div className="space-y-2">
+              <Link 
+                to="/?category=engenharia" 
+                className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Engenharia
+              </Link>
+              <Link 
+                to="/?category=noticias" 
+                className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Notícias
+              </Link>
+              <Link 
+                to="/crypto" 
+                className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Crypto
+              </Link>
+              <Link 
+                to="/musica" 
+                className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Música
+              </Link>
+              <Link 
+                to="/motivacional" 
+                className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Motivacional
+              </Link>
+            </div>
 
             <div className="pt-4 border-t space-y-3">
               {user ? (
