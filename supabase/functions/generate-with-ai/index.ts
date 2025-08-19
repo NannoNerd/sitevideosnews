@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openRouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +20,7 @@ serve(async (req) => {
     try {
       body = await req.json();
     } catch (e) {
+      console.error('JSON parse error:', e);
       return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -27,6 +28,7 @@ serve(async (req) => {
     }
 
     const prompt: string | undefined = body?.prompt;
+    console.log('Received prompt:', prompt);
 
     if (!prompt || !prompt.trim()) {
       return new Response(JSON.stringify({ error: 'Campo "prompt" é obrigatório' }), {
@@ -35,129 +37,90 @@ serve(async (req) => {
       });
     }
 
-    if (!openRouterApiKey) {
-      return new Response(JSON.stringify({ error: 'OPENROUTER_API_KEY não configurada' }), {
+    if (!openAIApiKey) {
+      console.error('OPENAI_API_KEY not configured');
+      return new Response(JSON.stringify({ error: 'OPENAI_API_KEY não configurada' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Helper to call DeepSeek with a model
-    const callDeepSeek = async (model: string) => {
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openRouterApiKey}`,
-          'HTTP-Referer': req.headers.get('origin') || 'https://opbtbgtzinpysokwfaqn.supabase.co',
-          'X-Title': 'Ivo Fernandes News - AI Generator',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            {
-              role: 'system',
-              content:
-                'Você é um assistente técnico que gera comandos e scripts para ferramentas de engenharia (AutoCAD, Revit, SAP2000, MATLAB, Python para engenharia, etc.). Responda SEMPRE em português do Brasil, com passos claros, listas numeradas e trechos de código/comandos em blocos markdown. Inclua observações de segurança quando aplicável.'
-            },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.2,
-          max_tokens: 1200,
-        }),
-      });
+    console.log('Calling OpenAI API...');
 
-      let rawText = '';
-      let json: any = null;
-      try {
-        rawText = await res.text();
-        json = rawText ? JSON.parse(rawText) : null;
-      } catch { /* keep rawText */ }
-
-      if (!res.ok) {
-        const message = json?.error?.message || json?.message || rawText || 'Erro ao chamar o provedor de IA';
-        return {
-          ok: false as const,
-          status: res.status,
-          error: {
-            provider: 'openrouter',
-            status: res.status,
-            message,
-            raw: json ?? rawText
+    // Call OpenAI ChatGPT API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-2025-04-14', // Using the reliable GPT-4.1 model
+        messages: [
+          {
+            role: 'system',
+            content: 'Você é um assistente especializado que gera conteúdo de alta qualidade em português do Brasil. Responda sempre de forma clara, objetiva e útil. Para conteúdo técnico, inclua passos detalhados e exemplos práticos quando apropriado.'
+          },
+          { 
+            role: 'user', 
+            content: prompt 
           }
-        };
-      }
+        ],
+        max_tokens: 1500,
+        temperature: 0.7,
+      }),
+    });
 
-      const data = json;
-      const messageObj = data?.choices?.[0]?.message ?? {};
-
-      // OpenRouter pode retornar o conteúdo como string OU como array de segmentos
-      // (ex.: DeepSeek R1: [{ type: 'reasoning', text: '...' }, { type: 'output_text', text: '...' }])
-      let reasoning = '';
-      let contentText = '';
-      const msgContent: any = messageObj?.content;
-
-      if (Array.isArray(msgContent)) {
-        const toLower = (v: any) => (typeof v === 'string' ? v.toLowerCase() : v);
-        const reasoningParts = msgContent
-          .filter((p: any) => toLower(p?.type) === 'reasoning' || toLower(p?.type) === 'thinking')
-          .map((p: any) => p?.text)
-          .filter(Boolean);
-        const outputParts = msgContent
-          .filter((p: any) => toLower(p?.type) === 'output_text' || toLower(p?.type) === 'text')
-          .map((p: any) => p?.text)
-          .filter(Boolean);
-        reasoning = reasoningParts.join('\n');
-        contentText = outputParts.join('\n');
-      } else if (typeof msgContent === 'string') {
-        contentText = msgContent;
-      }
-
-      // Alguns provedores retornam reasoning_content como string separada
-      if (!reasoning && typeof (messageObj as any)?.reasoning_content === 'string') {
-        reasoning = (messageObj as any).reasoning_content;
-      }
-
-      const finalText = [reasoning, contentText]
-        .filter((s) => s && String(s).trim().length > 0)
-        .join('\n\n');
-
-      return { ok: true as const, data, generatedText: finalText };
-    };
-
-    // Try Reasoner first, then fallback to chat model if permission/model error
-    const primary = await callDeepSeek('deepseek/deepseek-r1-0528:free');
-
-    if (!primary.ok && [400, 401, 403, 404].includes(primary.status)) {
-      console.error('[OpenRouter primary error]', primary.error);
-      const fallback = await callDeepSeek('deepseek/deepseek-chat:free');
-      if (!fallback.ok) {
-        console.error('[OpenRouter fallback error]', fallback.error);
-        return new Response(JSON.stringify({ error: fallback.error }), {
-          status: fallback.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      return new Response(JSON.stringify({ generatedText: fallback.generatedText, provider: 'deepseek/deepseek-chat:free' }), {
+    let rawText = '';
+    let json: any = null;
+    
+    try {
+      rawText = await response.text();
+      console.log('OpenAI raw response:', rawText);
+      json = rawText ? JSON.parse(rawText) : null;
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      return new Response(JSON.stringify({ error: 'Erro ao processar resposta da IA' }), {
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    if (!primary.ok) {
-      console.error('[DeepSeek error]', primary.error);
-      return new Response(JSON.stringify({ error: primary.error }), {
-        status: primary.status,
+    if (!response.ok) {
+      console.error('OpenAI API error:', response.status, json);
+      const errorMessage = json?.error?.message || 'Erro ao chamar a API do ChatGPT';
+      return new Response(JSON.stringify({ 
+        error: errorMessage,
+        status: response.status 
+      }), {
+        status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ generatedText: primary.generatedText, provider: 'deepseek/deepseek-r1-0528:free' }), {
+    const generatedText = json?.choices?.[0]?.message?.content || '';
+    console.log('Generated text:', generatedText);
+
+    if (!generatedText) {
+      return new Response(JSON.stringify({ error: 'Nenhum conteúdo foi gerado' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ 
+      generatedText: generatedText.trim(),
+      provider: 'openai-gpt-4.1'
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error: any) {
     console.error('Error in generate-with-ai function:', error);
-    return new Response(JSON.stringify({ error: error?.message || 'Erro inesperado no Edge Function' }), {
+    return new Response(JSON.stringify({ 
+      error: error?.message || 'Erro inesperado no Edge Function',
+      details: error?.stack
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
