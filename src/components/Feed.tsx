@@ -14,7 +14,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { truncateWithTooltip, processTextWithLinks, truncateText } from '@/lib/text-utils';
-import PositiveMessageModal from '@/components/PositiveMessageModal';
+
 interface ContentItem {
   id: string;
   title: string;
@@ -389,7 +389,7 @@ export default function Feed() {
                   console.log('Mensagem limpa:', cleanMessage);
                   const finalMessage = cleanMessage || 'Mensagem não disponível no momento.';
                   setPositiveMessage(finalMessage);
-                  setPositiveMessageOpen(true); // Só abre o modal quando a mensagem estiver pronta
+                  // Remove a abertura do modal - agora a mensagem aparece abaixo do botão
                 } catch (err) {
                   console.error('Erro ao gerar mensagem:', err);
                   toast({
@@ -405,16 +405,19 @@ export default function Feed() {
                   {generatingPositiveMessage ? 'Gerando...' : 'Gerar Mensagem Positiva'}
                 </Button>
               </div>
-            </div>
 
-            {/* Positive Message Modal */}
-            <PositiveMessageModal open={positiveMessageOpen} onOpenChange={open => {
-            console.log('Modal state changing to:', open);
-            setPositiveMessageOpen(open);
-            if (!open) {
-              setPositiveMessage(null); // Reset message when closing
-            }
-          }} initialMessage={positiveMessage} />
+              {/* Mensagem Positiva abaixo do botão */}
+              {positiveMessage && (
+                <div className="mt-8 max-w-2xl mx-auto">
+                  <div className="relative">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg blur"></div>
+                    <blockquote className="relative text-lg md:text-xl font-medium text-cyan-300 leading-relaxed italic px-6 py-4 text-center bg-gray-900/50 rounded-lg border border-purple-500/20">
+                      "{positiveMessage}"
+                    </blockquote>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* IA Commands Dialog */}
             <Dialog open={iaOpen} onOpenChange={setIaOpen}>
