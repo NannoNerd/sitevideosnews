@@ -105,18 +105,54 @@ const Navigation = () => {
             <img 
               src="/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png" 
               alt="VidNews Logo" 
-              className="h-[60px] rounded-lg"
+              className="h-[120px] rounded-lg"
             />
           </Link>
         </div>
 
-        {/* Menu Dropdown no Centro */}
-        <div className="flex-1 flex justify-center">
+        {/* Menu Links no Centro - Desktop */}
+        <div className="flex-1 hidden md:flex justify-center">
+          <nav className="flex items-center space-x-8">
+            <Link 
+              to="/?category=engenharia" 
+              className="text-white hover:text-white/80 transition-colors font-medium"
+            >
+              Engenharia
+            </Link>
+            <Link 
+              to="/?category=noticias" 
+              className="text-white hover:text-white/80 transition-colors font-medium"
+            >
+              Notícias
+            </Link>
+            <Link 
+              to="/crypto" 
+              className="text-white hover:text-white/80 transition-colors font-medium"
+            >
+              Crypto
+            </Link>
+            <Link 
+              to="/musica" 
+              className="text-white hover:text-white/80 transition-colors font-medium"
+            >
+              Música
+            </Link>
+            <Link 
+              to="/motivacional" 
+              className="text-white hover:text-white/80 transition-colors font-medium"
+            >
+              Motivacional
+            </Link>
+          </nav>
+        </div>
+
+        {/* Menu Dropdown no Centro - Mobile */}
+        <div className="flex-1 md:hidden flex justify-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 flex items-center gap-2">
                 <Menu className="h-5 w-5" />
-                <span className="hidden md:inline">Menu</span>
+                <span>Menu</span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
