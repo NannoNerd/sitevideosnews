@@ -97,10 +97,21 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
-      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-20 items-center px-4 relative">
+      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-20 items-center px-4 justify-between">
         
-        {/* Menu Dropdown na Esquerda */}
-        <div className="flex items-center">
+        {/* Logo na Esquerda */}
+        <div className="flex-1 flex justify-start">
+          <Link ref={logoRef} to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png" 
+              alt="VidNews Logo" 
+              className="h-[60px] rounded-lg"
+            />
+          </Link>
+        </div>
+
+        {/* Menu Dropdown no Centro */}
+        <div className="flex-1 flex justify-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 flex items-center gap-2">
@@ -109,7 +120,7 @@ const Navigation = () => {
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-background border-border">
+            <DropdownMenuContent align="center" className="w-56 bg-background border-border">
               <DropdownMenuItem asChild>
                 <Link to="/?category=engenharia" className="w-full cursor-pointer">
                   Engenharia
@@ -139,19 +150,9 @@ const Navigation = () => {
           </DropdownMenu>
         </div>
 
-        {/* Logo Centralizado */}
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-          <Link ref={logoRef} to="/" className="flex items-center">
-            <img 
-              src="/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png" 
-              alt="VidNews Logo" 
-              className="h-[180px] rounded-lg"
-            />
-          </Link>
-        </div>
-
         {/* Actions na Direita */}
-        <div ref={actionsRef} className="ml-auto flex items-center space-x-4">
+        <div ref={actionsRef} className="flex-1 flex justify-end">
+          <div className="flex items-center space-x-4">
           {user ? (
             <div className="flex items-center space-x-3">
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 p-2" asChild>
@@ -198,6 +199,7 @@ const Navigation = () => {
               </Button>
             </div>
           )}
+          </div>
         </div>
 
         {/* Mobile menu button (para mobile adicional se necessário) */}
