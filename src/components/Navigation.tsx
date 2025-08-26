@@ -102,12 +102,12 @@ const Navigation = () => {
         {/* Logo na Esquerda */}
         <div className="flex-1 flex justify-start">
           <Link ref={logoRef} to="/" className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
-                <circle cx="12" cy="8" r="2" fill="currentColor" opacity="0.7"/>
-                <path d="M8 14h8v2H8z" fill="currentColor" opacity="0.5"/>
-              </svg>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+              <img 
+                src="/lovable-uploads/23842c11-d314-4af2-9cd5-38695ed34b8e.png" 
+                alt="IVO FERNANDES NEWS Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="hidden sm:block">
               <span className="text-white font-bold text-xl tracking-tight">
