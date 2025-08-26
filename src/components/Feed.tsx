@@ -600,7 +600,7 @@ export default function Feed() {
         </section>
 
         {/* Seção de Engenharia */}
-        <section className="py-16 bg-background">
+        <section className="py-16 bg-gray-50 dark:bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-3 gap-8 items-center max-w-7xl mx-auto">
               {/* Coluna 1 - Textos */}
@@ -608,13 +608,13 @@ export default function Feed() {
                 <h2 className="text-3xl md:text-4xl font-bold mb-6 text-blue-600">
                   Aulas de Autocad Civil 3D
                 </h2>
-                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                <p className="text-lg text-gray-700 mb-8 leading-relaxed">
                   Desenvolva suas habilidades em modelagem, projetos de infraestrutura e análise de terrenos com nossas aulas especializadas de Autocad Civil 3D.
                 </p>
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300"
+                  className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 bg-white"
                 >
                   Saiba Mais
                 </Button>
@@ -631,15 +631,15 @@ export default function Feed() {
 
               {/* Coluna 3 - Card Engenharia e Designer */}
               <div className={`transition-all duration-1000 delay-400 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
-                <Card className="bg-white dark:bg-card border-gray-200 dark:border-border hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <Card className="bg-white border-gray-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
                   <CardHeader className="text-center">
                     <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Cog className="w-8 h-8 text-white" />
                     </div>
-                    <CardTitle className="text-2xl font-bold text-gray-800 dark:text-foreground">
+                    <CardTitle className="text-2xl font-bold text-gray-800">
                       Engenharia e Designer
                     </CardTitle>
-                    <CardDescription className="text-gray-600 dark:text-muted-foreground">
+                    <CardDescription className="text-gray-600">
                       Gere scripts e comandos para softwares de engenharia usando IA.
                     </CardDescription>
                   </CardHeader>
@@ -654,8 +654,8 @@ export default function Feed() {
                       Geração de Comandos por IA
                     </Button>
                     <div className="mt-4 space-y-2">
-                      <p className="text-sm text-muted-foreground">Manuais e Tutoriais (Em Breve...)</p>
-                      <p className="text-sm text-muted-foreground">Projetos de Engenharia Civil (Em Breve...)</p>
+                      <p className="text-sm text-gray-500">Manuais e Tutoriais (Em Breve...)</p>
+                      <p className="text-sm text-gray-500">Projetos de Engenharia Civil (Em Breve...)</p>
                     </div>
                   </CardContent>
                 </Card>
