@@ -602,8 +602,8 @@ export default function Feed() {
         {/* Seção de Engenharia */}
         <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-              {/* Coluna Esquerda - Aulas AutoCAD */}
+            <div className="grid lg:grid-cols-3 gap-8 items-center max-w-7xl mx-auto">
+              {/* Coluna 1 - Textos */}
               <div className={`transition-all duration-1000 delay-200 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
                 <h2 className="text-3xl md:text-4xl font-bold mb-6 text-blue-600">
                   Aulas de Autocad Civil 3D
@@ -620,26 +620,26 @@ export default function Feed() {
                 </Button>
               </div>
 
-              {/* Coluna Direita - Imagem e Card */}
+              {/* Coluna 2 - Imagem AutoCAD */}
+              <div className={`transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} flex justify-center`}>
+                <img 
+                  src={civil3dImage} 
+                  alt="Autocad Civil 3D" 
+                  className="w-full max-w-sm rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                />
+              </div>
+
+              {/* Coluna 3 - Card Engenharia e Designer */}
               <div className={`transition-all duration-1000 delay-400 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
-                <div className="relative mb-8">
-                  <img 
-                    src={civil3dImage} 
-                    alt="Autocad Civil 3D" 
-                    className="w-full max-w-md mx-auto rounded-lg shadow-lg"
-                  />
-                </div>
-                
-                {/* Card Engenharia e Designer */}
-                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <Card className="bg-white dark:bg-card border-gray-200 dark:border-border hover:shadow-lg transition-all duration-300 hover:scale-105">
                   <CardHeader className="text-center">
                     <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Cog className="w-8 h-8 text-white" />
                     </div>
-                    <CardTitle className="text-2xl font-bold text-orange-800 dark:text-orange-200">
+                    <CardTitle className="text-2xl font-bold text-gray-800 dark:text-foreground">
                       Engenharia e Designer
                     </CardTitle>
-                    <CardDescription className="text-orange-700 dark:text-orange-300">
+                    <CardDescription className="text-gray-600 dark:text-muted-foreground">
                       Gere scripts e comandos para softwares de engenharia usando IA.
                     </CardDescription>
                   </CardHeader>
@@ -649,7 +649,7 @@ export default function Feed() {
                         setIaMode('engenharia');
                         setIaOpen(true);
                       }}
-                      className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300"
+                      className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
                     >
                       Geração de Comandos por IA
                     </Button>
