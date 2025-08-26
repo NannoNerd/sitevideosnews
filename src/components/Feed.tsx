@@ -19,6 +19,9 @@ import { truncateWithTooltip, processTextWithLinks, truncateText } from '@/lib/t
 import civil3dImage from '@/assets/civil3d.png';
 import criptosImage from '@/assets/criptos.png';
 import iaIconImage from '@/assets/ia-icon.png';
+import supereLimitesImage from '@/assets/supere-limites.jpg';
+import mentalidadeVencedoraImage from '@/assets/mentalidade-vencedora.jpg';
+import focoDisciplinaImage from '@/assets/foco-disciplina.jpg';
 
 interface ContentItem {
   id: string;
@@ -703,7 +706,13 @@ export default function Feed() {
             {/* Cards Motivacionais */}
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               <Card className="bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-t-lg"></div>
+                <div className="h-48 rounded-t-lg overflow-hidden">
+                  <img 
+                    src={supereLimitesImage} 
+                    alt="Supere seus limites" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <CardContent className="p-6 text-center">
                   <h3 className="text-xl font-bold mb-2 text-white">Supere seus limites</h3>
                   <p className="text-gray-300">Histórias inspiradoras de resiliência e determinação.</p>
@@ -711,7 +720,13 @@ export default function Feed() {
               </Card>
 
               <Card className="bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <div className="h-48 bg-gradient-to-br from-orange-500 to-red-600 rounded-t-lg"></div>
+                <div className="h-48 rounded-t-lg overflow-hidden">
+                  <img 
+                    src={mentalidadeVencedoraImage} 
+                    alt="Mentalidade vencedora" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <CardContent className="p-6 text-center">
                   <h3 className="text-xl font-bold mb-2 text-white">Mentalidade vencedora</h3>
                   <p className="text-gray-300">Aprenda a cultivar pensamentos positivos diariamente.</p>
@@ -719,7 +734,13 @@ export default function Feed() {
               </Card>
 
               <Card className="bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <div className="h-48 bg-gradient-to-br from-green-500 to-teal-600 rounded-t-lg"></div>
+                <div className="h-48 rounded-t-lg overflow-hidden">
+                  <img 
+                    src={focoDisciplinaImage} 
+                    alt="Foco e disciplina" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <CardContent className="p-6 text-center">
                   <h3 className="text-xl font-bold mb-2 text-white">Foco e disciplina</h3>
                   <p className="text-gray-300">Descubra como manter a consistência para alcançar seus sonhos.</p>
