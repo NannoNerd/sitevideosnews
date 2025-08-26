@@ -83,7 +83,7 @@ export default function Feed() {
       id: 1,
       name: "Ana Souza",
       role: "Engenheira Civil",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5e5?w=100&h=100&fit=crop&crop=face",
+      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=face",
       message: "Os conteúdos do site mudaram minha perspectiva profissional e pessoal. Recomendo a todos!"
     },
     {
@@ -730,10 +730,10 @@ export default function Feed() {
         </section>
 
         {/* Seção de Criptomoedas */}
-        <section className="py-16 bg-background">
+        <section className="py-16 bg-gray-50 dark:bg-gray-50">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-              {/* Coluna Esquerda - Imagem Crypto */}
+            <div className="grid lg:grid-cols-3 gap-8 items-center max-w-7xl mx-auto">
+              {/* Coluna 1 - Imagem Crypto */}
               <div className={`transition-all duration-1000 delay-200 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
                 <img 
                   src={criptosImage} 
@@ -742,32 +742,34 @@ export default function Feed() {
                 />
               </div>
 
-              {/* Coluna Direita - Conteúdo */}
-              <div className={`transition-all duration-1000 delay-400 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-blue-600">
+              {/* Coluna 2 - Textos */}
+              <div className={`transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-pink-600">
                   Mundo das Criptomoedas
                 </h2>
-                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                <p className="text-lg text-gray-700 mb-8 leading-relaxed">
                   Explore análises, tendências e oportunidades no mercado de criptomoedas. Informação confiável e atualizada para quem deseja investir com segurança.
                 </p>
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 mb-8"
+                  className="border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white transition-all duration-300 bg-white"
                 >
                   Ver Conteúdos
                 </Button>
+              </div>
 
-                {/* Card CryptoMoeda + IA */}
-                <Card className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-950 dark:to-pink-900 border-pink-200 dark:border-pink-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+              {/* Coluna 3 - Card CryptoMoeda */}
+              <div className={`transition-all duration-1000 delay-400 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+                <Card className="bg-white border-gray-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
                   <CardHeader className="text-center">
                     <div className="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
                       <CreditCard className="w-8 h-8 text-white" />
                     </div>
-                    <CardTitle className="text-2xl font-bold text-pink-800 dark:text-pink-200">
+                    <CardTitle className="text-2xl font-bold text-gray-800">
                       CryptoMoeda + IA
                     </CardTitle>
-                    <CardDescription className="text-pink-700 dark:text-pink-300">
+                    <CardDescription className="text-gray-600">
                       Tire suas dúvidas sobre criptomoedas e blockchain com nosso assistente.
                     </CardDescription>
                   </CardHeader>
@@ -782,8 +784,8 @@ export default function Feed() {
                       Crypto IA / Pergunte
                     </Button>
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Análise de Gráficos (Em Breve...)</p>
-                      <p className="text-sm text-muted-foreground">Notícias e Atualidades (Em Breve...)</p>
+                      <p className="text-sm text-gray-500">Análise de Gráficos (Em Breve...)</p>
+                      <p className="text-sm text-gray-500">Notícias e Atualidades (Em Breve...)</p>
                     </div>
                   </CardContent>
                 </Card>
