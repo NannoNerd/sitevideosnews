@@ -321,379 +321,399 @@ export default function Feed() {
       </div>;
   }
 
-  // Special layout for engineering category - Modern Redesign
+  // Special layout for engineering category
   if (categoryFilter === 'engenharia') {
     return <TooltipProvider>
-        <div className="min-h-screen w-full bg-background overflow-x-hidden">
-          <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[85vw] lg:max-w-[1400px]">
-            
+        <div className="min-h-screen w-full overflow-x-hidden" style={{
+        backgroundColor: '#0f172a'
+      }}>
+            <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
             {/* Hero Section */}
-            <section className={`relative mb-24 transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="text-center space-y-8">
-                {/* Floating Icons */}
-                <div className="flex justify-center items-center space-x-12 mb-12">
-                  <div className="animate-float" style={{ animationDelay: '0s' }}>
-                    <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-lg hover-lift">
-                      <Cog className="w-10 h-10 text-primary-foreground" />
-                    </div>
+            <div className={`text-center mb-16 transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="relative mb-8">
+                <div className="flex justify-center items-center space-x-8 mb-8">
+                  <div className="animate-bounce" style={{
+                  animationDelay: '0s'
+                }}>
+                    <Cog className="w-16 h-16 text-orange-400 drop-shadow-lg" />
                   </div>
-                  <div className="animate-float" style={{ animationDelay: '0.7s' }}>
-                    <div className="w-20 h-20 bg-gradient-to-br from-secondary to-secondary/80 rounded-full flex items-center justify-center shadow-lg hover-lift">
-                      <CreditCard className="w-10 h-10 text-secondary-foreground" />
-                    </div>
+                  <div className="animate-bounce" style={{
+                  animationDelay: '0.5s'
+                }}>
+                    <CreditCard className="w-16 h-16 text-cyan-400 drop-shadow-lg" />
                   </div>
-                  <div className="animate-float" style={{ animationDelay: '1.4s' }}>
-                    <div className="w-20 h-20 bg-gradient-to-br from-accent to-accent/80 rounded-full flex items-center justify-center shadow-lg hover-lift">
-                      <Brain className="w-10 h-10 text-accent-foreground" />
-                    </div>
+                  <div className="animate-bounce" style={{
+                  animationDelay: '1s'
+                }}>
+                    <Brain className="w-16 h-16 text-pink-400 drop-shadow-lg" />
                   </div>
                 </div>
-
-                {/* Main Title */}
-                <div className="space-y-6">
-                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold gradient-text leading-tight">
-                    Engenharia & Arquitetura
-                  </h1>
-                  <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                    Transforme ideias em realidade com tecnologia de ponta, IA generativa e metodologias modernas de projeto
-                  </p>
-                </div>
-
-                {/* CTA Section */}
-                <div className="flex flex-col items-center space-y-6">
-                  <Button 
-                    onClick={async () => {
-                      try {
-                        setGeneratingPositiveMessage(true);
-                        setPositiveMessage(null);
-                        const prompt = `Gere uma mensagem motivacional e inspiradora em português do Brasil sobre engenharia e arquitetura. 
-                            A mensagem deve ser:
-                            - Curta (máximo 2 frases)
-                            - Poética e bonita
-                            - Sobre inovação, criação, construir o futuro ou transformar ideias em realidade
-                            - No estilo: "Cada projeto é uma ponte entre sonhos e realidade, construída com precisão e paixão."
-                            
-                            Retorne apenas a mensagem, sem aspas ou formatação adicional.`;
-                        const { data, error } = await supabase.functions.invoke('generate-with-ai', {
-                          body: { prompt }
-                        });
-                        if (error) throw error;
-                        const generatedMessage = (data as any)?.generatedText || (data as any)?.text || '';
-                        const cleanMessage = generatedMessage
-                          .replace(/^["']|["']$/g, '')
-                          .replace(/^\s*["""'']\s*|\s*["""'']\s*$/g, '')
-                          .trim();
-                        setPositiveMessage(cleanMessage || 'Inspire-se para criar o extraordinário.');
-                      } catch (err) {
-                        console.error('Erro ao gerar mensagem:', err);
-                        toast({
-                          title: 'Erro ao gerar mensagem',
-                          description: 'Tente novamente em alguns momentos.',
-                          variant: 'destructive'
-                        });
-                      } finally {
-                        setGeneratingPositiveMessage(false);
-                      }
-                    }}
-                    disabled={generatingPositiveMessage}
-                    size="lg"
-                    className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-primary-foreground px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-primary/25 hover-lift transition-all duration-300"
-                  >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    {generatingPositiveMessage ? 'Gerando Inspiração...' : 'Gerar Mensagem Inspiradora'}
-                  </Button>
-
-                  {/* Inspirational Message Display */}
-                  {positiveMessage && (
-                    <div className="animate-fade-in mt-8 max-w-3xl mx-auto">
-                      <Card className="bg-gradient-to-r from-card/50 to-card/30 border-primary/20 backdrop-blur-sm">
-                        <CardContent className="p-8">
-                          <blockquote className="text-xl md:text-2xl font-medium text-center text-primary italic leading-relaxed">
-                            "{positiveMessage}"
-                          </blockquote>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )}
-                </div>
               </div>
-            </section>
-
-            {/* Main Features Grid */}
-            <section className={`mb-24 transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="grid lg:grid-cols-3 gap-8">
-                
-                {/* Engineering Tools */}
-                <Card className="group hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 hover-lift overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardHeader className="relative z-10 text-center pb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                      <Cog className="w-8 h-8 text-primary-foreground animate-spin-slow" />
-                    </div>
-                    <CardTitle className="text-2xl mb-3 group-hover:text-primary transition-colors duration-300">
-                      Ferramentas de Engenharia
-                    </CardTitle>
-                    <CardDescription className="text-base leading-relaxed">
-                      Scripts automatizados e comandos inteligentes para softwares profissionais de engenharia
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Button 
-                      onClick={() => { setIaMode('engenharia'); setIaOpen(true); }}
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground hover-lift shadow-md"
-                    >
-                      Geração de Comandos por IA
-                    </Button>
-                    <div className="space-y-2">
-                      <div className="text-sm text-muted-foreground">Suporte para:</div>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="text-xs">AutoCAD</Badge>
-                        <Badge variant="secondary" className="text-xs">Revit</Badge>
-                        <Badge variant="secondary" className="text-xs">SAP2000</Badge>
-                        <Badge variant="secondary" className="text-xs">MATLAB</Badge>
-                        <Badge variant="secondary" className="text-xs">Python</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Architecture & Design */}
-                <Card className="group hover:shadow-xl hover:shadow-secondary/10 transition-all duration-500 hover-lift overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardHeader className="relative z-10 text-center pb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-secondary to-secondary/80 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                      <User className="w-8 h-8 text-secondary-foreground" />
-                    </div>
-                    <CardTitle className="text-2xl mb-3 group-hover:text-secondary transition-colors duration-300">
-                      Arquitetura & Design
-                    </CardTitle>
-                    <CardDescription className="text-base leading-relaxed">
-                      Projetos arquitetônicos modernos, sustentabilidade e design centrado no usuário
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className="w-2 h-2 bg-secondary rounded-full" />
-                        <span className="text-sm font-medium">Arquitetura Sustentável</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className="w-2 h-2 bg-secondary rounded-full" />
-                        <span className="text-sm font-medium">Design Paramétrico</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className="w-2 h-2 bg-secondary rounded-full" />
-                        <span className="text-sm font-medium">BIM e Modelagem 3D</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className="w-2 h-2 bg-secondary rounded-full" />
-                        <span className="text-sm font-medium">Eficiência Energética</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* AI & Innovation */}
-                <Card className="group hover:shadow-xl hover:shadow-accent/10 transition-all duration-500 hover-lift overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardHeader className="relative z-10 text-center pb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent/80 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                      <Brain className="w-8 h-8 text-accent-foreground" />
-                    </div>
-                    <CardTitle className="text-2xl mb-3 group-hover:text-accent transition-colors duration-300">
-                      IA & Inovação
-                    </CardTitle>
-                    <CardDescription className="text-base leading-relaxed">
-                      Inteligência artificial aplicada ao desenvolvimento pessoal e soluções criativas
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Button 
-                      onClick={() => { setIaMode('crypto'); setIaOpen(true); }}
-                      className="w-full bg-accent hover:bg-accent/90 text-accent-foreground hover-lift shadow-md"
-                    >
-                      Crypto IA / Pergunte
-                    </Button>
-                    <Button 
-                      onClick={() => { setIaMode('growth'); setIaOpen(true); }}
-                      className="w-full bg-accent/80 hover:bg-accent text-accent-foreground hover-lift shadow-md"
-                    >
-                      Crescimento Pessoal IA
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
-
-            {/* Technical Specializations */}
-            <section className={`mb-24 transition-all duration-1000 delay-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold gradient-text mb-6">Especialidades Técnicas</h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  Explore as principais áreas de atuação em engenharia e arquitetura moderna
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  { title: "Engenharia Civil", icon: "🏗️", topics: ["Estruturas", "Fundações", "Concreto Armado", "Análise Estrutural"] },
-                  { title: "Arquitetura", icon: "🏛️", topics: ["Projeto Arquitetônico", "Urbanismo", "Paisagismo", "Patrimônio"] },
-                  { title: "Engenharia Elétrica", icon: "⚡", topics: ["Sistemas de Potência", "Automação", "Eletrônica", "Energia Renovável"] },
-                  { title: "Engenharia Mecânica", icon: "⚙️", topics: ["Termodinâmica", "Mecânica dos Fluidos", "Projetos Mecânicos", "CAD/CAM"] }
-                ].map((spec, index) => (
-                  <Card key={index} className="group hover:shadow-lg hover-lift transition-all duration-300">
-                    <CardHeader className="text-center pb-4">
-                      <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                        {spec.icon}
-                      </div>
-                      <CardTitle className="text-lg font-semibold mb-2">{spec.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {spec.topics.map((topic, topicIndex) => (
-                          <div key={topicIndex} className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                            {topic}
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-
-            {/* Testimonials */}
-            <section className={`mb-24 transition-all duration-1000 delay-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <Card className="bg-gradient-to-r from-card/50 to-card/30 backdrop-blur-sm border-muted/50">
-                <CardContent className="p-12">
-                  <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold gradient-text mb-4">Depoimentos</h2>
-                    <p className="text-xl text-muted-foreground">O que profissionais da área estão dizendo</p>
-                  </div>
-                  
-                  <div className="grid md:grid-cols-3 gap-8">
-                    {[
-                      {
-                        name: "Mariana Silva",
-                        role: "Engenheira Civil",
-                        image: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face",
-                        quote: "As ferramentas de IA para engenharia revolucionaram meu fluxo de trabalho. Economizo horas na criação de scripts."
-                      },
-                      {
-                        name: "Carlos Mendes",
-                        role: "Arquiteto",
-                        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-                        quote: "A integração entre arquitetura sustentável e tecnologia aqui é impressionante. Conteúdo de altíssima qualidade."
-                      },
-                      {
-                        name: "Ana Costa",
-                        role: "Engenheira Elétrica",
-                        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-                        quote: "O suporte para automação e a geração de comandos me ajudou muito nos projetos industriais. Recomendo!"
-                      }
-                    ].map((testimonial, index) => (
-                      <div key={index} className="text-center group">
-                        <div className="relative mb-6">
-                          <img 
-                            src={testimonial.image} 
-                            alt={testimonial.name}
-                            className="w-20 h-20 rounded-full mx-auto object-cover border-4 border-primary/20 group-hover:border-primary/40 transition-colors duration-300"
-                          />
-                        </div>
-                        <blockquote className="text-sm italic text-muted-foreground mb-4 leading-relaxed">
-                          "{testimonial.quote}"
-                        </blockquote>
-                        <div>
-                          <div className="font-semibold text-foreground">{testimonial.name}</div>
-                          <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-
-            {/* Footer */}
-            <footer className="text-center py-8 border-t border-border">
-              <p className="text-muted-foreground">
-                © 2025 Ivo Fernandes. Transformando ideias em realidade através da engenharia.
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent mb-6">
+                Explore o Futuro com Tecnologia e Conhecimento
+              </h1>
+              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Aprenda, evolua e acompanhe o crescimento do nosso ativo digital.
               </p>
-            </footer>
+              <div className="relative inline-block">
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 animate-pulse pointer-events-none"></div>
+                <Button onClick={async () => {
+                try {
+                  setGeneratingPositiveMessage(true);
+                  setPositiveMessage(null);
+                  console.log('Gerando mensagem positiva...');
+                  const prompt = `Gere uma mensagem motivacional e inspiradora em português do Brasil. 
+                      A mensagem deve ser:
+                      - Curta (máximo 2 frases)
+                      - Poética e bonita
+                      - Sobre fé, destino, sucesso, perseverança ou crescimento pessoal
+                      - No estilo da frase: "A fé que vibra no coração é a semente que germina o destino."
+                      
+                      Retorne apenas a mensagem, sem aspas ou formatação adicional.`;
+                  const {
+                    data,
+                    error
+                  } = await supabase.functions.invoke('generate-with-ai', {
+                    body: {
+                      prompt
+                    }
+                  });
+                  console.log('Resposta da IA:', data, error);
+                  if (error) throw error;
+                  const generatedMessage = (data as any)?.generatedText || (data as any)?.text || '';
+
+                  // Clean the message - remove quotes and extra formatting
+                  const cleanMessage = generatedMessage.replace(/^["']|["']$/g, '') // Remove quotes from start/end
+                  .replace(/^\s*["""'']\s*|\s*["""'']\s*$/g, '') // Remove fancy quotes
+                  .trim();
+                  console.log('Mensagem limpa:', cleanMessage);
+                  const finalMessage = cleanMessage || 'Mensagem não disponível no momento.';
+                  setPositiveMessage(finalMessage);
+                  // Remove a abertura do modal - agora a mensagem aparece abaixo do botão
+                } catch (err) {
+                  console.error('Erro ao gerar mensagem:', err);
+                  toast({
+                    title: 'Erro ao gerar mensagem',
+                    description: 'Tente novamente em alguns momentos.',
+                    variant: 'destructive'
+                  });
+                } finally {
+                  setGeneratingPositiveMessage(false);
+                }
+              }} disabled={generatingPositiveMessage} className="relative z-10 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25 cursor-pointer">
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  {generatingPositiveMessage ? 'Gerando...' : 'Gerar Mensagem Positiva'}
+                </Button>
+              </div>
+
+              {/* Mensagem Positiva abaixo do botão */}
+              {positiveMessage && (
+                <div className="mt-8 max-w-2xl mx-auto">
+                  <div className="relative">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg blur"></div>
+                    <blockquote className="relative text-lg md:text-xl font-medium text-cyan-300 leading-relaxed italic px-6 py-4 text-center bg-gray-900/50 rounded-lg border border-purple-500/20">
+                      "{positiveMessage}"
+                    </blockquote>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* IA Commands Dialog */}
             <Dialog open={iaOpen} onOpenChange={setIaOpen}>
-              <DialogContent className="sm:max-w-[680px] bg-card border-border">
+              <DialogContent className="sm:max-w-[680px] bg-slate-900 text-white border border-slate-700">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl text-foreground">
-                    {iaMode === 'engenharia' ? 'Geração de Comandos por IA' : 
-                     iaMode === 'crypto' ? 'Crypto IA — Pergunte' : 'Crescimento Pessoal IA'}
+                  <DialogTitle className="text-2xl">
+                    {iaMode === 'engenharia' ? 'Geração de Comandos por IA' : iaMode === 'crypto' ? 'Crypto IA — Pergunte' : 'Crescimento Pessoal IA'}
                   </DialogTitle>
-                  <DialogDescription className="text-muted-foreground">
-                    {iaMode === 'engenharia' ? 
-                      'Descreva a tarefa ou comando que você precisa e nossa IA gerará o script ou instruções para ferramentas de engenharia.' : 
-                      iaMode === 'crypto' ? 
-                      'Faça sua pergunta sobre criptomoedas e blockchain (educacional, sem aconselhamento financeiro).' : 
-                      'Peça conselhos práticos de produtividade, hábitos e carreira.'}
+                  <DialogDescription className="text-slate-300">
+                    {iaMode === 'engenharia' ? 'Descreva a tarefa ou comando que você precisa e nossa IA gerará o script ou instruções para ferramentas de engenharia.' : iaMode === 'crypto' ? 'Faça sua pergunta sobre criptomoedas e blockchain (educacional, sem aconselhamento financeiro).' : 'Peça conselhos práticos de produtividade, hábitos e carreira.'}
                   </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
-                  <Textarea 
-                    value={iaPrompt} 
-                    onChange={e => setIaPrompt(e.target.value)} 
-                    placeholder={
-                      iaMode === 'engenharia' ? 
-                      "Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD'; 'Comando para criar uma parede de 20cm no Revit'; 'Modelar uma viga no SAP2000'" :
-                      iaMode === 'crypto' ?
-                      "Ex: 'O que é staking e quais os riscos?'; 'Como funciona a rede Ethereum e o gas?'; 'Diferença entre token e coin?'; 'Como guardar minhas chaves com segurança?'" :
-                      "Ex: 'Como montar uma rotina matinal produtiva?'; 'Técnicas para foco profundo (deep work)?'; 'Como criar o hábito de estudar diariamente?'; 'Framework para metas SMART?'"
-                    }
-                    className="min-h-[140px] bg-muted/50 text-foreground placeholder:text-muted-foreground border-border"
-                  />
+                  <Textarea value={iaPrompt} onChange={e => setIaPrompt(e.target.value)} placeholder={iaMode === 'engenharia' ? "Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD'; 'Comando para criar uma parede de 20cm no Revit'; 'Modelar uma viga no SAP2000'" : iaMode === 'crypto' ? "Ex: 'O que é staking e quais os riscos?'; 'Como funciona a rede Ethereum e o gas?'; 'Diferença entre token e coin?'; 'Como guardar minhas chaves com segurança?'" : "Ex: 'Como montar uma rotina matinal produtiva?'; 'Técnicas para foco profundo (deep work)?'; 'Como criar o hábito de estudar diariamente?'; 'Framework para metas SMART?'"} className="min-h-[140px] bg-slate-800/60 text-white placeholder:text-slate-400" />
 
                   <div className="flex items-center gap-3">
-                    <Button 
-                      onClick={handleGenerateIaCommand} 
-                      disabled={iaLoading} 
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                    >
-                      {iaLoading ? 'Gerando...' : 
-                       iaMode === 'engenharia' ? 'Gerar Comando' : 
-                       iaMode === 'crypto' ? 'Pergunte IA' : 'Gerar Dica'}
+                    <Button onClick={handleGenerateIaCommand} disabled={iaLoading} className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white">
+                      {iaLoading ? 'Gerando...' : iaMode === 'engenharia' ? 'Gerar Comando' : iaMode === 'crypto' ? 'Pergunte IA' : 'Gerar Dica'}
                     </Button>
-                    <Button 
-                      variant="secondary" 
-                      onClick={() => setIaOpen(false)}
-                      className="bg-secondary hover:bg-secondary/80 text-secondary-foreground"
-                    >
+                    <Button variant="secondary" onClick={() => setIaOpen(false)} className="bg-slate-700 hover:bg-slate-600 text-gray-200">
                       Fechar
                     </Button>
                   </div>
 
-                  {iaResult && (
-                    <Card className="mt-4 border-border bg-muted/20">
-                      <CardHeader className="pb-2">
-                        <div className="text-sm font-medium text-foreground">Resultado</div>
-                      </CardHeader>
-                      <CardContent>
-                        <div 
-                          className="max-h-[320px] overflow-auto text-sm text-foreground leading-relaxed space-y-3 
-                                   [&_h2]:text-foreground [&_h2]:text-lg [&_h2]:font-semibold 
-                                   [&_h3]:text-foreground [&_ul]:list-disc [&_ul]:pl-6 
-                                   [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded 
-                                   [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded" 
-                          dangerouslySetInnerHTML={{ __html: iaResult }} 
-                        />
-                      </CardContent>
-                    </Card>
-                  )}
+                  {iaResult && <div className="mt-2 rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
+                      <div className="px-4 py-2 text-sm text-slate-300 border-b border-slate-700">Resultado</div>
+                      <div className="max-h-[320px] overflow-auto p-4 text-sm text-slate-200 leading-relaxed space-y-3 [&_h2]:text-white [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-6 [&_code]:bg-black/40 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_pre]:bg-black/40 [&_pre]:p-3 [&_pre]:rounded" dangerouslySetInnerHTML={{
+                    __html: iaResult
+                  }} />
+                    </div>}
                 </div>
 
                 <DialogFooter />
               </DialogContent>
             </Dialog>
+
+            {/* Three Cards Section */}
+            <div className={`grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              {/* Engenharia e Designer */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10 group">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-4 rounded-2xl transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
+                    <div className="text-white text-2xl animate-pulse">⚙️</div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-orange-400 transition-colors duration-300">
+                    Engenharia e Designer
+                  </h3>
+                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
+                    Gere scripts e comandos para softwares de engenharia usando IA.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button onClick={() => {
+                  setIaMode('engenharia');
+                  setIaOpen(true);
+                }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-cyan-500/25">
+                    Geração de Comandos por IA
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
+                    Manuais e Tutoriais (Em Breve...)
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200 text-xs">
+                    Projetos de Engenharia Civil  (Em Breve...)
+                  </Button>
+                </div>
+              </div>
+
+              {/* CryptoMoeda + IA */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/10 group">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
+                    <div className="text-white text-2xl animate-pulse">🧠</div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-pink-400 transition-colors duration-300">
+                    CryptoMoeda + IA
+                  </h3>
+                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
+                    Tire suas dúvidas sobre criptomoedas e blockchain com nosso assistente.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button onClick={() => {
+                  setIaMode('crypto');
+                  setIaOpen(true);
+                }} className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-purple-500/25">
+                    Crypto IA / Pergunte
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
+                    Análise de Gráficos (Em Breve...)
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
+                    Notícias e Atualidades (Em Breve...)
+                  </Button>
+                </div>
+              </div>
+
+              {/* Conteúdo + Motivação */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-gray-500/10 group">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
+                    <div className="text-white text-2xl animate-pulse">💭</div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-gray-400 transition-colors duration-300">
+                    Conteúdo + Motivação
+                  </h3>
+                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
+                    Receba conselhos e insights para seu desenvolvimento pessoal e carreira.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button onClick={() => {
+                  setIaMode('growth');
+                  setIaOpen(true);
+                }} className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-pink-500/25">
+                    Crescimento Pessoal IA
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
+                    Atualidades IA (Em Breve...)
+                  </Button>
+                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
+                    Conteúdo Vlog (Em Breve...)
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonials Section */}
+            <div style={{
+            backgroundColor: '#111828'
+          }} className={`backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mt-24 mb-16 transition-all duration-1000 delay-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="max-w-6xl mx-auto">
+                <h2 className="text-4xl font-bold text-white text-center mb-16">
+                  O que as pessoas estão dizendo
+                </h2>
+                <div className="grid md:grid-cols-4 gap-8">
+                  <div style={{
+                  backgroundColor: '#202938'
+                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face" alt="Mariana L." className="w-12 h-12 rounded-full object-cover mb-2" />
+                      <div>
+                        <div className="text-white font-medium">Mariana L.</div>
+                        <div className="text-gray-400 text-sm">Engenheira Civil</div>
+                      </div>
+                    </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "Esse projeto me inspira todos os dias a buscar mais conhecimento. Parabéns pela iniciativa!"
+                    </p>
+                  </div>
+
+                  <div style={{
+                  backgroundColor: '#202938'
+                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face" alt="João V." className="w-12 h-12 rounded-full object-cover mb-2" />
+                      <div>
+                        <div className="text-white font-medium">João V.</div>
+                        <div className="text-gray-400 text-sm">Arquiteto</div>
+                      </div>
+                    </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "Muito além de um site comum. É uma experiência completa com conteúdo útil de verdade."
+                    </p>
+                  </div>
+
+                  <div style={{
+                  backgroundColor: '#202938'
+                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face" alt="Camila F." className="w-12 h-12 rounded-full object-cover mb-2" />
+                      <div>
+                        <div className="text-white font-medium">Camila F.</div>
+                        <div className="text-gray-400 text-sm">Designer</div>
+                      </div>
+                    </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "Gostei da parte da IA motivacional. Às vezes, é exatamente o que a gente precisa."
+                    </p>
+                  </div>
+
+                  <div style={{
+                  backgroundColor: '#202938'
+                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
+                    <div className="flex flex-col items-center mb-4">
+                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Ricardo T." className="w-12 h-12 rounded-full object-cover mb-2" />
+                      <div>
+                        <div className="text-white font-medium">Ricardo T.</div>
+                        <div className="text-gray-400 text-sm">Desenvolvedor</div>
+                      </div>
+                    </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "A proposta de ativos digitais é bem original. Estou curioso para ver como isso vai evoluir."
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* About Us Section */}
+            <div style={{
+            backgroundColor: '#030712'
+          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+              <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-4xl font-bold text-white mb-8">
+                  Sobre Nós
+                </h2>
+                <p className="text-lg text-gray-300 leading-relaxed">
+                  Somos movidos pela vontade de transformar ideias em realidade. Nosso projeto une 
+                  engenharia, inteligência artificial, criação de conteúdo e ativos digitais em um só lugar. Aqui 
+                  você aprende, investe, se motiva e evolui — sempre com apoio de tecnologia de ponta e 
+                  inteligência coletiva.
+                </p>
+              </div>
+            </div>
+
+            {/* Novidades & Atualizações Section */}
+            <div style={{
+            backgroundColor: '#111828'
+          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+              <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-4xl font-bold text-white mb-8">
+                  Novidades & Atualizações
+                </h2>
+                <div className="space-y-4 text-gray-300 text-lg">
+                  <div className="flex items-start justify-center gap-3">
+                    <span className="text-orange-400 text-xl">🚀</span>
+                    <p>Lançamento oficial do site e início da fase beta!</p>
+                  </div>
+                  <div className="flex items-start justify-center gap-3">
+                    <span className="text-blue-400 text-xl">💡</span>
+                    <p>Nova IA para conselhos motivacionais já em funcionamento.</p>
+                  </div>
+                  <div className="flex items-start justify-center gap-3">
+                    <span className="text-green-400 text-xl">📱</span>
+                    <p>Monitoramento de Ativo Digital agora disponível.</p>
+                  </div>
+                  <div className="flex items-start justify-center gap-3">
+                    <span className="text-purple-400 text-xl">📚</span>
+                    <p>Mais recursos chegando em breve, fique ligado!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Perguntas Frequentes Section */}
+            <div style={{
+            backgroundColor: '#030712'
+          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-4xl font-bold text-white text-center mb-12">
+                  Perguntas Frequentes
+                </h2>
+                <div className="space-y-8">
+                  <div>
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-blue-400 text-xl">🔍</span>
+                      <h3 className="text-xl font-bold text-white">O que é o Ativo Digital?</h3>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed ml-8">
+                      É um valor construído com base nas transações positivas de Ivo Fernandes, disponível para consulta e participação.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-green-400 text-xl">📊</span>
+                      <h3 className="text-xl font-bold text-white">Como posso acompanhar os lucros?</h3>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed ml-8">
+                      Os lucros são exibidos na seção "Nosso Ativo Digital". Em breve, teremos gráficos dinâmicos!
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-pink-400 text-xl">🧠</span>
+                      <h3 className="text-xl font-bold text-white">Como funciona a IA Motivacional?</h3>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed ml-8">
+                      Ao clicar no botão, você recebe uma mensagem gerada automaticamente com foco em bem-estar e motivação.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center py-8 border-t border-slate-700/50">
+              <p className="text-gray-400">
+                © 2025 Ivo Fernandes. Todos os direitos reservados.
+              </p>
+            </div>
           </main>
         </div>
       </TooltipProvider>;
