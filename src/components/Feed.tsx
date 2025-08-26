@@ -9,11 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Heart, MessageCircle, Eye, Search, Plus, Settings, User, Cog, CreditCard, Brain, Sparkles } from 'lucide-react';
+import { Heart, MessageCircle, Eye, Search, Plus, Settings, User, Cog, CreditCard, Brain, Sparkles, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { truncateWithTooltip, processTextWithLinks, truncateText } from '@/lib/text-utils';
+
+// Import das imagens
+import civil3dImage from '@/assets/civil3d.png';
+import criptosImage from '@/assets/criptos.png';
+import iaIconImage from '@/assets/ia-icon.png';
 
 interface ContentItem {
   id: string;
@@ -39,14 +44,10 @@ interface ContentItem {
   comments_count: number;
   type: 'post' | 'video';
 }
+
 export default function Feed() {
-  const {
-    user,
-    signOut
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,62 +64,98 @@ export default function Feed() {
   const [iaResult, setIaResult] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Positive Message Modal state
-  const [positiveMessageOpen, setPositiveMessageOpen] = useState(false);
+  // Positive Message state
   const [positiveMessage, setPositiveMessage] = useState<string | null>(null);
   const [generatingPositiveMessage, setGeneratingPositiveMessage] = useState(false);
+
+  // Testimonials carousel state
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   // Initialize search query from URL and set mounted state
   useEffect(() => {
     setSearchQuery(searchParams.get('search') || '');
     setMounted(true);
   }, [searchParams]);
+
+  // Testimonials data
+  const testimonials = [
+    {
+      id: 1,
+      name: "Ana Souza",
+      role: "Engenheira Civil",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b5e5?w=100&h=100&fit=crop&crop=face",
+      message: "Os conteúdos do site mudaram minha perspectiva profissional e pessoal. Recomendo a todos!"
+    },
+    {
+      id: 2,
+      name: "Carlos Silva",
+      role: "Arquiteto",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+      message: "Excelente plataforma para aprender sobre tecnologia e inovação. Muito útil!"
+    },
+    {
+      id: 3,
+      name: "Maria Santos",
+      role: "Investidora",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+      message: "As análises de crypto me ajudaram muito nas minhas decisões de investimento."
+    }
+  ];
+
   const fetchContent = async () => {
     try {
       // Build posts query
-      let postsQuery = supabase.from('posts').select(`
+      let postsQuery = supabase
+        .from('posts')
+        .select(`
           *,
           categories(name, slug)
-        `).eq('published', true);
+        `)
+        .eq('published', true);
 
       // Add category filter if specified
       if (categoryFilter) {
         postsQuery = postsQuery.eq('categories.slug', categoryFilter);
       }
-      const {
-        data: posts,
-        error: postsError
-      } = await postsQuery.order('published_at', {
-        ascending: false
-      }).limit(10);
+
+      const { data: posts, error: postsError } = await postsQuery
+        .order('published_at', { ascending: false })
+        .limit(10);
+
       if (postsError) throw postsError;
 
       // Build videos query
-      let videosQuery = supabase.from('videos').select(`
+      let videosQuery = supabase
+        .from('videos')
+        .select(`
           *,
           categories(name, slug)
-        `).eq('published', true);
+        `)
+        .eq('published', true);
 
       // Add category filter if specified
       if (categoryFilter) {
         videosQuery = videosQuery.eq('categories.slug', categoryFilter);
       }
-      const {
-        data: videos,
-        error: videosError
-      } = await videosQuery.order('published_at', {
-        ascending: false
-      }).limit(10);
+
+      const { data: videos, error: videosError } = await videosQuery
+        .order('published_at', { ascending: false })
+        .limit(10);
+
       if (videosError) throw videosError;
 
       // Get unique author IDs
-      const authorIds = [...(posts || []).map(p => p.author_id), ...(videos || []).map(v => v.author_id)].filter((id, index, arr) => arr.indexOf(id) === index);
+      const authorIds = [
+        ...(posts || []).map(p => p.author_id),
+        ...(videos || []).map(v => v.author_id)
+      ].filter((id, index, arr) => arr.indexOf(id) === index);
 
       // Fetch author profiles
-      const {
-        data: profiles,
-        error: profilesError
-      } = await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', authorIds);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', authorIds);
+
       if (profilesError) throw profilesError;
 
       // Create author lookup map
@@ -128,39 +165,42 @@ export default function Feed() {
       }, {} as Record<string, any>);
 
       // Combine and sort content
-      const allContent: ContentItem[] = [...(posts || []).map(post => ({
-        ...post,
-        type: 'post' as const,
-        category: post.categories || {
-          name: 'Sem categoria',
-          slug: ''
-        },
-        author: {
-          display_name: authorMap[post.author_id]?.display_name || 'Anônimo',
-          avatar_url: authorMap[post.author_id]?.avatar_url
-        }
-      })), ...(videos || []).map(video => ({
-        ...video,
-        type: 'video' as const,
-        category: video.categories || {
-          name: 'Sem categoria',
-          slug: ''
-        },
-        author: {
-          display_name: authorMap[video.author_id]?.display_name || 'Anônimo',
-          avatar_url: authorMap[video.author_id]?.avatar_url
-        }
-      }))].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+      const allContent: ContentItem[] = [
+        ...(posts || []).map(post => ({
+          ...post,
+          type: 'post' as const,
+          category: post.categories || { name: 'Sem categoria', slug: '' },
+          author: {
+            display_name: authorMap[post.author_id]?.display_name || 'Anônimo',
+            avatar_url: authorMap[post.author_id]?.avatar_url
+          }
+        })),
+        ...(videos || []).map(video => ({
+          ...video,
+          type: 'video' as const,
+          category: video.categories || { name: 'Sem categoria', slug: '' },
+          author: {
+            display_name: authorMap[video.author_id]?.display_name || 'Anônimo',
+            avatar_url: authorMap[video.author_id]?.avatar_url
+          }
+        }))
+      ].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+
       setContent(allContent);
 
       // Fetch user likes if authenticated
       if (user) {
         const contentIds = allContent.map(item => item.id);
-        const {
-          data: likes
-        } = await supabase.from('likes').select('post_id, video_id').eq('user_id', user.id).or(`post_id.in.(${contentIds.join(',')}),video_id.in.(${contentIds.join(',')})`);
+        const { data: likes } = await supabase
+          .from('likes')
+          .select('post_id, video_id')
+          .eq('user_id', user.id)
+          .or(`post_id.in.(${contentIds.join(',')}),video_id.in.(${contentIds.join(',')})`);
+
         if (likes) {
-          const likedIds = new Set(likes.map(like => like.post_id || like.video_id).filter(Boolean));
+          const likedIds = new Set(
+            likes.map(like => like.post_id || like.video_id).filter(Boolean)
+          );
           setUserLikes(likedIds);
         }
       }
@@ -175,6 +215,7 @@ export default function Feed() {
       setLoading(false);
     }
   };
+
   const handleLike = async (item: ContentItem) => {
     if (!user) {
       toast({
@@ -184,12 +225,18 @@ export default function Feed() {
       });
       return;
     }
+
     const isLiked = userLikes.has(item.id);
     const foreignKey = item.type === 'post' ? 'post_id' : 'video_id';
+
     try {
       if (isLiked) {
         // Remove like
-        await supabase.from('likes').delete().eq(foreignKey, item.id).eq('user_id', user.id);
+        await supabase
+          .from('likes')
+          .delete()
+          .eq(foreignKey, item.id)
+          .eq('user_id', user.id);
 
         // Update UI
         setUserLikes(prev => {
@@ -197,10 +244,14 @@ export default function Feed() {
           newSet.delete(item.id);
           return newSet;
         });
-        setContent(prev => prev.map(contentItem => contentItem.id === item.id ? {
-          ...contentItem,
-          likes_count: contentItem.likes_count - 1
-        } : contentItem));
+
+        setContent(prev =>
+          prev.map(contentItem =>
+            contentItem.id === item.id
+              ? { ...contentItem, likes_count: contentItem.likes_count - 1 }
+              : contentItem
+          )
+        );
       } else {
         // Add like
         await supabase.from('likes').insert({
@@ -210,10 +261,13 @@ export default function Feed() {
 
         // Update UI
         setUserLikes(prev => new Set([...prev, item.id]));
-        setContent(prev => prev.map(contentItem => contentItem.id === item.id ? {
-          ...contentItem,
-          likes_count: contentItem.likes_count + 1
-        } : contentItem));
+        setContent(prev =>
+          prev.map(contentItem =>
+            contentItem.id === item.id
+              ? { ...contentItem, likes_count: contentItem.likes_count + 1 }
+              : contentItem
+          )
+        );
       }
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -224,41 +278,54 @@ export default function Feed() {
       });
     }
   };
+
   useEffect(() => {
     fetchContent();
 
     // Set up real-time subscription to update comment counts
-    const commentsChannel = supabase.channel('comments-updates').on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'comments'
-    }, () => {
-      // Refetch content to update comment counts
-      fetchContent();
-    }).on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'posts'
-    }, () => {
-      // Refetch content when posts are updated (for comment counts)
-      fetchContent();
-    }).on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'videos'
-    }, () => {
-      // Refetch content when videos are updated (for comment counts)
-      fetchContent();
-    }).subscribe();
+    const commentsChannel = supabase
+      .channel('comments-updates')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'comments'
+      }, () => {
+        // Refetch content to update comment counts
+        fetchContent();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'posts'
+      }, () => {
+        // Refetch content when posts are updated (for comment counts)
+        fetchContent();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'videos'      
+      }, () => {
+        // Refetch content when videos are updated (for comment counts)
+        fetchContent();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(commentsChannel);
     };
   }, [user, categoryFilter]);
+
   const filteredContent = content.filter(item => {
-    const matchesFilter = filter === 'all' || filter === 'posts' && item.type === 'post' || filter === 'videos' && item.type === 'video';
-    const matchesSearch = searchQuery === '' || item.title.toLowerCase().includes(searchQuery.toLowerCase()) || (item.content || item.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filter === 'all' || 
+      (filter === 'posts' && item.type === 'post') || 
+      (filter === 'videos' && item.type === 'video');
+    const matchesSearch = searchQuery === '' || 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.content || item.description || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
   const handleSignOut = async () => {
     await signOut();
   };
@@ -273,39 +340,54 @@ export default function Feed() {
       });
       return;
     }
+
     try {
       setIaLoading(true);
       setIaResult(null);
+
       const baseInstructionByMode: Record<typeof iaMode, string> = {
         engenharia: 'Você é um assistente técnico que gera comandos/scripts para ferramentas de engenharia (AutoCAD, Revit, SAP2000, MATLAB, Python para engenharia, etc.). Forneça passos claros e, quando aplicável, blocos de código ou comandos prontos para copiar.',
         crypto: 'Você é um especialista em criptomoedas e tecnologia blockchain. Explique conceitos, riscos e boas práticas de forma clara e educativa (isto não é aconselhamento financeiro).',
         growth: 'Você é um mentor de crescimento pessoal e produtividade. Forneça conselhos práticos, listas numeradas e frameworks simples para aplicação imediata.'
       };
+
       const formatInstruction = 'Formate a resposta em HTML simples (sem markdown). Use <h2>, <h3>, <p>, <ul>, <li>, <code>, <pre> quando apropriado. Não use asteriscos para negrito; use <strong>. Responda em português do Brasil.';
       const fullPrompt = `${baseInstructionByMode[iaMode]}\n\n${formatInstruction}\n\nSolicitação do usuário: ${iaPrompt}`;
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('generate-with-ai', {
-        body: {
-          prompt: fullPrompt
-        }
+
+      const { data, error } = await supabase.functions.invoke('generate-with-ai', {
+        body: { prompt: fullPrompt }
       });
+
       if (error) throw error;
+
       const generated = (data as any)?.generatedText || (data as any)?.text || '';
 
       // Fallback: se não vier em HTML, converte marcações básicas e quebra de linhas
       let html = generated;
       if (!/<[a-z][\s\S]*>/i.test(html)) {
-        html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/__([^_]+)__/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>').replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br />');
+        html = html
+          .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>')
+          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+          .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+          .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+          .replace(/_([^_]+)_/g, '<em>$1</em>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br />');
         html = `<p>${html}</p>`;
       }
+
       setIaResult(html);
     } catch (err) {
       console.error('Erro ao gerar comando:', err);
       const ctx = (err as any)?.context;
-      const providerMessage = ctx?.response?.text || (typeof ctx?.body === 'string' ? ctx.body : undefined) || (ctx?.response?.error ? JSON.stringify(ctx.response.error) : undefined);
-      const description = providerMessage || (err as any)?.message || (typeof err === 'string' ? err : 'Verifique sua conexão ou tente novamente em instantes.');
+      const providerMessage = ctx?.response?.text || 
+        (typeof ctx?.body === 'string' ? ctx.body : undefined) || 
+        (ctx?.response?.error ? JSON.stringify(ctx.response.error) : undefined);
+      const description = providerMessage || 
+        (err as any)?.message || 
+        (typeof err === 'string' ? err : 'Verifique sua conexão ou tente novamente em instantes.');
+
       toast({
         title: 'Erro ao gerar comando',
         description,
@@ -315,794 +397,553 @@ export default function Feed() {
       setIaLoading(false);
     }
   };
+
+  // Generate positive message
+  const handleGeneratePositiveMessage = async () => {
+    try {
+      setGeneratingPositiveMessage(true);
+      setPositiveMessage(null);
+
+      const prompt = `Gere uma mensagem motivacional e inspiradora em português do Brasil. 
+        A mensagem deve ser:
+        - Curta (máximo 2 frases)
+        - Poética e bonita
+        - Sobre fé, destino, sucesso, perseverança ou crescimento pessoal
+        - No estilo da frase: "A fé que vibra no coração é a semente que germina o destino."
+        
+        Retorne apenas a mensagem, sem aspas ou formatação adicional.`;
+
+      const { data, error } = await supabase.functions.invoke('generate-with-ai', {
+        body: { prompt }
+      });
+
+      if (error) throw error;
+
+      const generatedMessage = (data as any)?.generatedText || (data as any)?.text || '';
+
+      // Clean the message - remove quotes and extra formatting
+      const cleanMessage = generatedMessage
+        .replace(/^["']|["']$/g, '') // Remove quotes from start/end
+        .replace(/^\s*["""'']\s*|\s*["""'']\s*$/g, '') // Remove fancy quotes
+        .trim();
+
+      const finalMessage = cleanMessage || 'Mensagem não disponível no momento.';
+      setPositiveMessage(finalMessage);
+    } catch (err) {
+      console.error('Erro ao gerar mensagem:', err);
+      toast({
+        title: 'Erro ao gerar mensagem',
+        description: 'Tente novamente em alguns momentos.',
+        variant: 'destructive'
+      });
+    } finally {
+      setGeneratingPositiveMessage(false);
+    }
+  };
+
+  // Testimonial navigation
+  const nextTestimonial = () => {
+    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prevTestimonial = () => {
+    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">
+    return (
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>;
+      </div>
+    );
   }
 
-  // Special layout for engineering category
-  if (categoryFilter === 'engenharia') {
-    return <TooltipProvider>
-        <div className="min-h-screen w-full overflow-x-hidden" style={{
-        backgroundColor: '#0f172a'
-      }}>
-            <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
-            {/* Hero Section */}
-            <div className={`text-center mb-16 transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="relative mb-8">
-                <div className="flex justify-center items-center space-x-8 mb-8">
-                  <div className="animate-bounce" style={{
-                  animationDelay: '0s'
-                }}>
-                    <Cog className="w-16 h-16 text-orange-400 drop-shadow-lg" />
+  // Se há filtro de categoria, mostrar conteúdo filtrado
+  if (categoryFilter && categoryFilter !== 'engenharia') {
+    return (
+      <TooltipProvider>
+        <div className="min-h-screen bg-background">
+          <main className="container mx-auto px-4 py-8">
+            <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
+              {/* Search and Filter Section */}
+              <div className="w-full lg:w-1/4">
+                <div className="sticky top-8 space-y-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Buscar conteúdo..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-                  <div className="animate-bounce" style={{
-                  animationDelay: '0.5s'
-                }}>
-                    <CreditCard className="w-16 h-16 text-cyan-400 drop-shadow-lg" />
-                  </div>
-                  <div className="animate-bounce" style={{
-                  animationDelay: '1s'
-                }}>
-                    <Brain className="w-16 h-16 text-pink-400 drop-shadow-lg" />
-                  </div>
+                  
+                  <Tabs value={filter} onValueChange={(value) => setFilter(value as 'all' | 'posts' | 'videos')}>
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="all">Todos</TabsTrigger>
+                      <TabsTrigger value="posts">Posts</TabsTrigger>
+                      <TabsTrigger value="videos">Vídeos</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent mb-6">
-                Explore o Futuro com Tecnologia e Conhecimento
-              </h1>
-              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                Aprenda, evolua e acompanhe o crescimento do nosso ativo digital.
-              </p>
-              <div className="relative inline-block">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20 animate-pulse pointer-events-none"></div>
-                <Button onClick={async () => {
-                try {
-                  setGeneratingPositiveMessage(true);
-                  setPositiveMessage(null);
-                  console.log('Gerando mensagem positiva...');
-                  const prompt = `Gere uma mensagem motivacional e inspiradora em português do Brasil. 
-                      A mensagem deve ser:
-                      - Curta (máximo 2 frases)
-                      - Poética e bonita
-                      - Sobre fé, destino, sucesso, perseverança ou crescimento pessoal
-                      - No estilo da frase: "A fé que vibra no coração é a semente que germina o destino."
-                      
-                      Retorne apenas a mensagem, sem aspas ou formatação adicional.`;
-                  const {
-                    data,
-                    error
-                  } = await supabase.functions.invoke('generate-with-ai', {
-                    body: {
-                      prompt
-                    }
-                  });
-                  console.log('Resposta da IA:', data, error);
-                  if (error) throw error;
-                  const generatedMessage = (data as any)?.generatedText || (data as any)?.text || '';
 
-                  // Clean the message - remove quotes and extra formatting
-                  const cleanMessage = generatedMessage.replace(/^["']|["']$/g, '') // Remove quotes from start/end
-                  .replace(/^\s*["""'']\s*|\s*["""'']\s*$/g, '') // Remove fancy quotes
-                  .trim();
-                  console.log('Mensagem limpa:', cleanMessage);
-                  const finalMessage = cleanMessage || 'Mensagem não disponível no momento.';
-                  setPositiveMessage(finalMessage);
-                  // Remove a abertura do modal - agora a mensagem aparece abaixo do botão
-                } catch (err) {
-                  console.error('Erro ao gerar mensagem:', err);
-                  toast({
-                    title: 'Erro ao gerar mensagem',
-                    description: 'Tente novamente em alguns momentos.',
-                    variant: 'destructive'
-                  });
-                } finally {
-                  setGeneratingPositiveMessage(false);
-                }
-              }} disabled={generatingPositiveMessage} className="relative z-10 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25 cursor-pointer">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  {generatingPositiveMessage ? 'Gerando...' : 'Gerar Mensagem Positiva'}
+              {/* Content Section */}
+              <div className="w-full lg:w-3/4">
+                <div className="grid gap-6">
+                  {filteredContent.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
+                    </div>
+                  ) : (
+                    filteredContent.map((item) => (
+                      <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="secondary">{item.category.name}</Badge>
+                                <Badge variant={item.type === 'post' ? 'default' : 'outline'}>
+                                  {item.type === 'post' ? 'Post' : 'Vídeo'}
+                                </Badge>
+                              </div>
+                              <CardTitle className="line-clamp-2">
+                                <Link to={item.type === 'post' ? `/post/${item.slug}` : `/video/${item.slug}`}>
+                                  {item.title}
+                                </Link>
+                              </CardTitle>
+                              <CardDescription className="line-clamp-2 mt-2">
+                                {truncateText(item.description || item.content || '', 150)}
+                              </CardDescription>
+                            </div>
+                            {(item.cover_image_url || item.thumbnail_url) && (
+                              <div className="w-24 h-24 ml-4 flex-shrink-0">
+                                <img
+                                  src={item.cover_image_url || item.thumbnail_url}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover rounded-md"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Avatar className="w-6 h-6">
+                                  <AvatarFallback>
+                                    {item.author.display_name.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span>{item.author.display_name}</span>
+                              </div>
+                              <span>•</span>
+                              <span>{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleLike(item)}
+                                className={userLikes.has(item.id) ? 'text-red-500' : ''}
+                              >
+                                <Heart className={`w-4 h-4 mr-1 ${userLikes.has(item.id) ? 'fill-current' : ''}`} />
+                                {item.likes_count}
+                              </Button>
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <MessageCircle className="w-4 h-4" />
+                                {item.comments_count}
+                              </div>
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <Eye className="w-4 h-4" />
+                                {item.views_count}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
+  // Layout principal da homepage
+  return (
+    <TooltipProvider>
+      <div className="min-h-screen bg-background">
+        {/* Hero Section */}
+        <section className="relative min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920&h=1080&fit=crop')] bg-cover bg-center opacity-20"></div>
+          <div className="relative z-10 container mx-auto px-4 text-center">
+            <div className={`transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
+                Conhecimento, Inspiração e Inovação
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 text-gray-300 max-w-3xl mx-auto">
+                Aprenda Autocad Civil 3D, inspire-se com vídeos motivacionais e fique por dentro do universo das criptomoedas.
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Explorar Agora
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Seção de Engenharia */}
+        <section className="py-16 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+              {/* Coluna Esquerda - Aulas AutoCAD */}
+              <div className={`transition-all duration-1000 delay-200 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-blue-600">
+                  Aulas de Autocad Civil 3D
+                </h2>
+                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                  Desenvolva suas habilidades em modelagem, projetos de infraestrutura e análise de terrenos com nossas aulas especializadas de Autocad Civil 3D.
+                </p>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300"
+                >
+                  Saiba Mais
                 </Button>
               </div>
 
-              {/* Mensagem Positiva abaixo do botão */}
-              {positiveMessage && (
-                <div className="mt-8 max-w-2xl mx-auto">
-                  <div className="relative">
-                    <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg blur"></div>
-                    <blockquote className="relative text-lg md:text-xl font-medium text-cyan-300 leading-relaxed italic px-6 py-4 text-center bg-gray-900/50 rounded-lg border border-purple-500/20">
-                      "{positiveMessage}"
-                    </blockquote>
+              {/* Coluna Direita - Imagem e Card */}
+              <div className={`transition-all duration-1000 delay-400 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+                <div className="relative mb-8">
+                  <img 
+                    src={civil3dImage} 
+                    alt="Autocad Civil 3D" 
+                    className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                  />
+                </div>
+                
+                {/* Card Engenharia e Designer */}
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Cog className="w-8 h-8 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold text-orange-800 dark:text-orange-200">
+                      Engenharia e Designer
+                    </CardTitle>
+                    <CardDescription className="text-orange-700 dark:text-orange-300">
+                      Gere scripts e comandos para softwares de engenharia usando IA.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <Button 
+                      onClick={() => {
+                        setIaMode('engenharia');
+                        setIaOpen(true);
+                      }}
+                      className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300"
+                    >
+                      Geração de Comandos por IA
+                    </Button>
+                    <div className="mt-4 space-y-2">
+                      <p className="text-sm text-muted-foreground">Manuais e Tutoriais (Em Breve...)</p>
+                      <p className="text-sm text-muted-foreground">Projetos de Engenharia Civil (Em Breve...)</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Seção de Vídeos Motivacionais */}
+        <section className="py-16 bg-slate-900 text-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-cyan-400">
+                Vídeos Motivacionais
+              </h2>
+              <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Encontre inspiração para superar desafios e conquistar seus objetivos com conteúdos motivacionais cuidadosamente selecionados.
+              </p>
+              
+              {/* Botão Gerar Mensagem Positiva */}
+              <div className="mb-12">
+                <Button 
+                  onClick={handleGeneratePositiveMessage}
+                  disabled={generatingPositiveMessage}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  {generatingPositiveMessage ? 'Gerando...' : 'Gerar Mensagem Positiva'}
+                </Button>
+                
+                {/* Mensagem Positiva */}
+                {positiveMessage && (
+                  <div className="mt-8 max-w-2xl mx-auto">
+                    <div className="relative">
+                      <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg blur"></div>
+                      <blockquote className="relative text-lg md:text-xl font-medium text-cyan-300 leading-relaxed italic px-6 py-4 text-center bg-gray-900/50 rounded-lg border border-purple-500/20">
+                        "{positiveMessage}"
+                      </blockquote>
+                    </div>
                   </div>
+                )}
+              </div>
+            </div>
+
+            {/* Cards Motivacionais */}
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              <Card className="bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-t-lg"></div>
+                <CardContent className="p-6 text-center">
+                  <h3 className="text-xl font-bold mb-2 text-white">Supere seus limites</h3>
+                  <p className="text-gray-300">Histórias inspiradoras de resiliência e determinação.</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <div className="h-48 bg-gradient-to-br from-orange-500 to-red-600 rounded-t-lg"></div>
+                <CardContent className="p-6 text-center">
+                  <h3 className="text-xl font-bold mb-2 text-white">Mentalidade vencedora</h3>
+                  <p className="text-gray-300">Aprenda a cultivar pensamentos positivos diariamente.</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <div className="h-48 bg-gradient-to-br from-green-500 to-teal-600 rounded-t-lg"></div>
+                <CardContent className="p-6 text-center">
+                  <h3 className="text-xl font-bold mb-2 text-white">Foco e disciplina</h3>
+                  <p className="text-gray-300">Descubra como manter a consistência para alcançar seus sonhos.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Seção de Criptomoedas */}
+        <section className="py-16 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+              {/* Coluna Esquerda - Imagem Crypto */}
+              <div className={`transition-all duration-1000 delay-200 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+                <img 
+                  src={criptosImage} 
+                  alt="Criptomoedas" 
+                  className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                />
+              </div>
+
+              {/* Coluna Direita - Conteúdo */}
+              <div className={`transition-all duration-1000 delay-400 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-blue-600">
+                  Mundo das Criptomoedas
+                </h2>
+                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                  Explore análises, tendências e oportunidades no mercado de criptomoedas. Informação confiável e atualizada para quem deseja investir com segurança.
+                </p>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 mb-8"
+                >
+                  Ver Conteúdos
+                </Button>
+
+                {/* Card CryptoMoeda + IA */}
+                <Card className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-950 dark:to-pink-900 border-pink-200 dark:border-pink-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CreditCard className="w-8 h-8 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold text-pink-800 dark:text-pink-200">
+                      CryptoMoeda + IA
+                    </CardTitle>
+                    <CardDescription className="text-pink-700 dark:text-pink-300">
+                      Tire suas dúvidas sobre criptomoedas e blockchain com nosso assistente.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <Button 
+                      onClick={() => {
+                        setIaMode('crypto');
+                        setIaOpen(true);
+                      }}
+                      className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 mb-4"
+                    >
+                      Crypto IA / Pergunte
+                    </Button>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Análise de Gráficos (Em Breve...)</p>
+                      <p className="text-sm text-muted-foreground">Notícias e Atualidades (Em Breve...)</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Seção de Testemunhos */}
+        <section className="py-16 bg-slate-900 text-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-cyan-400">
+                Testemunhos
+              </h2>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <Card className="bg-slate-800 border-slate-700 p-8">
+                <CardContent className="text-center">
+                  <div className="mb-6">
+                    <img 
+                      src={testimonials[currentTestimonial].avatar}
+                      alt={testimonials[currentTestimonial].name}
+                      className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+                    />
+                  </div>
+                  
+                  <blockquote className="text-xl md:text-2xl font-medium text-white mb-6 leading-relaxed">
+                    "{testimonials[currentTestimonial].message}"
+                  </blockquote>
+                  
+                  <div className="text-cyan-400 font-semibold text-lg">
+                    {testimonials[currentTestimonial].name}
+                  </div>
+                  <div className="text-gray-400">
+                    {testimonials[currentTestimonial].role}
+                  </div>
+
+                  {/* Navigation */}
+                  <div className="flex justify-center items-center mt-8 space-x-4">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={prevTestimonial}
+                      className="text-cyan-400 hover:text-cyan-300 hover:bg-slate-700"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </Button>
+                    
+                    <div className="flex space-x-2">
+                      {testimonials.map((_, index) => (
+                        <div 
+                          key={index}
+                          className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                            index === currentTestimonial ? 'bg-cyan-400' : 'bg-gray-600'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={nextTestimonial}
+                      className="text-cyan-400 hover:text-cyan-300 hover:bg-slate-700"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-slate-950 text-white py-12">
+          <div className="container mx-auto px-4">
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-cyan-400">Ivo Fernandes News</h3>
+                <p className="text-gray-300">
+                  Unindo tecnologia, inspiração e informação em um só lugar.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-cyan-400">Navegação</h3>
+                <ul className="space-y-2 text-gray-300">
+                  <li>Autocad Civil 3D</li>
+                  <li>Motivacionais</li>
+                  <li>Criptomoedas</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-cyan-400">Contato</h3>
+                <p className="text-gray-300">
+                  Email: contato@ivoferrandesnews.com
+                </p>
+              </div>
+            </div>
+            
+            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-gray-400">
+              © 2025 Ivo Fernandes News - Todos os direitos reservados
+            </div>
+          </div>
+        </footer>
+
+        {/* IA Commands Dialog */}
+        <Dialog open={iaOpen} onOpenChange={setIaOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Brain className="w-5 h-5" />
+                Assistente IA - {iaMode === 'engenharia' ? 'Engenharia' : iaMode === 'crypto' ? 'Criptomoedas' : 'Crescimento Pessoal'}
+              </DialogTitle>
+              <DialogDescription>
+                {iaMode === 'engenharia' && 'Gere comandos e scripts para ferramentas de engenharia'}
+                {iaMode === 'crypto' && 'Tire dúvidas sobre criptomoedas e blockchain'}
+                {iaMode === 'growth' && 'Receba conselhos de crescimento pessoal e produtividade'}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <Textarea
+                placeholder={
+                  iaMode === 'engenharia' 
+                    ? 'Ex: Como criar um script para automatizar a criação de perfis longitudinais no AutoCAD Civil 3D?'
+                    : iaMode === 'crypto'
+                    ? 'Ex: Qual a diferença entre Bitcoin e Ethereum?'
+                    : 'Ex: Como posso melhorar minha produtividade no trabalho?'
+                }
+                value={iaPrompt}
+                onChange={(e) => setIaPrompt(e.target.value)}
+                rows={4}
+              />
+
+              <Button
+                onClick={handleGenerateIaCommand}
+                disabled={iaLoading}
+                className="w-full"
+              >
+                {iaLoading ? 'Gerando...' : 'Gerar Resposta'}
+              </Button>
+
+              {iaResult && (
+                <div className="mt-6 p-4 border rounded-lg bg-muted/50">
+                  <h4 className="font-semibold mb-2">Resposta da IA:</h4>
+                  <div 
+                    className="prose prose-sm max-w-none dark:prose-invert"
+                    dangerouslySetInnerHTML={{ __html: iaResult }}
+                  />
                 </div>
               )}
             </div>
-
-            {/* IA Commands Dialog */}
-            <Dialog open={iaOpen} onOpenChange={setIaOpen}>
-              <DialogContent className="sm:max-w-[680px] bg-slate-900 text-white border border-slate-700">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl">
-                    {iaMode === 'engenharia' ? 'Geração de Comandos por IA' : iaMode === 'crypto' ? 'Crypto IA — Pergunte' : 'Crescimento Pessoal IA'}
-                  </DialogTitle>
-                  <DialogDescription className="text-slate-300">
-                    {iaMode === 'engenharia' ? 'Descreva a tarefa ou comando que você precisa e nossa IA gerará o script ou instruções para ferramentas de engenharia.' : iaMode === 'crypto' ? 'Faça sua pergunta sobre criptomoedas e blockchain (educacional, sem aconselhamento financeiro).' : 'Peça conselhos práticos de produtividade, hábitos e carreira.'}
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-4">
-                  <Textarea value={iaPrompt} onChange={e => setIaPrompt(e.target.value)} placeholder={iaMode === 'engenharia' ? "Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD'; 'Comando para criar uma parede de 20cm no Revit'; 'Modelar uma viga no SAP2000'" : iaMode === 'crypto' ? "Ex: 'O que é staking e quais os riscos?'; 'Como funciona a rede Ethereum e o gas?'; 'Diferença entre token e coin?'; 'Como guardar minhas chaves com segurança?'" : "Ex: 'Como montar uma rotina matinal produtiva?'; 'Técnicas para foco profundo (deep work)?'; 'Como criar o hábito de estudar diariamente?'; 'Framework para metas SMART?'"} className="min-h-[140px] bg-slate-800/60 text-white placeholder:text-slate-400" />
-
-                  <div className="flex items-center gap-3">
-                    <Button onClick={handleGenerateIaCommand} disabled={iaLoading} className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white">
-                      {iaLoading ? 'Gerando...' : iaMode === 'engenharia' ? 'Gerar Comando' : iaMode === 'crypto' ? 'Pergunte IA' : 'Gerar Dica'}
-                    </Button>
-                    <Button variant="secondary" onClick={() => setIaOpen(false)} className="bg-slate-700 hover:bg-slate-600 text-gray-200">
-                      Fechar
-                    </Button>
-                  </div>
-
-                  {iaResult && <div className="mt-2 rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
-                      <div className="px-4 py-2 text-sm text-slate-300 border-b border-slate-700">Resultado</div>
-                      <div className="max-h-[320px] overflow-auto p-4 text-sm text-slate-200 leading-relaxed space-y-3 [&_h2]:text-white [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-6 [&_code]:bg-black/40 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_pre]:bg-black/40 [&_pre]:p-3 [&_pre]:rounded" dangerouslySetInnerHTML={{
-                    __html: iaResult
-                  }} />
-                    </div>}
-                </div>
-
-                <DialogFooter />
-              </DialogContent>
-            </Dialog>
-
-            {/* Three Cards Section */}
-            <div className={`grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              {/* Engenharia e Designer */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10 group">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-4 rounded-2xl transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
-                    <div className="text-white text-2xl animate-pulse">⚙️</div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-orange-400 transition-colors duration-300">
-                    Engenharia e Designer
-                  </h3>
-                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
-                    Gere scripts e comandos para softwares de engenharia usando IA.
-                  </p>
-                </div>
-                
-                <div className="space-y-3">
-                  <Button onClick={() => {
-                  setIaMode('engenharia');
-                  setIaOpen(true);
-                }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-cyan-500/25">
-                    Geração de Comandos por IA
-                  </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Manuais e Tutoriais (Em Breve...)
-                  </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200 text-xs">
-                    Projetos de Engenharia Civil  (Em Breve...)
-                  </Button>
-                </div>
-              </div>
-
-              {/* CryptoMoeda + IA */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/10 group">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
-                    <div className="text-white text-2xl animate-pulse">🧠</div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-pink-400 transition-colors duration-300">
-                    CryptoMoeda + IA
-                  </h3>
-                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
-                    Tire suas dúvidas sobre criptomoedas e blockchain com nosso assistente.
-                  </p>
-                </div>
-                
-                <div className="space-y-3">
-                  <Button onClick={() => {
-                  setIaMode('crypto');
-                  setIaOpen(true);
-                }} className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-purple-500/25">
-                    Crypto IA / Pergunte
-                  </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Análise de Gráficos (Em Breve...)
-                  </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Notícias e Atualidades (Em Breve...)
-                  </Button>
-                </div>
-              </div>
-
-              {/* Conteúdo + Motivação */}
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 card-hover transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-gray-500/10 group">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
-                    <div className="text-white text-2xl animate-pulse">💭</div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-gray-400 transition-colors duration-300">
-                    Conteúdo + Motivação
-                  </h3>
-                  <p className="text-gray-400 mb-6 group-hover:text-gray-300 transition-colors duration-300">
-                    Receba conselhos e insights para seu desenvolvimento pessoal e carreira.
-                  </p>
-                </div>
-                
-                <div className="space-y-3">
-                  <Button onClick={() => {
-                  setIaMode('growth');
-                  setIaOpen(true);
-                }} className="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 rounded-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-pink-500/25">
-                    Crescimento Pessoal IA
-                  </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Atualidades IA (Em Breve...)
-                  </Button>
-                  <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-600 text-gray-300 py-3 rounded-lg transform hover:scale-105 transition-all duration-200">
-                    Conteúdo Vlog (Em Breve...)
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonials Section */}
-            <div style={{
-            backgroundColor: '#111828'
-          }} className={`backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mt-24 mb-16 transition-all duration-1000 delay-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="max-w-6xl mx-auto">
-                <h2 className="text-4xl font-bold text-white text-center mb-16">
-                  O que as pessoas estão dizendo
-                </h2>
-                <div className="grid md:grid-cols-4 gap-8">
-                  <div style={{
-                  backgroundColor: '#202938'
-                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
-                    <div className="flex flex-col items-center mb-4">
-                      <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face" alt="Mariana L." className="w-12 h-12 rounded-full object-cover mb-2" />
-                      <div>
-                        <div className="text-white font-medium">Mariana L.</div>
-                        <div className="text-gray-400 text-sm">Engenheira Civil</div>
-                      </div>
-                    </div>
-                    <p className="text-gray-300 text-sm italic">
-                      "Esse projeto me inspira todos os dias a buscar mais conhecimento. Parabéns pela iniciativa!"
-                    </p>
-                  </div>
-
-                  <div style={{
-                  backgroundColor: '#202938'
-                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
-                    <div className="flex flex-col items-center mb-4">
-                      <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face" alt="João V." className="w-12 h-12 rounded-full object-cover mb-2" />
-                      <div>
-                        <div className="text-white font-medium">João V.</div>
-                        <div className="text-gray-400 text-sm">Arquiteto</div>
-                      </div>
-                    </div>
-                    <p className="text-gray-300 text-sm italic">
-                      "Muito além de um site comum. É uma experiência completa com conteúdo útil de verdade."
-                    </p>
-                  </div>
-
-                  <div style={{
-                  backgroundColor: '#202938'
-                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
-                    <div className="flex flex-col items-center mb-4">
-                      <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face" alt="Camila F." className="w-12 h-12 rounded-full object-cover mb-2" />
-                      <div>
-                        <div className="text-white font-medium">Camila F.</div>
-                        <div className="text-gray-400 text-sm">Designer</div>
-                      </div>
-                    </div>
-                    <p className="text-gray-300 text-sm italic">
-                      "Gostei da parte da IA motivacional. Às vezes, é exatamente o que a gente precisa."
-                    </p>
-                  </div>
-
-                  <div style={{
-                  backgroundColor: '#202938'
-                }} className="backdrop-blur-sm rounded-2xl p-6 border border-slate-600/50 card-hover text-center">
-                    <div className="flex flex-col items-center mb-4">
-                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Ricardo T." className="w-12 h-12 rounded-full object-cover mb-2" />
-                      <div>
-                        <div className="text-white font-medium">Ricardo T.</div>
-                        <div className="text-gray-400 text-sm">Desenvolvedor</div>
-                      </div>
-                    </div>
-                    <p className="text-gray-300 text-sm italic">
-                      "A proposta de ativos digitais é bem original. Estou curioso para ver como isso vai evoluir."
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* About Us Section */}
-            <div style={{
-            backgroundColor: '#030712'
-          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
-              <div className="max-w-4xl mx-auto text-center">
-                <h2 className="text-4xl font-bold text-white mb-8">
-                  Sobre Nós
-                </h2>
-                <p className="text-lg text-gray-300 leading-relaxed">
-                  Somos movidos pela vontade de transformar ideias em realidade. Nosso projeto une 
-                  engenharia, inteligência artificial, criação de conteúdo e ativos digitais em um só lugar. Aqui 
-                  você aprende, investe, se motiva e evolui — sempre com apoio de tecnologia de ponta e 
-                  inteligência coletiva.
-                </p>
-              </div>
-            </div>
-
-            {/* Novidades & Atualizações Section */}
-            <div style={{
-            backgroundColor: '#111828'
-          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
-              <div className="max-w-4xl mx-auto text-center">
-                <h2 className="text-4xl font-bold text-white mb-8">
-                  Novidades & Atualizações
-                </h2>
-                <div className="space-y-4 text-gray-300 text-lg">
-                  <div className="flex items-start justify-center gap-3">
-                    <span className="text-orange-400 text-xl">🚀</span>
-                    <p>Lançamento oficial do site e início da fase beta!</p>
-                  </div>
-                  <div className="flex items-start justify-center gap-3">
-                    <span className="text-blue-400 text-xl">💡</span>
-                    <p>Nova IA para conselhos motivacionais já em funcionamento.</p>
-                  </div>
-                  <div className="flex items-start justify-center gap-3">
-                    <span className="text-green-400 text-xl">📱</span>
-                    <p>Monitoramento de Ativo Digital agora disponível.</p>
-                  </div>
-                  <div className="flex items-start justify-center gap-3">
-                    <span className="text-purple-400 text-xl">📚</span>
-                    <p>Mais recursos chegando em breve, fique ligado!</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Perguntas Frequentes Section */}
-            <div style={{
-            backgroundColor: '#030712'
-          }} className="backdrop-blur-sm rounded-3xl p-12 border border-slate-700/50 mb-16">
-              <div className="max-w-4xl mx-auto">
-                <h2 className="text-4xl font-bold text-white text-center mb-12">
-                  Perguntas Frequentes
-                </h2>
-                <div className="space-y-8">
-                  <div>
-                    <div className="flex items-start gap-3 mb-3">
-                      <span className="text-blue-400 text-xl">🔍</span>
-                      <h3 className="text-xl font-bold text-white">O que é o Ativo Digital?</h3>
-                    </div>
-                    <p className="text-gray-300 leading-relaxed ml-8">
-                      É um valor construído com base nas transações positivas de Ivo Fernandes, disponível para consulta e participação.
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="flex items-start gap-3 mb-3">
-                      <span className="text-green-400 text-xl">📊</span>
-                      <h3 className="text-xl font-bold text-white">Como posso acompanhar os lucros?</h3>
-                    </div>
-                    <p className="text-gray-300 leading-relaxed ml-8">
-                      Os lucros são exibidos na seção "Nosso Ativo Digital". Em breve, teremos gráficos dinâmicos!
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="flex items-start gap-3 mb-3">
-                      <span className="text-pink-400 text-xl">🧠</span>
-                      <h3 className="text-xl font-bold text-white">Como funciona a IA Motivacional?</h3>
-                    </div>
-                    <p className="text-gray-300 leading-relaxed ml-8">
-                      Ao clicar no botão, você recebe uma mensagem gerada automaticamente com foco em bem-estar e motivação.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="text-center py-8 border-t border-slate-700/50">
-              <p className="text-gray-400">
-                © 2025 Ivo Fernandes. Todos os direitos reservados.
-              </p>
-            </div>
-          </main>
-        </div>
-      </TooltipProvider>;
-  }
-
-  // Special layout for crypto category
-  if (categoryFilter === 'crypto') {
-    return <TooltipProvider>
-        <div className="min-h-screen w-full overflow-x-hidden" style={{
-        backgroundColor: '#0f172a'
-      }}>
-            <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                🚀 Mundo das Criptomoedas
-              </h1>
-              <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-                Descubra o universo das moedas digitais, blockchain e o futuro das finanças descentralizadas.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-12 mb-16">
-              <div className="bg-gradient-to-br from-purple-800/30 to-blue-800/30 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30">
-                <h2 className="text-2xl font-bold text-white mb-4">📈 Análise de Mercado</h2>
-                <p className="text-gray-300 mb-6">
-                  Acompanhe as tendências do mercado cripto com análises técnicas e fundamentais atualizadas diariamente.
-                </p>
-                <ul className="space-y-2 text-gray-400">
-                  <li>• Bitcoin e principais altcoins</li>
-                  <li>• Indicadores técnicos avançados</li>
-                  <li>• Previsões e projeções</li>
-                  <li>• Análise de sentimento do mercado</li>
-                </ul>
-              </div>
-
-              <div className="bg-gradient-to-br from-blue-800/30 to-cyan-800/30 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/30">
-                <h2 className="text-2xl font-bold text-white mb-4">🔗 Tecnologia Blockchain</h2>
-                <p className="text-gray-300 mb-6">
-                  Entenda a tecnologia por trás das criptomoedas e como ela está revolucionando diversos setores.
-                </p>
-                <ul className="space-y-2 text-gray-400">
-                  <li>• Conceitos fundamentais</li>
-                  <li>• Smart Contracts e DApps</li>
-                  <li>• NFTs e Metaverso</li>
-                  <li>• DeFi e protocolos emergentes</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 backdrop-blur-sm rounded-2xl p-8 border border-yellow-500/30 mb-12">
-              <h2 className="text-3xl font-bold text-white text-center mb-6">💡 Dicas de Investimento</h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-4xl mb-4">🛡️</div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Segurança</h3>
-                  <p className="text-gray-400 text-sm">Proteja seus ativos com carteiras seguras e boas práticas.</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl mb-4">📊</div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Diversificação</h3>
-                  <p className="text-gray-400 text-sm">Distribua riscos com um portfólio balanceado.</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl mb-4">🎯</div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Estratégia</h3>
-                  <p className="text-gray-400 text-sm">Defina objetivos claros e mantenha disciplina.</p>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      </TooltipProvider>;
-  }
-
-  // Special layout for music category
-  if (categoryFilter === 'musica') {
-    return <TooltipProvider>
-        <div className="min-h-screen w-full overflow-x-hidden" style={{
-        backgroundColor: '#0f172a'
-      }}>
-            <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                🎵 Universo Musical
-              </h1>
-              <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-                Explore a música em todas as suas formas: produção, teoria, tecnologia e cultura musical.
-              </p>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-8 mb-16">
-              <div className="bg-gradient-to-br from-pink-800/40 to-purple-800/40 backdrop-blur-sm rounded-2xl p-6 border border-pink-500/30">
-                <h2 className="text-xl font-bold text-white mb-4">🎛️ Produção Musical</h2>
-                <ul className="space-y-3 text-gray-300">
-                  <li>• Home Studio Setup</li>
-                  <li>• DAWs e Plugins</li>
-                  <li>• Mixagem e Masterização</li>
-                  <li>• Gravação e Edição</li>
-                </ul>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-800/40 to-blue-800/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30">
-                <h2 className="text-xl font-bold text-white mb-4">🎼 Teoria Musical</h2>
-                <ul className="space-y-3 text-gray-300">
-                  <li>• Harmonia e Melodia</li>
-                  <li>• Escalas e Acordes</li>
-                  <li>• Composição</li>
-                  <li>• Análise Musical</li>
-                </ul>
-              </div>
-
-              <div className="bg-gradient-to-br from-blue-800/40 to-cyan-800/40 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/30">
-                <h2 className="text-xl font-bold text-white mb-4">🎸 Instrumentos</h2>
-                <ul className="space-y-3 text-gray-300">
-                  <li>• Guitarra e Baixo</li>
-                  <li>• Piano e Teclados</li>
-                  <li>• Bateria e Percussão</li>
-                  <li>• Instrumentos Virtuais</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-orange-600/20 to-red-600/20 backdrop-blur-sm rounded-2xl p-8 border border-orange-500/30">
-              <h2 className="text-3xl font-bold text-white text-center mb-8">🌟 Tendências Musicais</h2>
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-4">🎧 Streaming e Distribuição</h3>
-                  <p className="text-gray-300 mb-4">
-                    Como artistas independentes podem alcançar milhões de ouvintes através das plataformas digitais.
-                  </p>
-                  <ul className="text-gray-400 space-y-1">
-                    <li>• Spotify, Apple Music, YouTube Music</li>
-                    <li>• Marketing musical digital</li>
-                    <li>• Monetização e royalties</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-4">🤖 IA na Música</h3>
-                  <p className="text-gray-300 mb-4">
-                    Inteligência artificial está revolucionando a criação, produção e distribuição musical.
-                  </p>
-                  <ul className="text-gray-400 space-y-1">
-                    <li>• Composição assistida por IA</li>
-                    <li>• Masterização automática</li>
-                    <li>• Recomendações personalizadas</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      </TooltipProvider>;
-  }
-
-  // Special layout for motivational category
-  if (categoryFilter === 'motivacional') {
-    return <TooltipProvider>
-        <div className="min-h-screen w-full overflow-x-hidden" style={{
-        backgroundColor: '#0f172a'
-      }}>
-            <main className="mx-auto w-full px-4 py-8 max-w-[95vw] md:max-w-[70vw]">
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                🔥 Crescimento Pessoal
-              </h1>
-              <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-                Desenvolva seu potencial máximo com estratégias comprovadas de produtividade, liderança e sucesso.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8 mb-16">
-              <div className="bg-gradient-to-br from-orange-800/40 to-red-800/40 backdrop-blur-sm rounded-2xl p-8 border border-orange-500/30">
-                <h2 className="text-2xl font-bold text-white mb-6">🎯 Produtividade</h2>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <span className="text-orange-400 text-xl">⏰</span>
-                    <div>
-                      <h3 className="font-semibold text-white">Gestão de Tempo</h3>
-                      <p className="text-gray-400 text-sm">Técnicas como Pomodoro, Time Blocking e GTD</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-orange-400 text-xl">🧠</span>
-                    <div>
-                      <h3 className="font-semibold text-white">Foco e Concentração</h3>
-                      <p className="text-gray-400 text-sm">Elimine distrações e maximize sua performance</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-orange-400 text-xl">📈</span>
-                    <div>
-                      <h3 className="font-semibold text-white">Hábitos de Sucesso</h3>
-                      <p className="text-gray-400 text-sm">Construa rotinas que levam a resultados extraordinários</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-red-800/40 to-pink-800/40 backdrop-blur-sm rounded-2xl p-8 border border-red-500/30">
-                <h2 className="text-2xl font-bold text-white mb-6">🚀 Liderança</h2>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <span className="text-red-400 text-xl">💪</span>
-                    <div>
-                      <h3 className="font-semibold text-white">Autoconfiança</h3>
-                      <p className="text-gray-400 text-sm">Desenvolva uma mentalidade de crescimento</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-red-400 text-xl">🤝</span>
-                    <div>
-                      <h3 className="font-semibold text-white">Comunicação</h3>
-                      <p className="text-gray-400 text-sm">Habilidades para inspirar e influenciar pessoas</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-red-400 text-xl">🎖️</span>
-                    <div>
-                      <h3 className="font-semibold text-white">Tomada de Decisão</h3>
-                      <p className="text-gray-400 text-sm">Estratégias para decisões assertivas e rápidas</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-6 mb-12">
-              <div className="bg-gradient-to-b from-yellow-600/30 to-orange-600/30 backdrop-blur-sm rounded-xl p-6 border border-yellow-500/30 text-center">
-                <div className="text-4xl mb-4">🏆</div>
-                <h3 className="text-lg font-bold text-white mb-2">Metas e Objetivos</h3>
-                <p className="text-gray-400 text-sm">Defina, planeje e alcance seus sonhos com metodologias comprovadas.</p>
-              </div>
-              <div className="bg-gradient-to-b from-green-600/30 to-emerald-600/30 backdrop-blur-sm rounded-xl p-6 border border-green-500/30 text-center">
-                <div className="text-4xl mb-4">💰</div>
-                <h3 className="text-lg font-bold text-white mb-2">Inteligência Financeira</h3>
-                <p className="text-gray-400 text-sm">Estratégias para construir riqueza e liberdade financeira.</p>
-              </div>
-              <div className="bg-gradient-to-b from-blue-600/30 to-indigo-600/30 backdrop-blur-sm rounded-xl p-6 border border-blue-500/30 text-center">
-                <div className="text-4xl mb-4">🧘</div>
-                <h3 className="text-lg font-bold text-white mb-2">Bem-estar Mental</h3>
-                <p className="text-gray-400 text-sm">Cuide da sua saúde mental e emocional para uma vida plena.</p>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30">
-              <h2 className="text-2xl font-bold text-white text-center mb-6">📚 Biblioteca de Crescimento</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">📖 Livros Recomendados</h3>
-                  <ul className="text-gray-300 space-y-1">
-                    <li>• Hábitos Atômicos - James Clear</li>
-                    <li>• Mindset - Carol Dweck</li>
-                    <li>• O Poder do Agora - Eckhart Tolle</li>
-                    <li>• Pai Rico, Pai Pobre - Robert Kiyosaki</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">🎧 Podcasts Inspiradores</h3>
-                  <ul className="text-gray-300 space-y-1">
-                    <li>• Flow Podcast</li>
-                    <li>• PodPeople</li>
-                    <li>• Mais1 Podcast</li>
-                    <li>• Café da Manhã</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      </TooltipProvider>;
-  }
-
-  // Default layout for "Notícias" (main page) - shows cards
-  return <TooltipProvider>
-      <div className="min-h-screen w-full overflow-x-hidden" style={{
-      backgroundColor: '#0f172a'
-    }}>
-        {/* Main Content */}
-        <main className="container mx-auto px-4 py-8 max-w-full">
-          {/* Search Bar */}
-          <div className="mb-6 flex justify-center">
-            <form onSubmit={e => {
-            e.preventDefault();
-            const newParams = new URLSearchParams(searchParams);
-            if (searchQuery.trim()) {
-              newParams.set('search', searchQuery.trim());
-            } else {
-              newParams.delete('search');
-            }
-            setSearchParams(newParams);
-          }} className="relative w-full max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input placeholder="Buscar conteúdo..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
-            </form>
-          </div>
-
-          <div className="mb-6 flex justify-center">
-            <Tabs value={filter} onValueChange={value => setFilter(value as any)}>
-              <TabsList>
-                <TabsTrigger value="all">Todos</TabsTrigger>
-                <TabsTrigger value="posts">Notícias</TabsTrigger>
-                <TabsTrigger value="videos">Vídeos</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* Search Results Info */}
-          {searchQuery && <div className="mb-4 text-center text-muted-foreground">
-              <p>{filteredContent.length} resultado(s) para o termo "{searchQuery}"</p>
-            </div>}
-
-          {filteredContent.length === 0 ? <div className="text-center py-12">
-              <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
-            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
-              {filteredContent.map(item => {
-            const isLiked = userLikes.has(item.id);
-            return <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow w-full">
-                    <Link to={`/${item.type}/${item.slug}`}>
-                      <div className="aspect-video bg-muted relative overflow-hidden">
-                        {item.type === 'video' && item.youtube_video_id ? <>
-                            <img src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_video_id}/maxresdefault.jpg`} alt={item.title} className="w-full h-full object-cover" />
-                            {item.duration && <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                                {item.duration}
-                              </div>}
-                          </> : item.cover_image_url ? <img src={item.cover_image_url} alt={item.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-muted">
-                            {item.type === 'video' ? <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                                <div className="w-0 h-0 border-l-[6px] border-l-primary border-y-[4px] border-y-transparent ml-1"></div>
-                              </div> : <div className="text-muted-foreground text-sm">Sem imagem</div>}
-                          </div>}
-                       </div>
-                     </Link>
-                     
-                      <CardHeader>
-                        <CardTitle className="break-anywhere leading-tight">
-                          <Link to={`/${item.type}/${item.slug}`} className="hover:text-primary">
-                            {item.title}
-                          </Link>
-                        </CardTitle>
-                         <div className="flex justify-between items-center mt-2">
-                           <Badge variant="secondary" className="text-xs">
-                             {item.category?.name}
-                           </Badge>
-                           <Badge variant="outline" className="text-xs">
-                             {item.type === 'post' ? 'Post' : 'Vídeo'}
-                           </Badge>
-                         </div>
-                        <CardDescription className="line-clamp-2 break-anywhere" dangerouslySetInnerHTML={{
-                  __html: processTextWithLinks(item.type === 'post' ? truncateText(item.content || '', 150) : truncateText(item.description || '', 150))
-                }} />
-                    </CardHeader>
-                    
-                     <CardContent>
-                       <div className="flex items-center justify-between text-sm text-muted-foreground">
-                         <div className="flex items-center gap-2">
-                           <Avatar className="h-6 w-6">
-                             <img src={item.author?.avatar_url || ''} alt={item.author?.display_name || 'Avatar'} className="h-full w-full object-cover" onError={e => {
-                        e.currentTarget.style.display = 'none';
-                      }} />
-                             <AvatarFallback className="h-6 w-6 text-xs bg-muted">
-                               {item.author?.display_name?.charAt(0)?.toUpperCase() || 'A'}
-                             </AvatarFallback>
-                           </Avatar>
-                           <span className="truncate">{item.author?.display_name}</span>
-                         </div>
-                         <span className="whitespace-nowrap">{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
-                       </div>
-                      
-                      <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-1">
-                          <Eye className="h-4 w-4" />
-                          <span>{item.views_count}</span>
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={e => {
-                    e.preventDefault();
-                    handleLike(item);
-                  }} className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}>
-                          <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-                          <span>{item.likes_count}</span>
-                        </Button>
-                        <div className="flex items-center space-x-1">
-                          <MessageCircle className="h-4 w-4" />
-                          <span>{item.comments_count}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>;
-          })}
-            </div>}
-        </main>
+          </DialogContent>
+        </Dialog>
       </div>
-    </TooltipProvider>;
+    </TooltipProvider>
+  );
 }
