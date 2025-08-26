@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User, Camera, Key, FileText, Eye, Heart, MessageCircle, Play, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import ContentEditDialog from "@/components/ContentEditDialog";
+import { truncateText } from '@/lib/text-utils';
 
 interface UserContent {
   id: string;
@@ -408,14 +409,12 @@ const Profile = () => {
                                          <Edit className="h-3 w-3 opacity-60" />
                                        </div>
                                      </div>
-                                      <div 
-                                        className="text-sm text-muted-foreground mt-1 line-clamp-2"
-                                        dangerouslySetInnerHTML={{
-                                          __html: item.type === 'post' 
-                                            ? (item.content?.substring(0, 100) + '...' || '') 
-                                            : (item.description || '')
-                                        }}
-                                      />
+                                       <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                         {item.type === 'post' 
+                                           ? truncateText(item.content || '', 100)
+                                           : truncateText(item.description || '', 100)
+                                         }
+                                       </div>
                                    </div>
                                 </div>
                                 

@@ -13,7 +13,8 @@ import { Heart, MessageCircle, Eye, Search, Plus, Settings, User, Cog, CreditCar
 import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { truncateWithTooltip, processTextWithLinks, truncateText } from '@/lib/text-utils';
+import { processTextWithLinks, truncateText } from '@/lib/text-utils';
+import { sanitizeHtml } from '@/lib/html-sanitizer';
 
 // Import das imagens
 import civil3dImage from '@/assets/civil3d.png';
@@ -959,7 +960,7 @@ export default function Feed() {
                   <h4 className="font-semibold mb-2">Resposta da IA:</h4>
                   <div 
                     className="prose prose-sm max-w-none dark:prose-invert"
-                    dangerouslySetInnerHTML={{ __html: iaResult }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(iaResult, 'content') }}
                   />
                 </div>
               )}

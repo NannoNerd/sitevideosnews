@@ -1,3 +1,5 @@
+import { sanitizeHtml, processAndSanitizeText, stripHtml, truncateHtmlSafely } from './html-sanitizer';
+
 export const truncateUrl = (url: string, maxLength: number = 30): string => {
   if (url.length <= maxLength) {
     return url;
@@ -19,14 +21,12 @@ export const processTextWithLinks = (text: string): string => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline" title="${url}">${displayUrl}</a>`;
   });
   
-  return processedText;
+  // Sanitize the processed text to prevent XSS
+  return sanitizeHtml(processedText, 'basic');
 };
 
-export const stripHtml = (html: string): string => {
-  const temp = document.createElement('div');
-  temp.innerHTML = html;
-  return temp.textContent || temp.innerText || '';
-};
+// Use the secure stripHtml from html-sanitizer
+export { stripHtml } from './html-sanitizer';
 
 export const cleanHtmlForEditor = (html: string): string => {
   if (!html) return '';
@@ -68,11 +68,7 @@ export const cleanHtmlForEditor = (html: string): string => {
 };
 
 export const truncateText = (text: string, maxLength: number = 150): string => {
-  const strippedText = stripHtml(text);
-  if (strippedText.length <= maxLength) {
-    return strippedText;
-  }
-  return strippedText.substring(0, maxLength) + '...';
+  return truncateHtmlSafely(text, maxLength);
 };
 
 export const truncateWithTooltip = (text: string, maxLength: number = 30): { truncated: string; full: string; needsTooltip: boolean } => {
