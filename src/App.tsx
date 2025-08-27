@@ -27,7 +27,7 @@ const App = () => (
         <BrowserRouter>
           <div className="min-h-screen bg-background dark">
             <Navigation />
-            <main>
+            <main className="container mx-auto max-w-7xl px-4">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />

@@ -9,7 +9,7 @@ const ComingSoonMusic = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-purple-900/10 to-pink-900/10 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-purple-900/10 to-pink-900/10 flex items-center justify-center">
       <div className="max-w-4xl mx-auto text-center">
         {/* Animated music icons */}
         <div className="relative mb-8">

@@ -9,7 +9,7 @@ const ComingSoonCrypto = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 flex items-center justify-center">
       <div className="max-w-4xl mx-auto text-center">
         {/* Animated crypto icons */}
         <div className="relative mb-8">

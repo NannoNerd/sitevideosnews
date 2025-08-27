@@ -97,7 +97,7 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b gradient-bg">
-      <div ref={containerRef} className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] flex h-20 items-center px-4 justify-between">
+      <div ref={containerRef} className="container mx-auto max-w-7xl flex h-20 items-center px-4 justify-between">
         
         {/* Logo na Esquerda */}
         <div className="flex-1 flex justify-start">
@@ -266,7 +266,7 @@ const Navigation = () => {
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="border-t bg-background z-50 animate-slide-up">
-          <div className="mx-auto w-full max-w-[95vw] md:max-w-[70vw] py-4 px-4 space-y-4">
+          <div className="container mx-auto max-w-7xl py-4 px-4 space-y-4">
             {/* Mobile Search */}
             <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />

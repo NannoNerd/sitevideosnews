@@ -9,7 +9,7 @@ const ComingSoonMotivational = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-orange-900/10 to-yellow-900/10 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-orange-900/10 to-yellow-900/10 flex items-center justify-center">
       <div className="max-w-4xl mx-auto text-center">
         {/* Animated motivational icons */}
         <div className="relative mb-8">
