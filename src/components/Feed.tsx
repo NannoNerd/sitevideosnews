@@ -600,7 +600,7 @@ export default function Feed() {
             </div>
 
             {/* Cards Motivacionais */}
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
               <Card className="bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600 hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <div className="h-48 rounded-t-lg overflow-hidden">
                   <img src={supereLimitesImage} alt="Supere seus limites" className="w-full h-full object-cover" />
@@ -697,7 +697,7 @@ export default function Feed() {
               </h2>
             </div>
 
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-7xl mx-auto">
               <Card className="bg-slate-800 border-slate-700 p-8">
                 <CardContent className="text-center">
                   <div className="mb-6">
@@ -738,7 +738,7 @@ export default function Feed() {
         {/* Footer */}
         <footer className="bg-slate-950 text-white py-12">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
               <div>
                 <h3 className="text-xl font-bold mb-4 text-cyan-400">Ivo Fernandes News</h3>
                 <p className="text-gray-300">
