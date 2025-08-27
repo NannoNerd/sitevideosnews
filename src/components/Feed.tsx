@@ -534,7 +534,7 @@ export default function Feed() {
                 Aprenda Autocad Civil 3D, inspire-se com vídeos motivacionais e fique por dentro do universo das criptomoedas.
               </p>
               <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-                <Link to="/?category=noticias">Explorar Agora</Link>
+                <Link to="/">Explorar Agora</Link>
               </Button>
             </div>
           </div>
@@ -553,7 +553,7 @@ export default function Feed() {
                   Desenvolva suas habilidades em modelagem, projetos de infraestrutura e análise de terrenos com nossas aulas especializadas de Autocad Civil 3D.
                 </p>
                 <Button asChild size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 bg-white">
-                  <Link to="/?category=noticias">Saiba Mais</Link>
+                  <Link to="/">Saiba Mais</Link>
                 </Button>
               </div>
 
