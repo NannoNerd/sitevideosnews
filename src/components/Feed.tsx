@@ -77,6 +77,8 @@ export default function Feed() {
 
   // Testimonials carousel state
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [isTestimonialPaused, setIsTestimonialPaused] = useState(false);
+  const [testimonialProgress, setTestimonialProgress] = useState(0);
 
   // Initialize search query from URL and set mounted state
   useEffect(() => {
@@ -392,9 +394,32 @@ export default function Feed() {
   // Testimonial navigation
   const nextTestimonial = () => {
     setCurrentTestimonial(prev => (prev + 1) % testimonials.length);
+    setTestimonialProgress(0);
   };
   const prevTestimonial = () => {
     setCurrentTestimonial(prev => (prev - 1 + testimonials.length) % testimonials.length);
+    setTestimonialProgress(0);
+  };
+
+  // Auto-advance testimonials
+  useEffect(() => {
+    if (isTestimonialPaused) return;
+
+    const interval = setInterval(() => {
+      setTestimonialProgress(prev => {
+        if (prev >= 100) {
+          nextTestimonial();
+          return 0;
+        }
+        return prev + 2; // Increment by 2% every 100ms = 5 seconds total
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isTestimonialPaused, currentTestimonial]);
+
+  const toggleTestimonialPause = () => {
+    setIsTestimonialPaused(prev => !prev);
   };
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">
@@ -508,8 +533,8 @@ export default function Feed() {
               <p className="text-xl md:text-2xl mb-8 text-gray-300 max-w-3xl mx-auto">
                 Aprenda Autocad Civil 3D, inspire-se com vídeos motivacionais e fique por dentro do universo das criptomoedas.
               </p>
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-                Explorar Agora
+              <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                <Link to="/?category=noticias">Explorar Agora</Link>
               </Button>
             </div>
           </div>
@@ -527,8 +552,8 @@ export default function Feed() {
                 <p className="text-lg text-gray-700 mb-8 leading-relaxed">
                   Desenvolva suas habilidades em modelagem, projetos de infraestrutura e análise de terrenos com nossas aulas especializadas de Autocad Civil 3D.
                 </p>
-                <Button size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 bg-white">
-                  Saiba Mais
+                <Button asChild size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 bg-white">
+                  <Link to="/?category=noticias">Saiba Mais</Link>
                 </Button>
               </div>
 
@@ -651,8 +676,8 @@ export default function Feed() {
                 <p className="text-lg text-gray-700 mb-8 leading-relaxed">
                   Explore análises, tendências e oportunidades no mercado de criptomoedas. Informação confiável e atualizada para quem deseja investir com segurança.
                 </p>
-                <Button size="lg" variant="outline" className="border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white transition-all duration-300 bg-white">
-                  Ver Conteúdos
+                <Button asChild size="lg" variant="outline" className="border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white transition-all duration-300 bg-white">
+                  <Link to="/coming-soon-crypto">Ver Conteúdos</Link>
                 </Button>
               </div>
 
@@ -698,7 +723,15 @@ export default function Feed() {
             </div>
 
             <div className="max-w-7xl mx-auto">
-              <Card className="bg-slate-800 border-slate-700 p-8">
+              <Card className="bg-slate-800 border-slate-700 p-8 relative overflow-hidden">
+                {/* Progress bar */}
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-slate-700">
+                  <div 
+                    className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-100 ease-linear" 
+                    style={{ width: `${testimonialProgress}%` }}
+                  />
+                </div>
+                
                 <CardContent className="text-center">
                   <div className="mb-6">
                     <img src={testimonials[currentTestimonial].avatar} alt={testimonials[currentTestimonial].name} className="w-20 h-20 rounded-full mx-auto mb-4 object-cover" />
@@ -719,6 +752,10 @@ export default function Feed() {
                   <div className="flex justify-center items-center mt-8 space-x-4">
                     <Button variant="ghost" size="sm" onClick={prevTestimonial} className="text-cyan-400 hover:text-cyan-300 hover:bg-slate-700">
                       <ChevronLeft className="w-5 h-5" />
+                    </Button>
+                    
+                    <Button variant="ghost" size="sm" onClick={toggleTestimonialPause} className="text-cyan-400 hover:text-cyan-300 hover:bg-slate-700">
+                      {isTestimonialPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
                     </Button>
                     
                     <div className="flex space-x-2">
@@ -751,7 +788,7 @@ export default function Feed() {
                 <ul className="space-y-2 text-gray-300">
                   <li>Autocad Civil 3D</li>
                   <li>Motivacionais</li>
-                  <li>Criptomoedas</li>
+                  <li><Link to="/coming-soon-crypto" className="hover:text-cyan-400 transition-colors">Criptomoedas</Link></li>
                 </ul>
               </div>
               
