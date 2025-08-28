@@ -17,7 +17,7 @@ import { processTextWithLinks, truncateText } from '@/lib/text-utils';
 import { sanitizeHtml } from '@/lib/html-sanitizer';
 
 // Import das imagens
-import civil3dImage from '@/assets/civil3d.png';
+const civil3dImage = "/lovable-uploads/da5ece07-5628-4634-ab39-067d57524178.png";
 import criptosImage from '@/assets/criptos.png';
 import iaIconImage from '@/assets/ia-icon.png';
 import supereLimitesImage from '@/assets/supere-limites.jpg';
