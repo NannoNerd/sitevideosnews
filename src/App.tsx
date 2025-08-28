@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import ComingSoonCrypto from "./pages/ComingSoonCrypto";
 import ComingSoonMusic from "./pages/ComingSoonMusic";
 import ComingSoonMotivational from "./pages/ComingSoonMotivational";
+import Engineering from "./pages/Engineering";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/crypto" element={<ComingSoonCrypto />} />
                 <Route path="/musica" element={<ComingSoonMusic />} />
                 <Route path="/motivacional" element={<ComingSoonMotivational />} />
+                <Route path="/engenharia" element={<Engineering />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

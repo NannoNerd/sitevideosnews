@@ -553,7 +553,7 @@ export default function Feed() {
                   Desenvolva suas habilidades em modelagem, projetos de infraestrutura e análise de terrenos com nossas aulas especializadas de Autocad Civil 3D.
                 </p>
                 <Button asChild size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 bg-white">
-                  <Link to="/">Saiba Mais</Link>
+                  <Link to="/engenharia">Saiba Mais</Link>
                 </Button>
               </div>
 
@@ -677,7 +677,7 @@ export default function Feed() {
                   Explore análises, tendências e oportunidades no mercado de criptomoedas. Informação confiável e atualizada para quem deseja investir com segurança.
                 </p>
                 <Button asChild size="lg" variant="outline" className="border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white transition-all duration-300 bg-white">
-                  <Link to="/coming-soon-crypto">Ver Conteúdos</Link>
+                  <Link to="/crypto">Ver Conteúdos</Link>
                 </Button>
               </div>
 
@@ -786,9 +786,9 @@ export default function Feed() {
               <div>
                 <h3 className="text-xl font-bold mb-4 text-cyan-400">Navegação</h3>
                 <ul className="space-y-2 text-gray-300">
-                  <li>Autocad Civil 3D</li>
-                  <li>Motivacionais</li>
-                  <li><Link to="/coming-soon-crypto" className="hover:text-cyan-400 transition-colors">Criptomoedas</Link></li>
+                  <li><Link to="/engenharia" className="hover:text-cyan-400 transition-colors">Autocad Civil 3D</Link></li>
+                  <li><Link to="/motivacional" className="hover:text-cyan-400 transition-colors">Motivacionais</Link></li>
+                  <li><Link to="/crypto" className="hover:text-cyan-400 transition-colors">Criptomoedas</Link></li>
                 </ul>
               </div>
               
