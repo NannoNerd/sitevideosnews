@@ -432,87 +432,111 @@ export default function Feed() {
     return <TooltipProvider>
         <div className="min-h-screen bg-background">
           <main className="container mx-auto px-4 py-8">
-            <div className="flex flex-col lg:flex-row gap-8">
-              {/* Search and Filter Section */}
-              <div className="w-full lg:w-1/4">
-                <div className="sticky top-8 space-y-6">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input placeholder="Buscar conteúdo..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
-                  </div>
-                  
-                  <Tabs value={filter} onValueChange={value => setFilter(value as 'all' | 'posts' | 'videos')}>
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="all">Todos</TabsTrigger>
-                      <TabsTrigger value="posts">Posts</TabsTrigger>
-                      <TabsTrigger value="videos">Vídeos</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
+            {/* Search and Filter Section - Centralized at top */}
+            <div className="max-w-2xl mx-auto mb-12 space-y-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input 
+                  placeholder="Buscar conteúdo..." 
+                  value={searchQuery} 
+                  onChange={e => setSearchQuery(e.target.value)} 
+                  className="pl-10 text-center" 
+                />
               </div>
+              
+              <div className="flex justify-center">
+                <Tabs value={filter} onValueChange={value => setFilter(value as 'all' | 'posts' | 'videos')}>
+                  <TabsList className="grid w-full grid-cols-3 max-w-md">
+                    <TabsTrigger value="all">Todos</TabsTrigger>
+                    <TabsTrigger value="posts">Posts</TabsTrigger>
+                    <TabsTrigger value="videos">Vídeos</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+            </div>
 
-              {/* Content Section */}
-              <div className="w-full lg:w-3/4">
-                <div className="grid gap-6">
-                  {filteredContent.length === 0 ? <div className="text-center py-12">
-                      <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
-                    </div> : filteredContent.map(item => <Card key={item.id} className="hover:shadow-lg transition-shadow">
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="secondary">{item.category.name}</Badge>
-                                <Badge variant={item.type === 'post' ? 'default' : 'outline'}>
-                                  {item.type === 'post' ? 'Post' : 'Vídeo'}
-                                </Badge>
-                              </div>
-                              <CardTitle className="line-clamp-2">
-                                <Link to={item.type === 'post' ? `/post/${item.slug}` : `/video/${item.slug}`}>
-                                  {item.title}
-                                </Link>
-                              </CardTitle>
-                              <CardDescription className="line-clamp-2 mt-2">
-                                {truncateText(item.description || item.content || '', 150)}
-                              </CardDescription>
-                            </div>
-                            {(item.cover_image_url || item.thumbnail_url) && <div className="w-24 h-24 ml-4 flex-shrink-0">
-                                <img src={item.cover_image_url || item.thumbnail_url} alt={item.title} className="w-full h-full object-cover rounded-md" />
-                              </div>}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Avatar className="w-6 h-6">
-                                  <AvatarFallback>
-                                    {item.author.display_name.charAt(0).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span>{item.author.display_name}</span>
-                              </div>
-                              <span>•</span>
-                              <span>{new Date(item.published_at).toLocaleDateString('pt-BR')}</span>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <Button variant="ghost" size="sm" onClick={() => handleLike(item)} className={userLikes.has(item.id) ? 'text-red-500' : ''}>
-                                <Heart className={`w-4 h-4 mr-1 ${userLikes.has(item.id) ? 'fill-current' : ''}`} />
-                                {item.likes_count}
-                              </Button>
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <MessageCircle className="w-4 h-4" />
-                                {item.comments_count}
-                              </div>
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <Eye className="w-4 h-4" />
-                                {item.views_count}
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>)}
+            {/* Content Section - 3 columns grid */}
+            <div className="max-w-7xl mx-auto">
+              {filteredContent.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">Nenhum conteúdo encontrado.</p>
                 </div>
-              </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredContent.map(item => (
+                    <Card key={item.id} className="hover:shadow-lg transition-shadow flex flex-col">
+                      {(item.cover_image_url || item.thumbnail_url) && (
+                        <div className="h-48 overflow-hidden rounded-t-lg">
+                          <img 
+                            src={item.cover_image_url || item.thumbnail_url} 
+                            alt={item.title} 
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
+                          />
+                        </div>
+                      )}
+                      
+                      <CardHeader className="flex-1">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          <Badge variant="secondary">{item.category.name}</Badge>
+                          <Badge variant={item.type === 'post' ? 'default' : 'outline'}>
+                            {item.type === 'post' ? 'Post' : 'Vídeo'}
+                          </Badge>
+                        </div>
+                        <CardTitle className="line-clamp-2 text-lg">
+                          <Link 
+                            to={item.type === 'post' ? `/post/${item.slug}` : `/video/${item.slug}`}
+                            className="hover:text-primary transition-colors"
+                          >
+                            {item.title}
+                          </Link>
+                        </CardTitle>
+                        <CardDescription className="line-clamp-3 mt-2">
+                          {truncateText(item.description || item.content || '', 120)}
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Avatar className="w-6 h-6">
+                              <AvatarFallback>
+                                {item.author.display_name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="truncate">{item.author.display_name}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(item.published_at).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleLike(item)} 
+                            className={userLikes.has(item.id) ? 'text-red-500' : ''}
+                          >
+                            <Heart className={`w-4 h-4 mr-1 ${userLikes.has(item.id) ? 'fill-current' : ''}`} />
+                            {item.likes_count}
+                          </Button>
+                          
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <MessageCircle className="w-4 h-4" />
+                              {item.comments_count}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-4 h-4" />
+                              {item.views_count}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </main>
         </div>
