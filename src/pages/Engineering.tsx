@@ -51,6 +51,13 @@ interface Project {
 export default function Engineering() {
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   const [content, setContent] = useState<ContentItem[]>([]);
   const [topVideos, setTopVideos] = useState<ContentItem[]>([]);
   const [latestVideo, setLatestVideo] = useState<ContentItem | null>(null);
@@ -322,31 +329,40 @@ export default function Engineering() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative py-16 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white">
-        <div className="container mx-auto px-4 text-center">
+      <section className="relative py-16 gradient-bg text-white">
+        <div className="container mx-auto px-4 text-center animate-fade-in">
           <div className="flex items-center justify-center mb-6">
-            <Cog className="w-12 h-12 text-blue-400 mr-4" />
+            <Cog className="w-12 h-12 text-white/90 mr-4" />
             <h1 className="text-4xl md:text-5xl font-bold">
               Engenharia & Design com o Poder da IA
             </h1>
           </div>
-          <p className="text-xl md:text-2xl mb-8 text-blue-200 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl mb-8 text-white/80 max-w-3xl mx-auto">
             Explore ferramentas e recursos inovadores para otimizar seus projetos, gerar comandos e aprimorar suas habilidades em engenharia e design.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button 
-              onClick={() => setIaOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg"
+              onClick={() => scrollToSection('ai-commands')}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-6 py-3 text-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105"
             >
               Geração de Comandos IA
             </Button>
-            <Button variant="outline" className="text-white border-white hover:bg-white hover:text-blue-900">
+            <Button 
+              onClick={() => scrollToSection('latest-video')}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-6 py-3 text-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105"
+            >
               Vídeos Tutoriais IA
             </Button>
-            <Button variant="outline" className="text-white border-white hover:bg-white hover:text-blue-900">
+            <Button 
+              onClick={() => scrollToSection('video-playlists')}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-6 py-3 text-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105"
+            >
               Playlists de Vídeos
             </Button>
-            <Button variant="outline" className="text-white border-white hover:bg-white hover:text-blue-900">
+            <Button 
+              onClick={() => scrollToSection('civil-projects')}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-6 py-3 text-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105"
+            >
               Projetos de Engenharia Civil
             </Button>
           </div>
@@ -354,49 +370,49 @@ export default function Engineering() {
       </section>
 
       {/* AI Command Generation Section */}
-      <section className="py-16 bg-slate-900 text-white">
+      <section id="ai-commands" className="py-16 bg-card animate-fade-in">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-cyan-400">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-primary">
               Geração de Comandos por IA
             </h2>
-            <p className="text-lg text-gray-300 mb-8">
+            <p className="text-lg text-muted-foreground mb-8">
               Descreva a tarefa ou o comando que você precisa, e nossa IA irá gerar o script ou a instrução para diversas ferramentas de engenharia.
             </p>
             
-            <div className="bg-slate-800 rounded-lg p-6 mb-8">
+            <div className="bg-secondary rounded-lg p-6 mb-8 border border-border hover-lift">
               <Textarea 
                 placeholder="Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD', 'Comando para criar uma parede de 20cm no Revit', 'Instrução para modelar uma viga em concreto armado no SAP2000'"
                 value={iaPrompt}
                 onChange={(e) => setIaPrompt(e.target.value)}
                 rows={4}
-                className="mb-4 bg-slate-700 border-slate-600 text-white"
+                className="mb-4 bg-background border-border text-foreground"
               />
               <Button 
                 onClick={handleGenerateIaCommand} 
                 disabled={iaLoading}
-                className="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-3 text-lg"
+                className="px-8 py-3 text-lg transition-all duration-300 hover:scale-105"
               >
                 {iaLoading ? 'Gerando...' : 'Gerar Comando'}
               </Button>
             </div>
 
             {iaResult && (
-              <div className="bg-slate-800 rounded-lg p-6 text-left">
+              <div className="bg-secondary rounded-lg p-6 text-left border border-border animate-slide-up">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-xl font-semibold text-cyan-400">Comando Gerado:</h4>
+                  <h4 className="text-xl font-semibold text-primary">Comando Gerado:</h4>
                   <Button 
                     onClick={copyToClipboard}
                     variant="outline"
                     size="sm"
-                    className="text-cyan-400 border-cyan-400"
+                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   >
                     {copied ? <CheckCircle className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                     {copied ? 'Copiado!' : 'Copiar Comando'}
                   </Button>
                 </div>
                 <div 
-                  className="prose prose-invert max-w-none"
+                  className="prose prose-lg max-w-none text-foreground"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(iaResult, 'content') }}
                 />
               </div>
@@ -407,22 +423,22 @@ export default function Engineering() {
 
       {/* Latest Video Section */}
       {latestVideo && (
-        <section className="py-16 bg-background">
+        <section id="latest-video" className="py-16 gradient-bg text-white animate-fade-in">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
                 Vídeos Tutoriais com Auxílio de IA
               </h2>
-              <p className="text-lg text-muted-foreground text-center mb-12 max-w-3xl mx-auto">
+              <p className="text-lg text-white/80 text-center mb-12 max-w-3xl mx-auto">
                 Desvende os segredos da engenharia com a clareza da inteligência artificial. Nossos vídeos tutoriais, criados com o auxílio de IA, oferecem insights precisos e explicações detalhadas.
               </p>
               
               <div className="grid lg:grid-cols-2 gap-8 items-center">
                 <div>
-                  <h3 className="text-2xl font-bold mb-4 text-primary">Último Vídeo Postado</h3>
-                  <Card className="hover:shadow-lg transition-shadow">
+                  <h3 className="text-2xl font-bold mb-4 text-white">Último Vídeo Postado</h3>
+                  <Card className="bg-white/10 backdrop-blur-sm border-white/20 card-hover">
                     <CardContent className="p-6">
-                      <div className="aspect-video bg-slate-200 rounded-lg mb-4 overflow-hidden">
+                      <div className="aspect-video bg-muted rounded-lg mb-4 overflow-hidden">
                         {latestVideo.youtube_video_id ? (
                           <iframe
                             width="100%"
@@ -445,33 +461,33 @@ export default function Engineering() {
                           </div>
                         )}
                       </div>
-                      <h4 className="text-xl font-semibold mb-2">{latestVideo.title}</h4>
-                      <p className="text-muted-foreground mb-4">
+                      <h4 className="text-xl font-semibold mb-2 text-white">{latestVideo.title}</h4>
+                      <p className="text-white/80 mb-4">
                         {truncateText(latestVideo.description || '', 120)}
                       </p>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-4 text-sm text-white/70">
                           <span>Visualizações Total: {latestVideo.views_count.toLocaleString()}</span>
                           <span>•</span>
                           <span>Curtidas: {latestVideo.likes_count}</span>
                         </div>
                         <Link to={`/video/${latestVideo.slug}`}>
-                          <Button variant="outline">Assistir</Button>
+                          <Button className="bg-white/20 hover:bg-white/30 text-white border-white/20">Assistir</Button>
                         </Link>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
 
-                <div>
-                  <h3 className="text-2xl font-bold mb-4 text-primary">Top 10 Vídeos Mais Assistidos</h3>
+                <div id="video-playlists">
+                  <h3 className="text-2xl font-bold mb-4 text-white">Top 10 Vídeos Mais Assistidos</h3>
                   <div className="space-y-3 max-h-96 overflow-y-auto">
                     {topVideos.map((video, index) => (
-                      <Card key={video.id} className="hover:shadow-md transition-shadow">
+                      <Card key={video.id} className="bg-white/10 backdrop-blur-sm border-white/20 hover:border-white/40 transition-all duration-300 card-hover">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
                             <div className="flex-shrink-0">
-                              <Badge variant={index < 3 ? 'default' : 'secondary'} className="w-8 h-8 rounded-full flex items-center justify-center p-0">
+                              <Badge variant={index < 3 ? 'default' : 'secondary'} className="w-8 h-8 rounded-full flex items-center justify-center p-0 bg-white/20 text-white border-white/20">
                                 {index < 3 ? (
                                   <Star className="w-4 h-4" />
                                 ) : (
@@ -480,10 +496,10 @@ export default function Engineering() {
                               </Badge>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <Link to={`/video/${video.slug}`} className="hover:text-primary">
-                                <h5 className="font-medium truncate">{video.title}</h5>
+                              <Link to={`/video/${video.slug}`} className="hover:text-white/80">
+                                <h5 className="font-medium truncate text-white">{video.title}</h5>
                               </Link>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2 text-sm text-white/70">
                                 <Eye className="w-3 h-3" />
                                 <span>{video.views_count.toLocaleString()} visualizações</span>
                               </div>
@@ -501,11 +517,11 @@ export default function Engineering() {
       )}
 
       {/* Engineering Projects Section */}
-      <section className="py-16 bg-slate-50 dark:bg-slate-900">
+      <section id="civil-projects" className="py-16 bg-card animate-fade-in">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
                 Projetos de Engenharia Civil
               </h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -515,25 +531,25 @@ export default function Engineering() {
 
             <div className="grid md:grid-cols-2 gap-8">
               {projects.map((project) => (
-                <Card key={project.id} className="hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Card key={project.id} className="border border-border hover:border-primary transition-all duration-300 card-hover hover-lift">
                   <div className="aspect-video overflow-hidden rounded-t-lg">
                     <img 
                       src={project.image} 
                       alt={project.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-3">{project.title}</h3>
+                    <h3 className="text-xl font-semibold mb-3 text-foreground">{project.title}</h3>
                     <p className="text-muted-foreground mb-4">{project.description}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {project.technologies.map((tech, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
+                        <Badge key={index} variant="secondary" className="text-xs bg-accent text-accent-foreground">
                           {tech}
                         </Badge>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-300">
                       Ver Detalhes do Projeto
                     </Button>
                   </CardContent>

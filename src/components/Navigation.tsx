@@ -124,7 +124,7 @@ const Navigation = () => {
         <div className="flex-1 hidden md:flex justify-center">
           <nav className="flex items-center space-x-8">
             <Link 
-              to="/?category=engenharia" 
+              to="/engenharia" 
               className="text-white hover:text-white/80 transition-colors font-medium"
             >
               Engenharia
@@ -168,7 +168,7 @@ const Navigation = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="w-56 bg-background border-border">
               <DropdownMenuItem asChild>
-                <Link to="/?category=engenharia" className="w-full cursor-pointer">
+                <Link to="/engenharia" className="w-full cursor-pointer">
                   Engenharia
                 </Link>
               </DropdownMenuItem>
@@ -281,7 +281,7 @@ const Navigation = () => {
             {/* Mobile Navigation Links */}
             <div className="space-y-2">
               <Link 
-                to="/?category=engenharia" 
+                to="/engenharia" 
                 className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
