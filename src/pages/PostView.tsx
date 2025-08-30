@@ -173,15 +173,15 @@ export default function PostView() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
-      <div className="py-8">
-        <Link to="/" className="inline-flex items-center mb-6 text-muted-foreground hover:text-primary">
+      <div className="container mx-auto px-4 py-8">
+        <Link to="/?category=engenharia" className="inline-flex items-center mb-6 text-muted-foreground hover:text-primary transition-colors hover-lift">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar ao feed
         </Link>
 
-        <article className="space-y-6">
+        <article className="space-y-6 bg-card/50 backdrop-blur-sm rounded-xl p-8 border border-border">
           {post.cover_image_url && (
-            <div className="aspect-video overflow-hidden rounded-lg">
+            <div className="aspect-video overflow-hidden rounded-lg animate-fade-in">
               <img
                 src={post.cover_image_url}
                 alt={post.title}
@@ -190,24 +190,24 @@ export default function PostView() {
             </div>
           )}
 
-          <header className="space-y-4">
+          <header className="space-y-4 animate-slide-up">
             <div className="flex items-center space-x-2">
               {post.categories && (
-                <Badge variant="secondary">{post.categories.name}</Badge>
+                <Badge variant="secondary" className="bg-primary/20 text-primary-foreground border-primary/30">{post.categories.name}</Badge>
               )}
             </div>
 
-            <h1 className="text-4xl font-bold leading-tight">{post.title}</h1>
+            <h1 className="text-4xl font-bold leading-tight text-foreground">{post.title}</h1>
 
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <Avatar>
-                    <AvatarFallback>
+                  <Avatar className="border-2 border-primary/20">
+                    <AvatarFallback className="bg-primary/10 text-primary">
                       <User className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <span>Por {post.author.display_name}</span>
+                  <span className="text-foreground">Por {post.author.display_name}</span>
                 </div>
                 <span>{new Date(post.published_at).toLocaleDateString('pt-BR')}</span>
               </div>
@@ -221,7 +221,7 @@ export default function PostView() {
                   variant="ghost"
                   size="sm"
                   onClick={handleLike}
-                  className={liked ? 'text-red-500' : ''}
+                  className={`hover-lift ${liked ? 'text-red-500' : ''}`}
                 >
                   <Heart className={`h-4 w-4 mr-1 ${liked ? 'fill-current' : ''}`} />
                   {post.likes_count}
@@ -230,12 +230,15 @@ export default function PostView() {
             </div>
           </header>
 
-          <div className="prose prose-lg max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: processTextWithLinks(post.content) }} />
+          <div className="prose prose-lg max-w-none animate-fade-in" style={{animationDelay: '0.2s'}}>
+            <div 
+              className="text-foreground [&>*]:text-foreground [&>h1]:text-foreground [&>h2]:text-foreground [&>h3]:text-foreground [&>h4]:text-foreground [&>h5]:text-foreground [&>h6]:text-foreground [&>p]:text-foreground [&>ul]:text-foreground [&>ol]:text-foreground [&>li]:text-foreground [&>blockquote]:text-muted-foreground [&>blockquote]:border-l-primary" 
+              dangerouslySetInnerHTML={{ __html: processTextWithLinks(post.content) }} 
+            />
           </div>
 
           {/* Comments Section */}
-          <div className="mt-12 pt-8 border-t">
+          <div className="mt-12 pt-8 border-t border-border animate-fade-in" style={{animationDelay: '0.4s'}}>
             <Comments contentId={post.id} contentType="post" />
           </div>
         </article>

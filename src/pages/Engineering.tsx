@@ -58,11 +58,12 @@ export default function Engineering() {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
   const [content, setContent] = useState<ContentItem[]>([]);
   const [topVideos, setTopVideos] = useState<ContentItem[]>([]);
   const [latestVideo, setLatestVideo] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
+  const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
   
   // IA Commands state
   const [iaOpen, setIaOpen] = useState(false);
@@ -71,37 +72,8 @@ export default function Engineering() {
   const [iaResult, setIaResult] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Projects data
-  const projects: Project[] = [
-    {
-      id: 1,
-      title: "Sistema de Drenagem Urbana",
-      description: "Projeto completo de drenagem para área urbana com análise hidrológica e dimensionamento de estruturas.",
-      image: "/lovable-uploads/da5ece07-5628-4634-ab39-067d57524178.png",
-      technologies: ["AutoCAD Civil 3D", "HEC-HMS", "HEC-RAS"]
-    },
-    {
-      id: 2,
-      title: "Rodovia com Terraplanagem",
-      description: "Projeto geométrico de rodovia rural incluindo terraplanagem, curvas de nível e perfis longitudinais.",
-      image: "/lovable-uploads/da5ece07-5628-4634-ab39-067d57524178.png",
-      technologies: ["AutoCAD Civil 3D", "Bentley MicroStation", "Topografia"]
-    },
-    {
-      id: 3,
-      title: "Ponte de Concreto Armado",
-      description: "Estrutura de ponte com 50m de vão, incluindo cálculos estruturais e detalhamento executivo.",
-      image: "/lovable-uploads/da5ece07-5628-4634-ab39-067d57524178.png",
-      technologies: ["SAP2000", "AutoCAD", "EBERICK"]
-    },
-    {
-      id: 4,
-      title: "Loteamento Residencial",
-      description: "Projeto urbanístico completo com ruas, quadras, infraestrutura e aprovação na prefeitura.",
-      image: "/lovable-uploads/da5ece07-5628-4634-ab39-067d57524178.png",
-      technologies: ["AutoCAD Civil 3D", "SketchUp", "QGIS"]
-    }
-  ];
+  // Engineering videos
+  const engineeringVideos = content.filter(item => item.type === 'video');
 
   const fetchEngineeringContent = async () => {
     try {
@@ -170,8 +142,11 @@ export default function Engineering() {
           .in('video_id', videoIds);
 
         if (likes) {
-          const likedIds = new Set(likes.map(like => like.video_id).filter(Boolean));
-          setUserLikes(likedIds);
+          const likedMap = likes.reduce((acc, like) => {
+            if (like.video_id) acc[like.video_id] = true;
+            return acc;
+          }, {} as Record<string, boolean>);
+          setUserLikes(likedMap);
         }
       }
     } catch (error) {
@@ -186,7 +161,7 @@ export default function Engineering() {
     }
   };
 
-  const handleLike = async (item: ContentItem) => {
+  const handleLike = async (videoId: string) => {
     if (!user) {
       toast({
         title: 'Login necessário',
@@ -196,7 +171,7 @@ export default function Engineering() {
       return;
     }
 
-    const isLiked = userLikes.has(item.id);
+    const isLiked = userLikes[videoId];
 
     try {
       if (isLiked) {
@@ -204,37 +179,37 @@ export default function Engineering() {
         await supabase
           .from('likes')
           .delete()
-          .eq('video_id', item.id)
+          .eq('video_id', videoId)
           .eq('user_id', user.id);
 
-        // Update UI
-        setUserLikes(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(item.id);
-          return newSet;
-        });
+        setUserLikes(prev => ({ ...prev, [videoId]: false }));
         setContent(prev => 
           prev.map(contentItem => 
-            contentItem.id === item.id 
+            contentItem.id === videoId 
               ? { ...contentItem, likes_count: contentItem.likes_count - 1 }
               : contentItem
           )
         );
+        if (latestVideo && latestVideo.id === videoId) {
+          setLatestVideo(prev => prev ? { ...prev, likes_count: prev.likes_count - 1 } : null);
+        }
       } else {
         // Add like
         await supabase
           .from('likes')
-          .insert({ video_id: item.id, user_id: user.id });
+          .insert({ video_id: videoId, user_id: user.id });
 
-        // Update UI
-        setUserLikes(prev => new Set([...prev, item.id]));
+        setUserLikes(prev => ({ ...prev, [videoId]: true }));
         setContent(prev => 
           prev.map(contentItem => 
-            contentItem.id === item.id 
+            contentItem.id === videoId 
               ? { ...contentItem, likes_count: contentItem.likes_count + 1 }
               : contentItem
           )
         );
+        if (latestVideo && latestVideo.id === videoId) {
+          setLatestVideo(prev => prev ? { ...prev, likes_count: prev.likes_count + 1 } : null);
+        }
       }
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -327,60 +302,83 @@ export default function Engineering() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative py-16 gradient-bg text-white">
-        <div className="container mx-auto px-4 text-center animate-fade-in">
-          <div className="flex items-center justify-center mb-6">
-            <Cog className="w-12 h-12 text-white/90 mr-4" />
-            <h1 className="text-4xl md:text-5xl font-bold">
-              Engenharia & Design com o Poder da IA
-            </h1>
-          </div>
-          <p className="text-xl md:text-2xl mb-8 text-white/80 max-w-3xl mx-auto">
-            Explore ferramentas e recursos inovadores para otimizar seus projetos, gerar comandos e aprimorar suas habilidades em engenharia e design.
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-8 space-y-12">
+        {/* Hero Section with Quick Actions */}
+        <section className="text-center space-y-6 bg-gradient-to-br from-primary/10 to-accent/20 rounded-xl p-8 animate-fade-in">
+          <h1 className="text-4xl font-bold gradient-text mb-4">
+            Engenharia Civil & Tecnologia
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Transforme sua carreira em engenharia com as ferramentas mais avançadas de IA, 
+            tutoriais práticos e projetos reais.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button 
-              onClick={() => scrollToSection('ai-commands')}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-6 py-3 text-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105"
-            >
+          
+          {/* Quick Action Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mt-8">
+            <Button onClick={() => scrollToSection('ai-commands')} className="hover-lift animate-bounce-in">
               Geração de Comandos IA
             </Button>
-            <Button 
-              onClick={() => scrollToSection('latest-video')}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-6 py-3 text-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105"
-            >
+            <Button variant="outline" onClick={() => scrollToSection('latest-video')} className="hover-lift animate-bounce-in" style={{animationDelay: '0.1s'}}>
               Vídeos Tutoriais IA
             </Button>
-            <Button 
-              onClick={() => scrollToSection('video-playlists')}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-6 py-3 text-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105"
-            >
+            <Button variant="outline" onClick={() => scrollToSection('video-playlists')} className="hover-lift animate-bounce-in" style={{animationDelay: '0.2s'}}>
               Playlists de Vídeos
             </Button>
-            <Button 
-              onClick={() => scrollToSection('civil-projects')}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-6 py-3 text-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105"
-            >
+            <Button variant="outline" onClick={() => scrollToSection('civil-projects')} className="hover-lift animate-bounce-in" style={{animationDelay: '0.3s'}}>
               Projetos de Engenharia Civil
             </Button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* AI Command Generation Section */}
-      <section id="ai-commands" className="py-16 bg-card animate-fade-in">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-primary">
-              Geração de Comandos por IA
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Descreva a tarefa ou o comando que você precisa, e nossa IA irá gerar o script ou a instrução para diversas ferramentas de engenharia.
-            </p>
-            
-            <div className="bg-secondary rounded-lg p-6 mb-8 border border-border hover-lift">
+        {/* AI Commands Section - Light Theme */}
+        <section id="ai-commands" className="bg-background border border-border rounded-xl p-8 animate-slide-up">
+          <h2 className="text-3xl font-bold text-center mb-8 gradient-text">Geração de Comandos por IA</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {[
+              {
+                title: "AutoCAD Civil 3D",
+                description: "Comandos automatizados para modelagem de terrenos, redes e infraestrutura",
+                icon: "🏗️"
+              },
+              {
+                title: "Análise Estrutural",
+                description: "Scripts para cálculos de vigas, pilares e fundações",
+                icon: "🏢"
+              },
+              {
+                title: "Geotecnia",
+                description: "Comandos para análise de solo e estabilidade de taludes",
+                icon: "🌍"
+              },
+              {
+                title: "Hidráulica",
+                description: "Cálculos automáticos de redes de água e esgoto",
+                icon: "💧"
+              },
+              {
+                title: "Pavimentação",
+                description: "Dimensionamento automático de pavimentos flexíveis e rígidos",
+                icon: "🛣️"
+              },
+              {
+                title: "Orçamentação",
+                description: "Geração automática de planilhas e composições de custos",
+                icon: "💰"
+              }
+            ].map((item, index) => (
+              <Card key={index} className="card-hover bg-card border-border animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-4 animate-bounce-in" style={{animationDelay: `${index * 0.15}s`}}>{item.icon}</div>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm">{item.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg p-6 mb-8 border border-border hover-lift">
               <Textarea 
                 placeholder="Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD', 'Comando para criar uma parede de 20cm no Revit', 'Instrução para modelar uma viga em concreto armado no SAP2000'"
                 value={iaPrompt}
@@ -391,21 +389,21 @@ export default function Engineering() {
               <Button 
                 onClick={handleGenerateIaCommand} 
                 disabled={iaLoading}
-                className="px-8 py-3 text-lg transition-all duration-300 hover:scale-105"
+                className="px-8 py-3 text-lg transition-all duration-300 hover:scale-105 hover-lift"
               >
                 {iaLoading ? 'Gerando...' : 'Gerar Comando'}
               </Button>
             </div>
 
             {iaResult && (
-              <div className="bg-secondary rounded-lg p-6 text-left border border-border animate-slide-up">
+              <div className="bg-card/50 backdrop-blur-sm rounded-lg p-6 text-left border border-border animate-slide-up">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-xl font-semibold text-primary">Comando Gerado:</h4>
                   <Button 
                     onClick={copyToClipboard}
                     variant="outline"
                     size="sm"
-                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground hover-lift"
                   >
                     {copied ? <CheckCircle className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                     {copied ? 'Copiado!' : 'Copiar Comando'}
@@ -418,198 +416,176 @@ export default function Engineering() {
               </div>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* Latest Video Section */}
-      {latestVideo && (
-        <section id="latest-video" className="py-16 gradient-bg text-white animate-fade-in">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-                Vídeos Tutoriais com Auxílio de IA
-              </h2>
-              <p className="text-lg text-white/80 text-center mb-12 max-w-3xl mx-auto">
-                Desvende os segredos da engenharia com a clareza da inteligência artificial. Nossos vídeos tutoriais, criados com o auxílio de IA, oferecem insights precisos e explicações detalhadas.
-              </p>
-              
-              <div className="grid lg:grid-cols-2 gap-8 items-center">
-                <div>
-                  <h3 className="text-2xl font-bold mb-4 text-white">Último Vídeo Postado</h3>
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20 card-hover">
-                    <CardContent className="p-6">
-                      <div className="aspect-video bg-muted rounded-lg mb-4 overflow-hidden">
-                        {latestVideo.youtube_video_id ? (
-                          <iframe
-                            width="100%"
-                            height="100%"
-                            src={`https://www.youtube.com/embed/${latestVideo.youtube_video_id}`}
-                            title={latestVideo.title}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          ></iframe>
-                        ) : latestVideo.thumbnail_url ? (
-                          <img 
-                            src={latestVideo.thumbnail_url} 
-                            alt={latestVideo.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Play className="w-16 h-16 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      <h4 className="text-xl font-semibold mb-2 text-white">{latestVideo.title}</h4>
-                      <p className="text-white/80 mb-4">
-                        {truncateText(latestVideo.description || '', 120)}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm text-white/70">
-                          <span>Visualizações Total: {latestVideo.views_count.toLocaleString()}</span>
-                          <span>•</span>
-                          <span>Curtidas: {latestVideo.likes_count}</span>
-                        </div>
-                        <Link to={`/video/${latestVideo.slug}`}>
-                          <Button className="bg-white/20 hover:bg-white/30 text-white border-white/20">Assistir</Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div id="video-playlists">
-                  <h3 className="text-2xl font-bold mb-4 text-white">Top 10 Vídeos Mais Assistidos</h3>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {topVideos.map((video, index) => (
-                      <Card key={video.id} className="bg-white/10 backdrop-blur-sm border-white/20 hover:border-white/40 transition-all duration-300 card-hover">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex-shrink-0">
-                              <Badge variant={index < 3 ? 'default' : 'secondary'} className="w-8 h-8 rounded-full flex items-center justify-center p-0 bg-white/20 text-white border-white/20">
-                                {index < 3 ? (
-                                  <Star className="w-4 h-4" />
-                                ) : (
-                                  <span>{index + 1}</span>
-                                )}
-                              </Badge>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <Link to={`/video/${video.slug}`} className="hover:text-white/80">
-                                <h5 className="font-medium truncate text-white">{video.title}</h5>
-                              </Link>
-                              <div className="flex items-center gap-2 text-sm text-white/70">
-                                <Eye className="w-3 h-3" />
-                                <span>{video.views_count.toLocaleString()} visualizações</span>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
-      )}
 
-      {/* Engineering Projects Section */}
-      <section id="civil-projects" className="py-16 bg-card animate-fade-in">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                Projetos de Engenharia Civil
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Explore nosso portfólio de projetos reais desenvolvidos com as melhores práticas e tecnologias da engenharia civil moderna.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              {projects.map((project) => (
-                <Card key={project.id} className="border border-border hover:border-primary transition-all duration-300 card-hover hover-lift">
-                  <div className="aspect-video overflow-hidden rounded-t-lg">
-                    <img 
-                      src={project.image} 
-                      alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-3 text-foreground">{project.title}</h3>
-                    <p className="text-muted-foreground mb-4">{project.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {project.technologies.map((tech, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs bg-accent text-accent-foreground">
-                          {tech}
-                        </Badge>
-                      ))}
+        {/* Latest Video Section - Dark Theme */}
+        <section id="latest-video" className="bg-gradient-to-br from-accent/20 to-primary/10 rounded-xl p-8 animate-slide-up">
+          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Último Vídeo de Engenharia</h2>
+          {latestVideo ? (
+            <div className="max-w-4xl mx-auto">
+              <Card className="overflow-hidden bg-card/50 backdrop-blur-sm border-border card-hover animate-fade-in">
+                <div className="aspect-video">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${latestVideo.youtube_video_id}`}
+                    title={latestVideo.title}
+                    className="w-full h-full rounded-t-lg"
+                    allowFullScreen
+                  />
+                </div>
+                <CardContent className="p-6 bg-card/80">
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">{latestVideo.title}</h3>
+                  <p className="text-muted-foreground mb-4" 
+                     dangerouslySetInnerHTML={{ __html: latestVideo.description?.substring(0, 200) + '...' || '' }} 
+                  />
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-1">
+                        <Eye className="h-4 w-4" />
+                        <span>{latestVideo.views_count} visualizações</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleLike(latestVideo.id)}
+                        className={`hover-lift ${userLikes[latestVideo.id] ? 'text-red-500' : ''}`}
+                      >
+                        <Heart className={`h-4 w-4 mr-1 ${userLikes[latestVideo.id] ? 'fill-current' : ''}`} />
+                        {latestVideo.likes_count}
+                      </Button>
                     </div>
-                    <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-300">
-                      Ver Detalhes do Projeto
-                    </Button>
+                    <span>{new Date(latestVideo.published_at).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground animate-fade-in">
+              <p>Nenhum vídeo de engenharia encontrado.</p>
+            </div>
+          )}
+        </section>
+
+        {/* Video Playlists Section - Light Theme */}
+        <section id="video-playlists" className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-up">
+          {/* Engineering Playlist */}
+          <div className="bg-background border border-border rounded-xl p-6 animate-fade-in">
+            <h3 className="text-2xl font-bold mb-6 text-foreground">📚 Playlist de Engenharia</h3>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {engineeringVideos.slice(0, 5).map((video, index) => (
+                <Card key={video.id} className="card-hover bg-card border-border animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
+                  <CardContent className="p-4">
+                    <div className="flex space-x-4">
+                      <div className="w-20 h-14 bg-primary/10 rounded flex-shrink-0 flex items-center justify-center hover-lift">
+                        <Play className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm line-clamp-2 mb-1 text-foreground">{video.title}</h4>
+                        <div className="flex items-center text-xs text-muted-foreground space-x-2">
+                          <span>{video.views_count} views</span>
+                          <span>•</span>
+                          <span>{new Date(video.published_at).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* IA Commands Dialog */}
-      <Dialog open={iaOpen} onOpenChange={setIaOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Brain className="w-5 h-5" />
-              Assistente IA - Engenharia
-            </DialogTitle>
-            <DialogDescription>
-              Gere comandos e scripts para ferramentas de engenharia
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <Textarea 
-              placeholder="Ex: Como criar um script para automatizar a criação de perfis longitudinais no AutoCAD Civil 3D?"
-              value={iaPrompt}
-              onChange={(e) => setIaPrompt(e.target.value)}
-              rows={4}
-            />
-
-            <Button 
-              onClick={handleGenerateIaCommand} 
-              disabled={iaLoading} 
-              className="w-full"
-            >
-              {iaLoading ? 'Gerando...' : 'Gerar Resposta'}
-            </Button>
-
-            {iaResult && (
-              <div className="mt-6 p-4 border rounded-lg bg-muted/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Resposta da IA:</h4>
-                  <Button 
-                    onClick={copyToClipboard}
-                    variant="ghost"
-                    size="sm"
-                  >
-                    {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  </Button>
-                </div>
-                <div 
-                  className="prose prose-sm max-w-none dark:prose-invert"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(iaResult, 'content') }}
-                />
-              </div>
-            )}
+          {/* Top 10 Videos */}
+          <div className="bg-gradient-to-br from-primary/10 to-accent/20 rounded-xl p-6 animate-fade-in" style={{animationDelay: '0.2s'}}>
+            <h3 className="text-2xl font-bold mb-6 text-foreground">🏆 Top 10 Vídeos Mais Vistos</h3>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {topVideos.map((video, index) => (
+                <Card key={video.id} className="card-hover bg-card/50 backdrop-blur-sm border-border animate-fade-in" style={{animationDelay: `${index * 0.05}s`}}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold hover-lift">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm line-clamp-2 mb-1 text-foreground">{video.title}</h4>
+                        <div className="flex items-center text-xs text-muted-foreground space-x-2">
+                          <Eye className="h-3 w-3" />
+                          <span>{video.views_count}</span>
+                          <Heart className="h-3 w-3" />
+                          <span>{video.likes_count}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </section>
+
+        {/* Civil Engineering Projects Section - Dark Theme */}
+        <section id="civil-projects" className="bg-gradient-to-br from-accent/20 to-primary/10 rounded-xl p-8 animate-slide-up">
+          <h2 className="text-3xl font-bold text-center mb-8 gradient-text">Projetos de Engenharia Civil</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Ponte Estaiada",
+                description: "Projeto completo de ponte estaiada com análise estrutural detalhada",
+                image: "/lovable-uploads/23842c11-d314-4af2-9cd5-38695ed34b8e.png",
+                category: "Estruturas"
+              },
+              {
+                title: "Edifício Residencial",
+                description: "Projeto arquitetônico e estrutural de edifício de 15 pavimentos",
+                image: "/lovable-uploads/6c142c27-1a58-4d4a-ae6c-b97b5940f500.png",
+                category: "Edificações"
+              },
+              {
+                title: "Sistema Viário",
+                description: "Projeto de sistema viário urbano com análise de tráfego",
+                image: "/lovable-uploads/c6c3898c-a4a6-40fb-9d56-6444b39e70eb.png",
+                category: "Infraestrutura"
+              },
+              {
+                title: "Estação de Tratamento",
+                description: "ETA completa com sistema de automação e controle",
+                image: "/lovable-uploads/da5ece07-5628-4634-ab39-067d57524178.png",
+                category: "Saneamento"
+              },
+              {
+                title: "Terminal Rodoviário",
+                description: "Projeto de terminal rodoviário com cobertura metálica",
+                image: "/lovable-uploads/e597480e-da67-45df-a678-231acebdee17.png",
+                category: "Infraestrutura"
+              },
+              {
+                title: "Complexo Esportivo",
+                description: "Centro esportivo com ginásio e piscina olímpica",
+                image: "/lovable-uploads/ffe260a2-df9a-4ce0-ae33-5d76f7e56231.png",
+                category: "Edificações"
+              }
+            ].map((project, index) => (
+              <Card key={index} className="overflow-hidden card-hover bg-card/50 backdrop-blur-sm border-border animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
+                <div className="aspect-video bg-muted/30">
+                  <img 
+                    src={project.image} 
+                    alt={project.title}
+                    className="w-full h-full object-cover hover-lift"
+                  />
+                </div>
+                <CardContent className="p-6 bg-card/80">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="secondary" className="bg-primary/20 text-primary-foreground border-primary/30">{project.category}</Badge>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{project.title}</h3>
+                  <p className="text-muted-foreground text-sm">{project.description}</p>
+                  <Button variant="outline" className="w-full mt-4 hover-lift border-primary/30 hover:bg-primary/10">
+                    Ver Projeto
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
