@@ -331,9 +331,9 @@ export default function Engineering() {
           </div>
         </section>
 
-        {/* AI Commands Section - Light Theme */}
-        <section id="ai-commands" className="bg-background border border-border rounded-xl p-8 animate-slide-up">
-          <h2 className="text-3xl font-bold text-center mb-8 gradient-text">Geração de Comandos por IA</h2>
+        {/* AI Commands Section - Dark Theme */}
+        <section id="ai-commands" className="bg-slate-900 text-white rounded-xl p-8 animate-slide-up">
+          <h2 className="text-3xl font-bold text-center mb-8 text-white">Geração de Comandos por IA</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {[
               {
@@ -367,24 +367,24 @@ export default function Engineering() {
                 icon: "💰"
               }
             ].map((item, index) => (
-              <Card key={index} className="card-hover bg-card border-border animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
+              <Card key={index} className="card-hover bg-slate-800 border-slate-700 animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-4 animate-bounce-in" style={{animationDelay: `${index * 0.15}s`}}>{item.icon}</div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">{item.title}</h3>
-                  <p className="text-muted-foreground text-sm">{item.description}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-white">{item.title}</h3>
+                  <p className="text-slate-300 text-sm">{item.description}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <div className="bg-card/50 backdrop-blur-sm rounded-lg p-6 mb-8 border border-border hover-lift">
+            <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-6 mb-8 border border-slate-700 hover-lift">
               <Textarea 
                 placeholder="Ex: 'Gerar um script Python para automatizar a criação de camadas no AutoCAD', 'Comando para criar uma parede de 20cm no Revit', 'Instrução para modelar uma viga em concreto armado no SAP2000'"
                 value={iaPrompt}
                 onChange={(e) => setIaPrompt(e.target.value)}
                 rows={4}
-                className="mb-4 bg-background border-border text-foreground"
+                className="mb-4 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
               />
               <Button 
                 onClick={handleGenerateIaCommand} 
@@ -396,21 +396,21 @@ export default function Engineering() {
             </div>
 
             {iaResult && (
-              <div className="bg-card/50 backdrop-blur-sm rounded-lg p-6 text-left border border-border animate-slide-up">
+              <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-6 text-left border border-slate-700 animate-slide-up">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-xl font-semibold text-primary">Comando Gerado:</h4>
+                  <h4 className="text-xl font-semibold text-blue-400">Comando Gerado:</h4>
                   <Button 
                     onClick={copyToClipboard}
                     variant="outline"
                     size="sm"
-                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground hover-lift"
+                    className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white hover-lift"
                   >
                     {copied ? <CheckCircle className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                     {copied ? 'Copiado!' : 'Copiar Comando'}
                   </Button>
                 </div>
                 <div 
-                  className="prose prose-lg max-w-none text-foreground"
+                  className="prose prose-lg max-w-none text-white prose-headings:text-white prose-strong:text-white prose-code:text-blue-300 prose-pre:bg-slate-900"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(iaResult, 'content') }}
                 />
               </div>
@@ -418,12 +418,12 @@ export default function Engineering() {
           </div>
         </section>
 
-        {/* Latest Video Section - Dark Theme */}
-        <section id="latest-video" className="bg-gradient-to-br from-accent/20 to-primary/10 rounded-xl p-8 animate-slide-up">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Último Vídeo de Engenharia</h2>
+        {/* Latest Video Section - Light Theme */}
+        <section id="latest-video" className="bg-white rounded-xl p-8 animate-slide-up border border-gray-200">
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">Último Vídeo de Engenharia</h2>
           {latestVideo ? (
             <div className="max-w-4xl mx-auto">
-              <Card className="overflow-hidden bg-card/50 backdrop-blur-sm border-border card-hover animate-fade-in">
+              <Card className="overflow-hidden bg-white border-gray-200 card-hover animate-fade-in shadow-lg">
                 <div className="aspect-video">
                   <iframe
                     src={`https://www.youtube.com/embed/${latestVideo.youtube_video_id}`}
@@ -432,12 +432,12 @@ export default function Engineering() {
                     allowFullScreen
                   />
                 </div>
-                <CardContent className="p-6 bg-card/80">
-                  <h3 className="text-xl font-semibold mb-2 text-foreground">{latestVideo.title}</h3>
-                  <p className="text-muted-foreground mb-4" 
+                <CardContent className="p-6 bg-white">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900">{latestVideo.title}</h3>
+                  <p className="text-gray-600 mb-4" 
                      dangerouslySetInnerHTML={{ __html: latestVideo.description?.substring(0, 200) + '...' || '' }} 
                   />
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between text-sm text-gray-600">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-1">
                         <Eye className="h-4 w-4" />
@@ -447,7 +447,7 @@ export default function Engineering() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleLike(latestVideo.id)}
-                        className={`hover-lift ${userLikes[latestVideo.id] ? 'text-red-500' : ''}`}
+                        className={`hover-lift text-gray-600 hover:text-gray-900 ${userLikes[latestVideo.id] ? 'text-red-500' : ''}`}
                       >
                         <Heart className={`h-4 w-4 mr-1 ${userLikes[latestVideo.id] ? 'fill-current' : ''}`} />
                         {latestVideo.likes_count}
@@ -465,22 +465,22 @@ export default function Engineering() {
           )}
         </section>
 
-        {/* Video Playlists Section - Light Theme */}
+        {/* Video Playlists Section - Dark Theme */}
         <section id="video-playlists" className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-up">
           {/* Engineering Playlist */}
-          <div className="bg-background border border-border rounded-xl p-6 animate-fade-in">
-            <h3 className="text-2xl font-bold mb-6 text-foreground">📚 Playlist de Engenharia</h3>
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 animate-fade-in">
+            <h3 className="text-2xl font-bold mb-6 text-white">📚 Playlist de Engenharia</h3>
             <div className="space-y-4 max-h-96 overflow-y-auto">
               {engineeringVideos.slice(0, 5).map((video, index) => (
-                <Card key={video.id} className="card-hover bg-card border-border animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
+                <Card key={video.id} className="card-hover bg-slate-800 border-slate-700 animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
                   <CardContent className="p-4">
                     <div className="flex space-x-4">
-                      <div className="w-20 h-14 bg-primary/10 rounded flex-shrink-0 flex items-center justify-center hover-lift">
-                        <Play className="h-6 w-6 text-primary" />
+                      <div className="w-20 h-14 bg-blue-600/20 rounded flex-shrink-0 flex items-center justify-center hover-lift">
+                        <Play className="h-6 w-6 text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm line-clamp-2 mb-1 text-foreground">{video.title}</h4>
-                        <div className="flex items-center text-xs text-muted-foreground space-x-2">
+                        <h4 className="font-medium text-sm line-clamp-2 mb-1 text-white">{video.title}</h4>
+                        <div className="flex items-center text-xs text-slate-300 space-x-2">
                           <span>{video.views_count} views</span>
                           <span>•</span>
                           <span>{new Date(video.published_at).toLocaleDateString('pt-BR')}</span>
@@ -494,19 +494,19 @@ export default function Engineering() {
           </div>
 
           {/* Top 10 Videos */}
-          <div className="bg-gradient-to-br from-primary/10 to-accent/20 rounded-xl p-6 animate-fade-in" style={{animationDelay: '0.2s'}}>
-            <h3 className="text-2xl font-bold mb-6 text-foreground">🏆 Top 10 Vídeos Mais Vistos</h3>
+          <div className="bg-slate-800 rounded-xl p-6 animate-fade-in" style={{animationDelay: '0.2s'}}>
+            <h3 className="text-2xl font-bold mb-6 text-white">🏆 Top 10 Vídeos Mais Vistos</h3>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {topVideos.map((video, index) => (
-                <Card key={video.id} className="card-hover bg-card/50 backdrop-blur-sm border-border animate-fade-in" style={{animationDelay: `${index * 0.05}s`}}>
+                <Card key={video.id} className="card-hover bg-slate-700 border-slate-600 animate-fade-in" style={{animationDelay: `${index * 0.05}s`}}>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold hover-lift">
+                      <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold hover-lift">
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm line-clamp-2 mb-1 text-foreground">{video.title}</h4>
-                        <div className="flex items-center text-xs text-muted-foreground space-x-2">
+                        <h4 className="font-medium text-sm line-clamp-2 mb-1 text-white">{video.title}</h4>
+                        <div className="flex items-center text-xs text-slate-300 space-x-2">
                           <Eye className="h-3 w-3" />
                           <span>{video.views_count}</span>
                           <Heart className="h-3 w-3" />
@@ -521,9 +521,9 @@ export default function Engineering() {
           </div>
         </section>
 
-        {/* Civil Engineering Projects Section - Dark Theme */}
-        <section id="civil-projects" className="bg-gradient-to-br from-accent/20 to-primary/10 rounded-xl p-8 animate-slide-up">
-          <h2 className="text-3xl font-bold text-center mb-8 gradient-text">Projetos de Engenharia Civil</h2>
+        {/* Civil Engineering Projects Section - Light Theme */}
+        <section id="civil-projects" className="bg-white rounded-xl p-8 animate-slide-up border border-gray-200">
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">Projetos de Engenharia Civil</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
@@ -563,21 +563,21 @@ export default function Engineering() {
                 category: "Edificações"
               }
             ].map((project, index) => (
-              <Card key={index} className="overflow-hidden card-hover bg-card/50 backdrop-blur-sm border-border animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
-                <div className="aspect-video bg-muted/30">
+              <Card key={index} className="overflow-hidden card-hover bg-white border-gray-200 shadow-lg animate-fade-in" style={{animationDelay: `${index * 0.1}s`}}>
+                <div className="aspect-video bg-gray-100">
                   <img 
                     src={project.image} 
                     alt={project.title}
                     className="w-full h-full object-cover hover-lift"
                   />
                 </div>
-                <CardContent className="p-6 bg-card/80">
+                <CardContent className="p-6 bg-white">
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary" className="bg-primary/20 text-primary-foreground border-primary/30">{project.category}</Badge>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">{project.category}</Badge>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">{project.title}</h3>
-                  <p className="text-muted-foreground text-sm">{project.description}</p>
-                  <Button variant="outline" className="w-full mt-4 hover-lift border-primary/30 hover:bg-primary/10">
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">{project.title}</h3>
+                  <p className="text-gray-600 text-sm">{project.description}</p>
+                  <Button variant="outline" className="w-full mt-4 hover-lift border-blue-300 text-blue-700 hover:bg-blue-50">
                     Ver Projeto
                   </Button>
                 </CardContent>
