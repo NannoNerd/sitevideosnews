@@ -104,7 +104,7 @@ const Navigation = () => {
           <Link ref={logoRef} to="/" className="flex items-center space-x-3">
             <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
               <img 
-                src="/lovable-uploads/23842c11-d314-4af2-9cd5-38695ed34b8e.png" 
+                src="/lovable-uploads/f549f699-4bbe-4e4b-9ec7-429c62c673a6.png" 
                 alt="IVO FERNANDES NEWS Logo" 
                 className="w-full h-full object-cover"
               />
