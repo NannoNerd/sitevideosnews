@@ -464,76 +464,77 @@ export default function Feed() {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredContent.map(item => (
-                    <Card key={item.id} className="hover:shadow-lg transition-shadow flex flex-col">
-                      {(item.cover_image_url || item.thumbnail_url) && (
-                        <div className="h-48 overflow-hidden rounded-t-lg">
-                          <img 
-                            src={item.cover_image_url || item.thumbnail_url} 
-                            alt={item.title} 
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
-                          />
-                        </div>
-                      )}
+                <Card key={item.id} className="hover:shadow-lg transition-shadow flex flex-col cursor-pointer">
+                  <Link to={item.type === 'post' ? `/post/${item.slug}` : `/video/${item.slug}`} className="flex flex-col h-full">
+                    {(item.cover_image_url || item.thumbnail_url) && (
+                      <div className="h-48 overflow-hidden rounded-t-lg">
+                        <img 
+                          src={item.cover_image_url || item.thumbnail_url} 
+                          alt={item.title} 
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
+                        />
+                      </div>
+                    )}
+                    
+                    <CardHeader className="flex-1">
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        <Badge variant="secondary">{item.category.name}</Badge>
+                        <Badge variant={item.type === 'post' ? 'default' : 'outline'}>
+                          {item.type === 'post' ? 'Post' : 'Vídeo'}
+                        </Badge>
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg hover:text-primary transition-colors">
+                        {item.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-3 mt-2">
+                        {truncateText(item.description || item.content || '', 120)}
+                      </CardDescription>
+                    </CardHeader>
+                  </Link>
+                  
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Avatar className="w-6 h-6">
+                          <AvatarFallback>
+                            {item.author.display_name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">{item.author.display_name}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(item.published_at).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleLike(item);
+                        }} 
+                        className={userLikes.has(item.id) ? 'text-red-500' : ''}
+                      >
+                        <Heart className={`w-4 h-4 mr-1 ${userLikes.has(item.id) ? 'fill-current' : ''}`} />
+                        {item.likes_count}
+                      </Button>
                       
-                      <CardHeader className="flex-1">
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          <Badge variant="secondary">{item.category.name}</Badge>
-                          <Badge variant={item.type === 'post' ? 'default' : 'outline'}>
-                            {item.type === 'post' ? 'Post' : 'Vídeo'}
-                          </Badge>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <MessageCircle className="w-4 h-4" />
+                          {item.comments_count}
                         </div>
-                        <CardTitle className="line-clamp-2 text-lg">
-                          <Link 
-                            to={item.type === 'post' ? `/post/${item.slug}` : `/video/${item.slug}`}
-                            className="hover:text-primary transition-colors"
-                          >
-                            {item.title}
-                          </Link>
-                        </CardTitle>
-                        <CardDescription className="line-clamp-3 mt-2">
-                          {truncateText(item.description || item.content || '', 120)}
-                        </CardDescription>
-                      </CardHeader>
-                      
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Avatar className="w-6 h-6">
-                              <AvatarFallback>
-                                {item.author.display_name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="truncate">{item.author.display_name}</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(item.published_at).toLocaleDateString('pt-BR')}
-                          </span>
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          {item.views_count}
                         </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleLike(item)} 
-                            className={userLikes.has(item.id) ? 'text-red-500' : ''}
-                          >
-                            <Heart className={`w-4 h-4 mr-1 ${userLikes.has(item.id) ? 'fill-current' : ''}`} />
-                            {item.likes_count}
-                          </Button>
-                          
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <MessageCircle className="w-4 h-4" />
-                              {item.comments_count}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Eye className="w-4 h-4" />
-                              {item.views_count}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
                   ))}
                 </div>
               )}

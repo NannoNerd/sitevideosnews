@@ -577,7 +577,7 @@ export default function Engineering() {
                   </div>
                   <h3 className="text-lg font-semibold mb-2 text-gray-900">{project.title}</h3>
                   <p className="text-gray-600 text-sm">{project.description}</p>
-                  <Button variant="outline" className="w-full mt-4 hover-lift border-blue-300 text-blue-700 hover:bg-blue-50">
+                  <Button variant="outline" className="w-full mt-4 hover-lift bg-cyan-500 text-black border-cyan-500 hover:bg-cyan-600 hover:text-black font-semibold">
                     Ver Projeto
                   </Button>
                 </CardContent>
