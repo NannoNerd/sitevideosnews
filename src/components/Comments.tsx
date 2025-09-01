@@ -84,11 +84,11 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
 
       if (error) throw error;
 
-      // Get user profiles for comments
+      // Get user profiles for comments (only public fields)
       const userIds = (commentsData || []).map(comment => comment.user_id);
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, display_name, role, avatar_url')
+        .select('user_id, display_name, avatar_url')
         .in('user_id', userIds);
 
       const profileMap = (profiles || []).reduce((acc, profile) => {
@@ -115,11 +115,11 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
 
           if (repliesError) throw repliesError;
 
-          // Get user profiles for replies
+          // Get user profiles for replies (only public fields)
           const replyUserIds = (replies || []).map(reply => reply.user_id);
           const { data: replyProfiles } = await supabase
             .from('profiles')
-            .select('user_id, display_name, role, avatar_url')
+            .select('user_id, display_name, avatar_url')
             .in('user_id', replyUserIds);
 
           const replyProfileMap = (replyProfiles || []).reduce((acc, profile) => {
@@ -363,7 +363,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
         {comments.map((comment) => (
         <Card key={comment.id}>
           <CardHeader className="pb-3">
-            <div className={`flex items-start gap-3 p-4 rounded-lg ${comment.user_profile?.role === 'admin' ? 'gradient-bg' : ''}`}>
+            <div className="flex items-start gap-3 p-4 rounded-lg">
               <Avatar className="h-8 w-8">
                 {comment.user_profile?.avatar_url && (
                   <AvatarImage src={comment.user_profile.avatar_url} alt={comment.user_profile.display_name || 'Usuário'} />
@@ -374,17 +374,17 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className={`font-medium text-sm ${comment.user_profile?.role === 'admin' ? 'text-white' : ''}`}>
+                  <span className="font-medium text-sm">
                     {comment.user_profile?.display_name || 'Usuário'}
                   </span>
-                  <span className={`text-xs ${comment.user_profile?.role === 'admin' ? 'text-white/70' : 'text-muted-foreground'}`}>
+                  <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(comment.created_at), {
                       addSuffix: true,
                       locale: ptBR
                     })}
                   </span>
                 </div>
-                <p className={`text-sm mt-2 break-words ${comment.user_profile?.role === 'admin' ? 'text-white' : ''}`}>{comment.content}</p>
+                <p className="text-sm mt-2 break-words">{comment.content}</p>
               </div>
             </div>
           </CardHeader>
@@ -461,7 +461,7 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
               {comment.replies && comment.replies.length > 0 && (
                 <div className="mt-4 space-y-3 border-l-2 border-muted pl-4">
                   {comment.replies.map((reply) => (
-                    <div key={reply.id} className={`flex gap-3 p-3 rounded-lg ${reply.user_profile?.role === 'admin' ? 'gradient-bg' : ''}`}>
+                    <div key={reply.id} className="flex gap-3 p-3 rounded-lg">
                       <Avatar className="h-6 w-6">
                         {reply.user_profile?.avatar_url && (
                           <AvatarImage src={reply.user_profile.avatar_url} alt={reply.user_profile.display_name || 'Usuário'} />
@@ -472,17 +472,17 @@ export default function Comments({ contentId, contentType }: CommentsProps) {
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium text-xs ${reply.user_profile?.role === 'admin' ? 'text-white' : ''}`}>
+                          <span className="font-medium text-xs">
                             {reply.user_profile?.display_name || 'Usuário'}
                           </span>
-                          <span className={`text-xs ${reply.user_profile?.role === 'admin' ? 'text-white/70' : 'text-muted-foreground'}`}>
+                          <span className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(reply.created_at), {
                               addSuffix: true,
                               locale: ptBR
                             })}
                           </span>
                         </div>
-                        <p className={`text-xs mt-1 break-words ${reply.user_profile?.role === 'admin' ? 'text-white' : ''}`}>{reply.content}</p>
+                        <p className="text-xs mt-1 break-words">{reply.content}</p>
                       </div>
                     </div>
                   ))}
